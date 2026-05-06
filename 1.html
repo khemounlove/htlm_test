@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>មង្គលការ | ខឹម អូន ♡ ជ្រុន លក្ខិណា</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@100;300;400;700;900&family=Moul&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Battambang', 'Noto Serif Khmer', system-ui, sans-serif;
+            background: #1a0f05;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+
+        /* FULLSCREEN BACKGROUND - ZOOM EFFECT */
+        .wedding-bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            filter: brightness(0.35) contrast(1.15);
+            z-index: -3;
+            animation: slowZoom 20s ease-in-out infinite alternate;
+        }
+        @keyframes slowZoom {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+        .overlay-gold {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(212,175,55,0.2) 0%, rgba(30,20,8,0.85) 100%);
+            z-index: -2;
+            pointer-events: none;
+        }
+        
+        /* Floating particles animation */
+        .floating-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: -1;
+            font-size: 1rem;
+            animation: floatParticle 12s linear infinite;
+            opacity: 0.6;
+        }
+       
+
+        /* MAIN CARD - BIGGER & BETTER FOR PHONE */
+        .invitation {
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+            background: url('https://i.pinimg.com/736x/7d/83/00/7d8300238750a6ac055c8cbf80d03103.jpg');
+            
+            border-radius: 56px;
+           
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: pointer;
+            text-align: center;
+            animation: cardGlow 2s ease-in-out infinite alternate;
+        }
+        @keyframes cardGlow {
+            0% { box-shadow: 0 35px 55px -15px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(212, 175, 55, 0.6), 0 0 25px rgba(212,175,55,0.3); }
+            100% { box-shadow: 0 40px 65px -15px rgba(0, 0, 0, 0.7), 0 0 0 3px rgba(212, 175, 55, 0.9), 0 0 45px rgba(212,175,55,0.5); }
+        }
+        .invitation:active { transform: scale(0.97); }
+
+        /* Floating roses */
+        .rose {
+            position: absolute;
+            font-size: 2.5rem;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25));
+            animation: floatSoft 4s ease-in-out infinite;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .rose1 { top: 2%; left: 2%; animation-delay: 0s; }
+        .rose2 { top: 5%; right: 2%; animation-delay: 1.2s; }
+        .rose3 { bottom: 3%; left: 3%; animation-delay: 2.4s; }
+        .rose4 { bottom: 6%; right: 3%; animation-delay: 0.6s; font-size: 2rem; }
+        
+
+        .title-main {
+            font-family: 'Moul', serif;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #f5bc5c, #d4af37, #f5bc5c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        /* Enhanced Circle Animation */
+        .circle {
+            width: 160px;
+            height: 160px;
+            border: 8px double #d4af37;
+            border-radius: 50%;
+            margin: 0.8rem auto;
+            background: rgba(255, 248, 225, 0.96);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 0 14px rgba(212,175,55,0.25);
+            animation: gentleSpin 20s linear infinite, pulseGlow 2s ease-in-out infinite alternate;
+        }
+       
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 8px rgba(212,175,55,0.2); }
+            100% { box-shadow: 0 0 0 20px rgba(212,175,55,0.45); }
+        }
+
+        .sparkle {
+            position: absolute;
+            font-size: 1.1rem;
+            animation: sparkPulse 1.5s ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes sparkPulse {
+            0% { opacity: 0; transform: scale(0.2);}
+            50% { opacity: 1; transform: scale(1.2);}
+            100% { opacity: 0; transform: scale(1.5);}
+        }
+
+        /* Music button - large & animated */
+        .music-float {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1200;
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(1px);
+            border: 2px solid #e4b138;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: #ffe2a4;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+            animation: musicPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes musicPulse {
+            0% { box-shadow: 0 0 0 0 rgba(212,175,55,0.5); }
+            70% { box-shadow: 0 0 0 14px rgba(212,175,55,0); }
+            100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); }
+        }
+        .music-float:active { transform: scale(0.92); }
+        .music-float.playing { border-color: #ff7b89; background: #2e1a0c; animation: none; }
+
+        /* Full Panel - Smooth */
+        .full-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:url('https://i.pinimg.com/736x/09/72/1d/09721decc4c715e0f64e4ff4380dc74e.jpg');
+            z-index: 2000;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            font-family: 'Battambang', sans-serif;
+            padding-bottom: 30px;
+        }
+        .full-panel.open { transform: translateY(0); }
+        .close-btn {
+            position: sticky;
+            top: 14px;
+            right: 14px;
+            float: right;
+            background: #d4af37;
+            border-radius: 50%;
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2100;
+            margin: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        .close-btn:active { transform: scale(0.92); }
+
+        #weddingMap {
+            height: 210px;
+            width: 100%;
+            border-radius: 28px;
+            border: 1.5px solid #ddb76b;
+            overflow: hidden;
+        }
+        .qr-card {
+            background: white;
+            padding: 10px;
+            border-radius: 28px;
+            display: inline-block;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+        input, select, textarea {
+            font-family: 'Battambang', sans-serif;
+            font-size: 15px;
+            text-align: center;
+        }
+        
+        /* Gallery Grid - Beautiful */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+            aspect-ratio: 1 / 1;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease;
+        }
+        .gallery-item:active {
+            transform: scale(0.96);
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+            padding: 12px;
+            color: white;
+            font-size: 0.75rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        /* Calendar - Big & Clear */
+        .calendar-grid {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        }
+        .calendar-grid th, .calendar-grid td {
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            border: 1px solid #f3d9a4;
+        }
+        .calendar-grid th {
+            background: #ffffff;
+            color: #2c1b0a;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        
+        /* Lightbox Modal */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox-img {
+            max-width: 92%;
+            max-height: 75%;
+            border-radius: 28px;
+            box-shadow: 0 0 40px rgba(212,175,55,0.6);
+            border: 3px solid #d4af37;
+        }
+        .lightbox-caption {
+            margin-top: 18px;
+            color: #ffefc0;
+            font-size: 1rem;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 24px;
+            border-radius: 50px;
+        }
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 44px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        /* Perfect Phone Responsive */
+        @media (max-width: 500px) {
+            body { padding: 10px; }
+            .invitation { max-width: 100%; border-radius: 44px; }
+            .circle { width: 140px; height: 140px; }
+            .title-main { font-size: 1.8rem; }
+            .gallery-grid { gap: 10px; }
+            .calendar-grid th, .calendar-grid td { padding: 8px 4px; font-size: 0.7rem; }
+            .rose { font-size: 2rem; }
+            .music-float { width: 54px; height: 54px; font-size: 1.6rem; bottom: 18px; right: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wedding-bg-layer"></div>
+    <div class="overlay-gold"></div>
+
+    <!-- MAIN INVITATION CARD - BIG & BEAUTIFUL -->
+    <div class="invitation mx-auto" onclick="openFullDetails()">
+        <span class="rose rose1">🌸</span>
+        <span class="rose rose2">🌺</span>
+        <span class="rose rose3">🌼</span>
+        <span class="rose rose4">💐</span>
+        
+        <div class="bg-gradient-to-b from-amber-50/90 to-rose-50/90 pt-7 pb-4">
+            <h1 class="title-main">ពិធីមង្គលការ</h1>
+            <p class="text-amber-800 text-sm font-semibold tracking-wide">អញ្ជើញក្នុងពិធីរៀបអាពាហ៍ពិពាហ៍</p>
+            <div class="circle">
+                <div class="text-center px-2">
+                    <div class="text-lg font-bold text-amber-900 leading-tight">
+                         អូន <span class="text-rose-500 text-2xl inline-block animate-pulse">♥</span>  លក្ខិណា
+                    </div>
+                    <div class="text-[11px] text-amber-700 mt-1">គូស្នេហ៍អមតៈ</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 bg-amber-50/70">
+            <p class="text-md leading-relaxed text-amber-900">
+                សូមគោរព និងអញ្ជើញ<br>
+                បង មិត្តភក្តិ និងញាតិមិត្តទាំងអស់<br>
+                មកចូលរួមក្នុងពិធីមង្គលការរបស់យើងខ្ញុំ<br>
+                 ដែលនឹងប្រារព្ធឡើងនៅថ្ងៃទី ០១ មករា ២០២៩<br>
+                 នៅភូមិ ភ្នំដំរី ឃុំ ដំណាក់កន្ទួតខាងលិច ស្រុក កំពងត្រាច ខេត្តកំពត<br>
+                 សូមមេត្តាអញ្ជើញចូលរួម<br>
+                 ដើម្បីចែករំលែកភាពរីករាយ និងពរជ័យជាមួយយើងខ្ញុំ<br>
+
+            </p>
+
+            <div class="my-6">
+                <div class="text-3xl font-bold text-amber-800">០១ មករា ២០២៩</div>
+                <div class="text-amber-700 text-sm mt-1">ថ្ងៃចន្ទ វេលា ៦:៣០ ព្រឹក</div>
+            </div>
+            <button id="openInviteBtn" class="w-full bg-gradient-to-r from-amber-700 to-amber-800 text-white py-4 rounded-2xl font-bold text-xl shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
+                <i class="fas fa-envelope-open-text"></i> បើកមើលកាអញ្ជើញ
+            </button>
+        </div>
+        <div class="bg-gradient-to-t from-amber-100/80 to-transparent py-3">
+            <p class="text-amber-800 text-xs px-4">ខឹម អូន 💗 ជ្រុន លក្ខិណា</p>
+        </div>
+    </div>
+
+    <!-- MUSIC BUTTON -->
+    <div id="musicFloatBtn" class="music-float" onclick="event.stopPropagation(); toggleMusic()">
+        <i class="fas fa-music" id="musicIconFloat"></i>
+    </div>
+    <audio id="bgMusic" loop preload="none">
+        <source src="images/ថ្ងៃដែលពួកយើងរង់ចាំ-ថុល សុភិទិ (Lyrics video).mp4" type="audio/mpeg">
+    </audio>
+
+    <!-- FULL DETAIL PANEL - ENHANCED -->
+    <div id="fullInvitePanel" class="full-panel">
+        <div class="close-btn" onclick="closeFullPanel()">
+            <i class="fas fa-times text-white text-xl"></i>
+        </div>
+        <div class="px-5 py-6 max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <p class="text-amber-800 text-xs tracking-wider">✧ អាពាហ៍ពិពាហ៍ ✧</p>
+                <p class="text-xl font-bold text-amber-900" style="font-family:'Moul',serif;">សិរីសួស្ដី</p> 
+            </div>
+            
+            <!-- Parents Info - Clean Layout -->
+            <div class="bg-amber-50/90 rounded-xl p-4 text-center border border-amber-200 my-4 shadow-sm">
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <p class="font-bold text-amber-800">ឪពុកម្តាយកូនកំណោះ</p>
+                        <p>លោក ខឹម តន</p>
+                        <p>អ្នកស្រី យុង ចន្ថា</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-amber-800">ឪពុកម្តាយកូនក្រមុំ</p>
+                        <p>លោក ផុក ច្រាន់</p>
+                        <p>អ្នកស្រី កប ទូច</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Names Center -->
+            <div class="text-center mb-5 bg-white/70 p-4 rounded-xl shadow-sm">
+                <h2 class="text-3xl font-bold text-amber-900" style="font-family:'Moul',serif;">ខឹម អូន</h2>
+                <div class="flex justify-center gap-2 text-rose-500 my-2 text-xl"><i class="fas fa-heartbeat"></i></div>
+                <h2 class="text-3xl font-bold text-amber-900" style="font-family:'Moul',serif;">ជ្រុន លក្ខិណា</h2>
+                <div class="mt-3 bg-amber-100 inline-block px-4 py-1.5 rounded-full text-amber-800 text-sm"><i class="far fa-calendar-alt"></i> ០១ មករា ២០២៩</div>
+                <div class="mt-2 text-amber-700 text-sm"><i class="fas fa-map-marker-alt"></i> ភូមិ ភ្នំដំរី, កំពត</div>
+                <p class="text-amber-600 text-sm mt-1"><i class="fas fa-clock"></i> ពិធីចាប់ផ្តើម ៦:៣០ព្រឹក ដល់ ១០:៣០យប់</p>
+            </div>
+
+            <!-- GALLERY SECTION: វិចត្រសាល -->
+            <div class="my-6 bg-amber-50/80 rounded-2xl p-5 shadow-lg border border-amber-200">
+                <div class="text-center mb-4">
+                    <i class="fas fa-images text-amber-600 text-3xl"></i>
+                    <h2 class="text-2xl font-bold text-amber-800 inline-block ml-2" style="font-family:'Moul',serif;">វិចត្រសាល</h2>
+                    <p class="text-amber-700 text-sm mt-1">រូបភាពដ៏ស្រស់ស្អាតនៃស្នេហ៍យើង</p>
+                </div>
+                <div class="gallery-grid" id="galleryGrid"></div>
+                <p class="text-center text-amber-600 text-xs mt-3 italic">✨ ចុចលើរូបភាពដើម្បីមើលធំ ✨</p>
+            </div>
+
+            <!-- Calendar -->
+            <div class="my-6 bg-white p-4 rounded-xl shadow-md">
+                <h3 class="font-bold text-amber-800 text-xl text-center mb-3"><i class="fas fa-calendar-alt"></i> ប្រតិទិន មករា ២០២៩</h3>
+                <div class="overflow-x-auto">
+                    <table class="calendar-grid w-full">
+                        <thead><tr><th>អា</th><th>ច</th><th>អ</th><th>ព</th><th>ព</th><th>ស</th><th>ស</th></tr></thead>
+                        <tbody>
+                            <tr><td class="p-2"></td><td class="p-2"></td><td class="p-2"></td><td class="p-2"></td><td class="p-2"></td><td class="p-2"></td><td class="p-2"></td></tr>
+                            <tr><td class="p-2">31</td><td class="bg-yellow-300 font-bold rounded-full p-2">1</td><td class="p-2">2</td><td class="p-2">3</td><td class="p-2">4</td><td class="p-2">5</td><td class="p-2">6</td></tr>
+                            <tr><td class="p-2">7</td><td class="p-2">8</td><td class="p-2">9</td><td class="p-2">10</td><td class="p-2">11</td><td class="p-2">12</td><td class="p-2">13</td></tr>
+                            <tr><td class="p-2">14</td><td class="p-2">15</td><td class="p-2">16</td><td class="p-2">17</td><td class="p-2">18</td><td class="p-2">19</td><td class="p-2">20</td></tr>
+                            <tr><td class="p-2">21</td><td class="p-2">22</td><td class="p-2">23</td><td class="p-2">24</td><td class="p-2">25</td><td class="p-2">26</td><td class="p-2">27</td></tr>
+                            <tr><td class="p-2">28</td><td class="p-2">29</td><td class="p-2">30</td><td class="p-2">31</td><td class="p-2"> </td><td class="p-2"> </td><td class="p-2"> </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <button onclick="addToGoogleCalEvent()" class="bg-amber-700 text-white text-sm px-4 py-2 rounded-full shadow-md"><i class="fab fa-google"></i> បន្ថែមទៅកាលវិភាគ</button>
+                </div>
+            </div>
+
+            <!-- Countdown + Map -->
+            <div class="grid grid-cols-1 gap-5 my-5">
+                <div class="bg-white/95 rounded-xl p-5 shadow-md border border-amber-200 text-center">
+                    <h3 class="font-bold text-amber-800 text-lg"><i class="fas fa-hourglass-half"></i> រាប់ថយដល់ថ្ងៃមង្គល</h3>
+                    <div class="grid grid-cols-4 gap-3 mt-3">
+                        <div><span id="cdDays" class="text-3xl font-bold text-rose-600">00</span><br/><span class="text-xs">ថ្ងៃ</span></div>
+                        <div><span id="cdHours" class="text-3xl font-bold text-rose-600">00</span><br/><span class="text-xs">ម៉ោង</span></div>
+                        <div><span id="cdMins" class="text-3xl font-bold text-rose-600">00</span><br/><span class="text-xs">នាទី</span></div>
+                        <div><span id="cdSecs" class="text-3xl font-bold text-rose-600">00</span><br/><span class="text-xs">វិនាទី</span></div>
+                    </div>
+                </div>
+                <div class="bg-white/95 rounded-xl p-4 shadow-md border border-amber-200">
+                    <h3 class="font-bold text-amber-800 text-lg text-center"><i class="fas fa-map-marked-alt"></i> ផែនទីទីតាំង</h3>
+                    <div id="weddingMap" class="mt-2"></div>
+                    <button onclick="openMapsExternal()" class="mt-3 bg-amber-600 text-white text-sm py-2 rounded-full w-full">បើកក្នុង Google Maps</button>
+                </div>
+            </div>
+
+            <!-- QR ABA Blessing -->
+            <div class="bg-gradient-to-r from-amber-100 to-rose-100 rounded-xl p-5 text-center border border-amber-300 my-5 shadow-md">
+                <i class="fas fa-gift text-amber-600 text-3xl"></i>
+                <h3 class="font-bold text-amber-800 text-xl">💖 ABA ជូនពរ ចំណងដៃ 💖</h3>
+                <div class="qr-card my-3">
+                    <img src="images/qr.jpg" alt="ABA QR" width="100" height="100">
+                </div>
+                <p class="text-sm text-amber-700">ស្កេនតាម ABA Mobile ដើម្បីផ្ញើពរជ័យ</p>
+                <p class="text-base font-bold text-amber-800 mt-1">គណនី: ខឹម អូន</p>
+            </div>
+
+            <!-- RSVP Form -->
+            <div class="bg-white rounded-xl p-5 shadow-xl border border-amber-200 mt-4">
+                <h3 class="text-xl font-bold text-center text-amber-800">បញ្ជាក់ការចូលរួម & ផ្ញើជូនពរ</h3>
+                <p class="text-xs text-center text-amber-600 mb-3">ព័ត៌មាននឹងផ្ញើទៅគូស្នេហ៍តាម Telegram</p>
+                <form id="rsvpForm">
+                    <div class="mb-3"><label class="block text-amber-800 text-sm">ឈ្មោះពេញ <span class="text-red-500">*</span></label><input type="text" id="fullname" required class="w-full border border-amber-300 rounded-xl p-2.5 text-sm text-center bg-amber-50"></div>
+                    <div class="mb-3"><label class="block text-amber-800 text-sm">លេខទូរស័ព្ទ <span class="text-red-500">*</span></label><input type="tel" id="phone" required class="w-full border border-amber-300 rounded-xl p-2.5 text-sm text-center bg-amber-50"></div>
+                    <div class="mb-3"><label class="block text-amber-800 text-sm">ទីកន្លែងចូលរួម</label><select id="locationSelect" class="w-full border border-amber-300 rounded-xl p-2.5 text-sm text-center bg-amber-50"><option value="កំពត">🌴 បានចូលរួម</option><option value="មិនបានចូលរួម">🏡 មិនបានចូលរួម</option></select></div>
+                    <div class="mb-3"><label class="block text-amber-800 text-sm">ចំនួនភ្ញៀវ</label><input type="number" id="guestCount" min="1" max="10" value="1" class="w-full border border-amber-300 rounded-xl p-2.5 text-sm text-center bg-amber-50"></div>
+                    <div class="mb-4"><label class="block text-amber-800 text-sm">សារជូនពរ</label><textarea id="messageText" rows="2" class="w-full border border-amber-300 rounded-xl p-2.5 text-sm text-center bg-amber-50" placeholder="សូមអោយបានសុខសប្បាយ..."></textarea></div>
+                    <button type="submit" id="submitRsvpBtn" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3 rounded-full font-bold text-base flex items-center justify-center gap-2 active:scale-95 transition"><i class="fab fa-telegram"></i> ផ្ញើការបញ្ជាក់</button>
+                    <div id="formMsg" class="text-center text-xs mt-3"></div>
+                </form>
+            </div>
+            <div class="text-center text-amber-700 text-xs py-5">អរគុណដែលបានចែករំលែកភាពរីករាយជាមួយយើងខ្ញុំ</div>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()"><span class="close-lightbox" onclick="closeLightbox()">&times;</span><img class="lightbox-img" id="lightboxImg" src=""><div class="lightbox-caption" id="lightboxCaption"></div></div>
+
+     <script>
+        // Gallery with beautiful images
+        const galleryImages = [
+            { src: "https://i.pinimg.com/736x/25/e3/1d/25e31d6ec42c47d46496a854e4334528.jpg", caption: "💑 ស្នេហ៍របស់យើងចាប់ផ្តើម" },
+            { src: "https://i.pinimg.com/736x/6d/ea/32/6dea32ddae67271fb9948a37cc150399.jpg", caption: "🌹 ថ្ងៃដ៏ផ្អែមល្ហែម" },
+            { src: "https://i.pinimg.com/736x/79/d0/56/79d056ee100fa988483d5f2fc5d1bd3d.jpg", caption: "💍 ចំណងដៃអមតៈ" },
+            { src: "https://i.pinimg.com/736x/10/2e/7f/102e7f58d05cca42945b87251c82deb0.jpg", caption: "🌸 និទាឃរដូវនៃក្តីស្រលាញ់" }
+        ];
+        function buildGallery() { const container = document.getElementById('galleryGrid'); if(!container) return; container.innerHTML = ''; galleryImages.forEach((img, idx) => { const item = document.createElement('div'); item.className = 'gallery-item'; item.onclick = (e) => { e.stopPropagation(); openLightbox(img.src, img.caption); }; item.innerHTML = `<img src="${img.src}" alt="gallery" loading="lazy"><div class="gallery-overlay">${img.caption}</div>`; container.appendChild(item); }); }
+        function openLightbox(src, cap) { const lb = document.getElementById('lightbox'); document.getElementById('lightboxImg').src = src; document.getElementById('lightboxCaption').innerText = cap; lb.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); document.body.style.overflow = ''; }
+        const musicAudio = document.getElementById('bgMusic'), musicBtn = document.getElementById('musicFloatBtn'), musicIcon = document.getElementById('musicIconFloat'); let musicActive = false;
+        function toggleMusic() { if(musicActive) { musicAudio.pause(); musicBtn.classList.remove('playing'); musicIcon.classList.remove('fa-pause'); musicIcon.classList.add('fa-music'); } else { musicAudio.play().catch(e=>console.log); musicBtn.classList.add('playing'); musicIcon.classList.remove('fa-music'); musicIcon.classList.add('fa-pause'); } musicActive = !musicActive; }
+        function createSparklesOnCircle() { const circle = document.querySelector('.circle'); if(!circle) return; setInterval(() => { const star = document.createElement('span'); star.className = 'sparkle'; star.textContent = '✨'; star.style.left = Math.random()*100+'%'; star.style.top = Math.random()*100+'%'; circle.appendChild(star); setTimeout(()=>star.remove(),1500); }, 600); }
+        function burstConfetti() { const icons = []; for(let i=0;i<80;i++) { const el = document.createElement('div'); el.textContent = icons[Math.floor(Math.random()*icons.length)]; el.style.cssText = `position:fixed; left:${Math.random()*100}vw; top:-20px; font-size:${Math.random()*18+14}px; z-index:9999; pointer-events:none;`; document.body.appendChild(el); el.animate([{transform:'translateY(0) rotate(0deg)',opacity:1},{transform:`translateY(${window.innerHeight+120}px) rotate(${Math.random()*500-250}deg)`,opacity:0}],{duration:2500}); setTimeout(()=>el.remove(),2500); } }
+        const BOT_TOKEN = "7568652737:AAEkGFkFs-eUxLoBb0vXxN7WnzBMFS6sNUE", CHAT_ID = "6444898588";
+        async function sendTelegramRSVP(name, phone, location, guests, msg) { const payload = `🎉 *ការបញ្ជាក់ចូលរួម* 🎉\n✅ *ឈ្មោះ:* ${name}\n📞 *ទូរស័ព្ទ:* ${phone}\n📍 *ស្ថានភាព:* ${location}\n👥 *ភ្ញៀវ:* ${guests}\n💬 *សារ:* ${msg||"គ្មាន"}`; try { const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:CHAT_ID,text:payload,parse_mode:'Markdown'})}); const data = await res.json(); return data.ok?{success:true}:{success:false,error:data.description}; } catch(e){return{success:false,error:e.message};} }
+        let leafletMap=false; function initMapPanel() { if(leafletMap) return; const mapDiv = document.getElementById('weddingMap'); if(!mapDiv) return; const map = L.map('weddingMap').setView([10.590998,104.482338],15); L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map); L.marker([10.590998,104.482338]).addTo(map).bindPopup("📍 ផ្ទះកូនក្រមុំ").openPopup(); leafletMap=true; }
+        function openMapsExternal(){ window.open('https://www.google.com/maps?q=10.590998,104.482338','_blank'); }
+        function addToGoogleCalEvent(){ window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent("មង្គលការ ខឹម អូន & ជ្រុន លក្ខិណា")}&dates=20290101T233000/20290101T153000&location=${encodeURIComponent("ភូមិភ្នំដំរី, កំពត")}`,'_blank'); }
+        let countdownInterval=null; function startCountdown(){ if(countdownInterval) clearInterval(countdownInterval); const target=new Date("January 1, 2029 06:30:00 GMT+07:00").getTime(); const refresh=()=>{ const diff=target-Date.now(); if(diff<=0){ ['cdDays','cdHours','cdMins','cdSecs'].forEach(id=>document.getElementById(id).innerText='00'); if(countdownInterval) clearInterval(countdownInterval); return; } document.getElementById('cdDays').innerText=Math.floor(diff/86400000).toString().padStart(2,'0'); document.getElementById('cdHours').innerText=Math.floor((diff%86400000)/3600000).toString().padStart(2,'0'); document.getElementById('cdMins').innerText=Math.floor((diff%3600000)/60000).toString().padStart(2,'0'); document.getElementById('cdSecs').innerText=Math.floor((diff%60000)/1000).toString().padStart(2,'0'); }; refresh(); countdownInterval=setInterval(refresh,1000); }
+        function openFullDetails(){ document.getElementById('fullInvitePanel').classList.add('open'); document.body.style.overflow='hidden'; if(!leafletMap) setTimeout(()=>initMapPanel(),200); startCountdown(); buildGallery(); }
+        function closeFullPanel(){ document.getElementById('fullInvitePanel').classList.remove('open'); document.body.style.overflow=''; }
+        document.getElementById('rsvpForm').addEventListener('submit', async(e)=>{ e.preventDefault(); const name=document.getElementById('fullname').value.trim(); const phone=document.getElementById('phone').value.trim(); if(!name||!phone){ document.getElementById('formMsg').innerHTML='<span class="text-red-500">សូមបំពេញឈ្មោះ និងលេខទូរស័ព្ទ</span>'; return; } const btn=document.getElementById('submitRsvpBtn'); btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-pulse"></i> កំពុងផ្ញើ...'; const res=await sendTelegramRSVP(name,phone,document.getElementById('locationSelect').value,document.getElementById('guestCount').value,document.getElementById('messageText').value.trim()); if(res.success){ document.getElementById('formMsg').innerHTML='<span class="text-green-600">✅ បានផ្ញើការបញ្ជាក់! អរគុណ!</span>'; burstConfetti(); document.getElementById('rsvpForm').reset(); document.getElementById('guestCount').value='1'; } else { document.getElementById('formMsg').innerHTML=`<span class="text-red-500">❌ ${res.error}</span>`; } btn.disabled=false; btn.innerHTML='<i class="fab fa-telegram"></i> ផ្ញើការបញ្ជាក់'; setTimeout(()=>{ if(document.getElementById('formMsg').innerText.includes('បានផ្ញើ')) document.getElementById('formMsg').innerHTML=''; },4000); });
+        document.getElementById('openInviteBtn').addEventListener('click',(e)=>{ e.stopPropagation(); openFullDetails(); });
+        window.onload = () => { createSparklesOnCircle(); for(let i=0;i<35;i++){ const p=document.createElement('div'); p.className='floating-particle'; p.innerHTML=['🌸','✨','💖','🌺','💐','🌹'][Math.floor(Math.random()*6)]; p.style.left=Math.random()*100+'%'; p.style.animationDuration=8+Math.random()*12+'s'; p.style.fontSize=12+Math.random()*16+'px'; p.style.opacity=0.3+Math.random()*0.5; document.body.appendChild(p); } };
+    </script>
+</body>
+</html>
