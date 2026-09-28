@@ -1,552 +1,1095 @@
 <!DOCTYPE html>
 <html lang="km">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>មង្គលការ | ខឹម អូន ♡ ជ្រុន លក្ខិណា</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@100;300;400;700;900&family=Moul&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ប្រឡងគ្រូភាសាអង់គ្លេសកម្រិតខ្ពស់ 👲</title>
+  <style>
+    :root {
+      --bg: #f3f6ff;
+      --panel: #ffffff;
+      --primary: #0031e3;
+      --primary-dark: #0024c5;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --good: #16a34a;
+      --bad: #dc2626;
+      --warn: #f59e0b;
+    }
 
-        body {
-            font-family: 'Battambang', 'Noto Serif Khmer', system-ui, sans-serif;
-            background: #1a0f05;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px;
-        }
+    * { box-sizing: border-box; }
 
-        /* FULLSCREEN BACKGROUND - ZOOM EFFECT */
-        .wedding-bg-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            filter: brightness(0.35) contrast(1.15);
-            z-index: -3;
-            animation: slowZoom 20s ease-in-out infinite alternate;
-        }
-        @keyframes slowZoom {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
-        }
-        .overlay-gold {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(212,175,55,0.2) 0%, rgba(30,20,8,0.85) 100%);
-            z-index: -2;
-            pointer-events: none;
-        }
-        
-        /* Floating particles animation */
-        .floating-particle {
-            position: fixed;
-            pointer-events: none;
-            z-index: -1;
-            font-size: 1rem;
-            animation: floatParticle 12s linear infinite;
-            opacity: 0.6;
-        }
-       
+    html {
+      min-height: 100%;
+      background-color: #e7edf7;
+      background-image: url("images/1.png");
+      background-position: center top;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-attachment: fixed;
+    }
 
-        /* MAIN CARD - BIGGER & BETTER FOR PHONE */
-        .invitation {
-            width: 100%;
-            max-width: 520px;
-            margin: 0 auto;
-            background: url('https://i.pinimg.com/736x/7d/83/00/7d8300238750a6ac055c8cbf80d03103.jpg');
-            
-            border-radius: 56px;
-           
-            overflow: hidden;
-            position: relative;
-            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            cursor: pointer;
-            text-align: center;
-            animation: cardGlow 2s ease-in-out infinite alternate;
-        }
-        @keyframes cardGlow {
-            0% { box-shadow: 0 35px 55px -15px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(212, 175, 55, 0.6), 0 0 25px rgba(212,175,55,0.3); }
-            100% { box-shadow: 0 40px 65px -15px rgba(0, 0, 0, 0.7), 0 0 0 3px rgba(212, 175, 55, 0.9), 0 0 45px rgba(212,175,55,0.5); }
-        }
-        .invitation:active { transform: scale(0.97); }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: "Khmer OS Battambang", "Noto Sans Khmer", sans-serif;
+      background: transparent;
+      color: var(--text);
+    }
 
-        /* Floating roses */
-        .rose {
-            position: absolute;
-            font-size: 2.5rem;
-            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25));
-            animation: floatSoft 4s ease-in-out infinite;
-            z-index: 5;
-            pointer-events: none;
-        }
-        .rose1 { top: 2%; left: 2%; animation-delay: 0s; }
-        .rose2 { top: 5%; right: 2%; animation-delay: 1.2s; }
-        .rose3 { bottom: 3%; left: 3%; animation-delay: 2.4s; }
-        .rose4 { bottom: 6%; right: 3%; animation-delay: 0.6s; font-size: 2rem; }
-        
+    .topbar {
+      background: transparent;
+      color: var(--text);
+      padding: 14px 20px;
+      position: relative;
+      z-index: 2;
+    }
 
-        .title-main {
-            font-family: 'Moul', serif;
-            font-size: 2.2rem;
-            background: linear-gradient(135deg, #f5bc5c, #d4af37, #f5bc5c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
-        }
+    .topbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
 
-        /* Enhanced Circle Animation */
-        .circle {
-            width: 160px;
-            height: 160px;
-            border: 8px double #d4af37;
-            border-radius: 50%;
-            margin: 0.8rem auto;
-            background: rgba(255, 248, 225, 0.96);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 0 14px rgba(212,175,55,0.25);
-            animation: gentleSpin 20s linear infinite, pulseGlow 2s ease-in-out infinite alternate;
-        }
-       
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 8px rgba(212,175,55,0.2); }
-            100% { box-shadow: 0 0 0 20px rgba(212,175,55,0.45); }
-        }
+    .title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin: 0;
+    }
 
-        .sparkle {
-            position: absolute;
-            font-size: 1.1rem;
-            animation: sparkPulse 1.5s ease-out forwards;
-            pointer-events: none;
-        }
-        @keyframes sparkPulse {
-            0% { opacity: 0; transform: scale(0.2);}
-            50% { opacity: 1; transform: scale(1.2);}
-            100% { opacity: 0; transform: scale(1.5);}
-        }
+    .badge {
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 4px 0;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
 
-        /* Music button - large & animated */
-        .music-float {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 1200;
-            width: 60px;
-            height: 60px;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(1px);
-            border: 2px solid #e4b138;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            color: #ffe2a4;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.4);
-            animation: musicPulse 1.5s ease-in-out infinite;
-        }
-        @keyframes musicPulse {
-            0% { box-shadow: 0 0 0 0 rgba(212,175,55,0.5); }
-            70% { box-shadow: 0 0 0 14px rgba(212,175,55,0); }
-            100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); }
-        }
-        .music-float:active { transform: scale(0.92); }
-        .music-float.playing { border-color: #ff7b89; background: #2e1a0c; animation: none; }
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 18px auto;
+      padding: 0 16px 40px;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 20px;
+    }
 
-        /* Full Panel - Smooth */
-        .full-panel {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:url('https://i.pinimg.com/736x/09/72/1d/09721decc4c715e0f64e4ff4380dc74e.jpg');
-            z-index: 2000;
-            overflow-y: auto;
-            transform: translateY(100%);
-            transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
-            font-family: 'Battambang', sans-serif;
-            padding-bottom: 30px;
-        }
-        .full-panel.open { transform: translateY(0); }
-        .close-btn {
-            position: sticky;
-            top: 14px;
-            right: 14px;
-            float: right;
-            background: #d4af37;
-            border-radius: 50%;
-            width: 46px;
-            height: 46px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 2100;
-            margin: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: all 0.2s;
-        }
-        .close-btn:active { transform: scale(0.92); }
+    .sidebar,
+    .card {
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
 
-        #weddingMap {
-            height: 210px;
-            width: 100%;
-            border-radius: 28px;
-            border: 1.5px solid #ddb76b;
-            overflow: hidden;
-        }
-        .qr-card {
-            background: white;
-            padding: 10px;
-            border-radius: 28px;
-            display: inline-block;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-        }
-        input, select, textarea {
-            font-family: 'Battambang', sans-serif;
-            font-size: 15px;
-            text-align: center;
-        }
-        
-        /* Gallery Grid - Beautiful */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
-        }
-        .gallery-item {
-            position: relative;
-            overflow: hidden;
-            border-radius: 28px;
-            aspect-ratio: 1 / 1;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            transition: transform 0.2s ease;
-        }
-        .gallery-item:active {
-            transform: scale(0.96);
-        }
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
-        .gallery-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
-            padding: 12px;
-            color: white;
-            font-size: 0.75rem;
-            text-align: center;
-            font-weight: 500;
-        }
-        
-        /* Calendar - Big & Clear */
-        .calendar-grid {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-        }
-        .calendar-grid th, .calendar-grid td {
-            padding: 12px 8px;
-            text-align: center;
-            font-size: 0.9rem;
-            border: 1px solid #f3d9a4;
-        }
-        .calendar-grid th {
-            background: #ffffff;
-            color: #2c1b0a;
-            font-weight: bold;
-            font-size: 0.85rem;
-        }
-        
-        /* Lightbox Modal */
-        .lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.96);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            cursor: pointer;
-        }
-        .lightbox.active { display: flex; }
-        .lightbox-img {
-            max-width: 92%;
-            max-height: 75%;
-            border-radius: 28px;
-            box-shadow: 0 0 40px rgba(212,175,55,0.6);
-            border: 3px solid #d4af37;
-        }
-        .lightbox-caption {
-            margin-top: 18px;
-            color: #ffefc0;
-            font-size: 1rem;
-            background: rgba(0,0,0,0.6);
-            padding: 8px 24px;
-            border-radius: 50px;
-        }
-        .close-lightbox {
-            position: absolute;
-            top: 20px;
-            right: 25px;
-            font-size: 44px;
-            color: white;
-            cursor: pointer;
-        }
-        
-        /* Perfect Phone Responsive */
-        @media (max-width: 500px) {
-            body { padding: 10px; }
-            .invitation { max-width: 100%; border-radius: 44px; }
-            .circle { width: 140px; height: 140px; }
-            .title-main { font-size: 1.8rem; }
-            .gallery-grid { gap: 10px; }
-            .calendar-grid th, .calendar-grid td { padding: 8px 4px; font-size: 0.7rem; }
-            .rose { font-size: 2rem; }
-            .music-float { width: 54px; height: 54px; font-size: 1.6rem; bottom: 18px; right: 18px; }
-        }
-    </style>
+    .sidebar {
+      padding: 12px 0;
+      height: fit-content;
+      position: sticky;
+      top: 80px;
+    }
+
+    .filter-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    button,
+    select {
+      font-family: inherit;
+    }
+
+    .category-picker {
+      position: relative;
+    }
+
+    #categoryToggle {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 0;
+      border-bottom: 1px solid currentColor;
+      border-radius: 0;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    #categoryToggle:hover,
+    #categoryToggle[aria-expanded="true"] {
+      border-color: var(--primary);
+    }
+
+    .category-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      z-index: 30;
+      display: grid;
+      gap: 4px;
+      max-height: min(55vh, 420px);
+      overflow-y: auto;
+      padding: 6px;
+      border: 0;
+      border-radius: 0;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: none;
+    }
+
+    .category-menu[hidden] {
+      display: none;
+    }
+
+    .category-option {
+      width: 100%;
+      padding: 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .category-option:hover,
+    .category-option[aria-pressed="true"] {
+      background: rgba(45, 91, 255, 0.12);
+      color: var(--primary-dark);
+    }
+
+    .questions {
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      padding: 14px 0;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .category {
+      background: transparent;
+      color: inherit;
+      border-radius: 0;
+      padding: 0;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .qid {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .question {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin: 0 0 14px;
+      font-weight: 700;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.2);
+      background: transparent;
+      color: var(--text);
+      border-radius: 0;
+      padding: 8px 4px;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-size: 0.92rem;
+    }
+
+    .option:hover {
+      border-color: var(--primary);
+      background: transparent;
+    }
+
+    .option.selected {
+      border-color: var(--primary);
+      background: transparent;
+      color: var(--primary-dark);
+    }
+
+    .option .letter {
+      min-width: 24px;
+      height: 24px;
+      border-radius: 0;
+      background: transparent;
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    .option.selected .letter {
+      background: transparent;
+      color: var(--primary-dark);
+    }
+
+    .answer-box {
+      margin-top: 12px;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: none;
+    }
+
+    .answer-box.correct {
+      color: var(--good);
+      border: 0;
+      display: block;
+    }
+
+    .answer-box.wrong {
+      color: var(--bad);
+      border: 0;
+      display: block;
+    }
+
+    .word-bank {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 14px;
+      padding: 4px 0 12px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .word-bank-label {
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    .word-chip {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 0.88rem;
+    }
+
+    .passage {
+      margin: 0 0 14px;
+      font-size: 1rem;
+      line-height: 2.2;
+    }
+
+    .cloze-card {
+      font-size: 0.88rem;
+    }
+
+    .cloze-card .question {
+      font-size: 0.9rem;
+    }
+
+    .cloze-card .passage {
+      font-size: 0.88rem;
+      line-height: 2;
+    }
+
+    .cloze-card .word-chip {
+      font-size: 0.78rem;
+    }
+
+    .cloze-card .answer-box {
+      font-size: 0.74rem;
+    }
+
+    .cloze-card .status {
+      font-size: 0.7rem;
+    }
+
+    .gap-select {
+      width: auto;
+      min-width: 150px;
+      max-width: 100%;
+      margin: 0 4px;
+      padding: 6px 8px;
+      font: inherit;
+    }
+
+    .check-cloze {
+      min-height: 40px;
+      padding: 0 14px;
+      border: 0;
+      border-bottom: 1px solid currentColor;
+      border-radius: 0;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .hint {
+      margin: 12px 0 0;
+      padding: 6px 0;
+      border-left: 0;
+      background: transparent;
+      color: #713f12;
+      font-size: 0.86rem;
+      line-height: 1.6;
+    }
+
+    .empty {
+      display: none;
+      text-align: center;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .pagination button {
+      min-height: 42px;
+      padding: 0 16px;
+      border: 0;
+      border-bottom: 1px solid currentColor;
+      border-radius: 0;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .pagination button:disabled {
+      border-color: transparent;
+      background: transparent;
+      color: rgba(31, 41, 55, 0.55);
+      cursor: not-allowed;
+    }
+
+    #pageInfo {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="wedding-bg-layer"></div>
-    <div class="overlay-gold"></div>
-
-    <!-- MAIN INVITATION CARD - BIG & BEAUTIFUL -->
-    <div class="invitation mx-auto" onclick="openFullDetails()">
-        <span class="rose rose1">🌸</span>
-        <span class="rose rose2">🌺</span>
-        <span class="rose rose3">🌼</span>
-        <span class="rose rose4">💐</span>
-        
-        <div class="bg-gradient-to-b from-amber-50/90 to-rose-50/90 pt-7 pb-4">
-            <h1 class="title-main">ពិធីមង្គលការ</h1>
-            <p class="text-amber-800 text-sm font-semibold tracking-wide">អញ្ជើញក្នុងពិធីរៀបអាពាហ៍ពិពាហ៍</p>
-            <div class="circle">
-                <div class="text-center px-2">
-                    <div class="text-lg font-bold text-amber-900 leading-tight">
-                         អូន <span class="text-rose-500 text-2xl inline-block animate-pulse">♥</span>  លក្ខិណា
-                    </div>
-                    <div class="text-[11px] text-amber-700 mt-1">គូស្នេហ៍អមតៈ</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="p-6 bg-amber-50/70">
-            <p class="text-md leading-relaxed text-amber-900">
-                សូមគោរព និងអញ្ជើញ<br>
-                បង មិត្តភក្តិ និងញាតិមិត្តទាំងអស់<br>
-                មកចូលរួមក្នុងពិធីមង្គលការរបស់យើងខ្ញុំ<br>
-                 ដែលនឹងប្រារព្ធឡើងនៅថ្ងៃទី ០១ មករា ២០២៩<br>
-                 នៅភូមិ ភ្នំដំរី ឃុំ ដំណាក់កន្ទួតខាងលិច ស្រុក កំពងត្រាច ខេត្តកំពត<br>
-                 សូមមេត្តាអញ្ជើញចូលរួម<br>
-                 ដើម្បីចែករំលែកភាពរីករាយ និងពរជ័យជាមួយយើងខ្ញុំ<br>
-
-            </p>
-
-            <div class="my-6">
-                <div class="text-3xl font-bold text-amber-800">០១ មករា ២០២៩</div>
-                <div class="text-amber-700 text-sm mt-1">ថ្ងៃចន្ទ វេលា ៦:៣០ ព្រឹក</div>
-            </div>
-            <button id="openInviteBtn" class="w-full bg-gradient-to-r from-amber-700 to-amber-800 text-white py-4 rounded-2xl font-bold text-xl shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
-                <i class="fas fa-envelope-open-text"></i> បើកមើលកាអញ្ជើញ
-            </button>
-        </div>
-        <div class="bg-gradient-to-t from-amber-100/80 to-transparent py-3">
-            <p class="text-amber-800 text-xs px-4">ខឹម អូន 💗 ជ្រុន លក្ខិណា</p>
-        </div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1 class="title">Exam 👲</h1>
+      <div id="totalBadge" class="badge"></div>
     </div>
+  </header>
 
-    <!-- MUSIC BUTTON -->
-    <div id="musicFloatBtn" class="music-float" onclick="event.stopPropagation(); toggleMusic()">
-        <i class="fas fa-music" id="musicIconFloat"></i>
-    </div>
-    <audio id="bgMusic" loop preload="none">
-        <source src="images/ថ្ងៃដែលពួកយើងរង់ចាំ-ថុល សុភិទិ (Lyrics video).mp4" type="audio/mpeg">
-    </audio>
+  <main class="wrapper">
+    <aside class="sidebar">
+      <span class="filter-label">Filter by Category</span>
+      <div class="category-picker">
+        <button id="categoryToggle" type="button" aria-expanded="false" aria-controls="categoryMenu">
+          <span id="selectedCategory">គ្រប់ប្រភេទ</span>
+          <span aria-hidden="true">▾</span>
+        </button>
+        <div id="categoryMenu" class="category-menu" role="group" aria-label="ប្រភេទសំណួរ" hidden></div>
+      </div>
+    </aside>
 
-    <!-- FULL DETAIL PANEL - ENHANCED -->
-    <div id="fullInvitePanel" class="full-panel">
-        <div class="close-btn" onclick="closeFullPanel()">
-            <i class="fas fa-times text-white text-xl"></i>
-        </div>
-        <div class="px-5 py-6 max-w-4xl mx-auto">
-            <!-- Header -->
-            <div class="text-center mb-5">
-                <p class="text-amber-800 text-xs tracking-wider">✧ អាពាហ៍ពិពាហ៍ ✧</p>
-                <p class="text-xl font-bold text-amber-900" style="font-family:'Moul',serif;">សិរីសួស្ដី</p> 
+    <section>
+      <div id="questions" class="questions"></div>
+      <div id="empty" class="empty">រកមិនឃើញសំណួរសម្រាប់ប្រភេទនេះទេ។</div>
+      <nav id="pagination" class="pagination" aria-label="ប្តូរទំព័រសំណួរ">
+        <button id="previousPage" type="button">ទំព័រមុន</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage" type="button">ទំព័របន្ទាប់</button>
+      </nav>
+    </section>
+  </main>
+
+  <script>
+    const categories = [
+      'វេយ្យាករណ៍ និងរចនាសម្ព័ន្ធ',
+      'វាក្យសព្ទ និងភាសាសិក្សា',
+      'វិធីសាស្ត្របង្រៀន',
+      'ការវាយតម្លៃសិក្សា',
+      'អត្ថបទបំពេញចន្លោះ',
+      'ចំណេះដឹងទូទៅ និងកម្ពុជា',
+      'គរុកោសល្យ និងក្រមសីលធម៌គ្រូ',
+      'ICT និងកុំព្យូទ័រ',
+      'ស្ថានការណ៍គរុកោសល្យ',
+      'ភូមិសាស្ត្រកម្ពុជា',
+      'វិទ្យាសាស្ត្រ និងធម្មជាតិ',
+      'សង្គម និងវប្បធម៌',
+      'ភាសា និងតក្កវិជ្ជា',
+      'ចំណេះដឹងសម្រាប់ប្រឡង'
+    ];
+
+    function buildQuestion(id, category, question, options, correctIndex, hint = '') {
+      return { id, category, question, options, correctIndex, hint };
+    }
+
+    function buildClozeQuestion(id, passage, wordBank, answers) {
+      return {
+        id,
+        category: categories[4],
+        question: 'ចូរបំពេញចន្លោះក្នុងអត្ថបទ ដោយជ្រើសរើសពាក្យពីប្រអប់។ ប្រើពាក្យនីមួយៗតែម្តង។',
+        type: 'cloze',
+        passage,
+        wordBank,
+        answers
+      };
+    }
+
+    const questionBank = [];
+    const examSections = [
+      {
+        category: categories[0],
+        questions: [
+          ['តើប្រយោគណាត្រឹមត្រូវក្រោយឃ្លាបញ្ច្រាស “Not until…”?', ['Not until the results were published, the committee understood the impact.', 'Not until were the results published did the committee understand the impact.', 'Not until the results were published did the committee understand the impact.', 'Not until the results published the committee did understand the impact.'], 2],
+          ['បំពេញចន្លោះ៖ The panel recommended that each candidate ___ a research proposal.', ['submits', 'submit', 'submitted', 'will submit'], 1],
+          ['បំពេញលក្ខខណ្ឌចម្រុះឱ្យត្រឹមត្រូវ៖ If Dara ___ the course last year, she ___ teaching now.', ['completed / would be', 'had completed / would be', 'would complete / had been', 'has completed / will be'], 1],
+          ['ជ្រើសរើសប្រយោគដែលប្រើ participial clause ត្រឹមត្រូវ៖', ['Having reviewed the evidence, the examiner revised the rubric.', 'Reviewed the evidence, the rubric was revised by the examiner.', 'Having reviewed the evidence, the rubric was revised.', 'The examiner having review the evidence, revised the rubric.'], 0],
+          ['តើប្រយោគណាមាន subject-verb agreement ត្រឹមត្រូវ?', ['Neither the mentor nor the trainees was prepared.', 'Neither the mentor nor the trainees were prepared.', 'Neither the mentor or the trainees were prepared.', 'Neither mentor nor trainees is prepared yesterday.'], 1],
+          ['តើវណ្ណយុត្តិមួយណាត្រឹមត្រូវសម្រាប់ relative clause ដែលមិនកំណត់ន័យ?', ['The students who completed the task, received feedback.', 'The students, who completed the task received feedback.', 'The students, who completed the task, received feedback.', 'The students who, completed the task received feedback.'], 2],
+          ['បំពេញចន្លោះដោយប្រើ modal verb សម្រាប់ការសន្និដ្ឋានខ្លាំងអំពីអតីតកាល៖ She ___ the email; I saw it in her sent folder.', ['must have sent', 'should send', 'might send', 'would be sending'], 0],
+          ['បំពេញចន្លោះ៖ We regret ___ you that the application has been unsuccessful.', ['informing', 'to inform', 'inform', 'to have informing'], 1],
+          ['ជ្រើសរើសប្រយោគដែលមាន parallel structure ត្រឹមត្រូវ៖', ['The role requires planning lessons, to assess learners, and communication with parents.', 'The role requires planning lessons, assessing learners, and communicating with parents.', 'The role requires to plan lessons, assessing learners, and parent communication.', 'The role requires lesson planning, assess learners, and to communicate with parents.'], 1],
+          ['បំពេញចន្លោះក្នុង cleft sentence៖ It was the feedback ___ helped the novice teacher refine the lesson.', ['who', 'whose', 'that', 'what'], 2]
+        ]
+      },
+      {
+        category: categories[1],
+        questions: [
+          ['តើ collocation ណាប្រើបានត្រឹមត្រូវក្នុងការសរសេរបែបសិក្សា?', ['do a distinction', 'draw a distinction', 'make a distinction between of', 'take distinction'], 1],
+          ['ក្នុងប្រយោគ “The findings are compelling, albeit preliminary,” ពាក្យ “albeit” មានន័យជិតនឹងអ្វី?', ['therefore', 'although', 'because', 'moreover'], 1],
+          ['តើ “corroborate a claim” មានន័យដូចម្តេច?', ['បដិសេធការអះអាង', 'ផ្តល់ភស្តុតាងគាំទ្រការអះអាង', 'ធ្វើឱ្យការអះអាងមិនច្បាស់', 'សង្ខេបការអះអាង'], 1],
+          ['តើកិរិយាសព្ទណាមានន័យថាកាត់បន្ថយភាពធ្ងន់ធ្ងរ ឬផលប៉ះពាល់?', ['mitigate', 'perpetuate', 'exacerbate', 'supersede'], 0],
+          ['ក្នុងអត្ថបទសិក្សា “ubiquitous” មានន័យថា៖', ['កើតមានជាញឹកញាប់នៅកន្លែងជាច្រើន', 'មានភាពចម្រូងចម្រាសខ្លាំង', 'ពិបាកវាស់វែង', 'មានលក្ខណៈបណ្តោះអាសន្ន'], 0],
+          ['តើ “ambiguous instruction” សំដៅលើអ្វី?', ['សេចក្តីណែនាំដែលមានន័យច្រើន ឬមិនច្បាស់', 'សេចក្តីណែនាំដែលមានឧទាហរណ៍ច្រើន', 'សេចក្តីណែនាំដែលខ្លីពេក', 'សេចក្តីណែនាំដែលមានលំដាប់ច្បាស់'], 0],
+          ['តើ “infer” មានន័យអ្វីនៅពេលអានអត្ថបទ?', ['ចម្លងព័ត៌មានតាមពាក្យដើម', 'សន្និដ្ឋានពីភស្តុតាងដែលមាន', 'បកប្រែគ្រប់ពាក្យ', 'បដិសេធគំនិតរបស់អ្នកនិពន្ធ'], 1],
+          ['តើមួយណាជាឧទាហរណ៍នៃ connotation អវិជ្ជមាន?', ['slim ជំនួស thin ក្នុងបរិបទសរសើរ', 'home ជំនួស house ក្នុងបរិបទកក់ក្តៅ', 'stubborn ជំនួស determined ក្នុងបរិបទរិះគន់', 'child ជំនួស student ក្នុងបរិបទសាលា'], 2],
+          ['ពាក្យ “Could you possibly submit the draft today?” បង្ហាញ register បែបណា?', ['informal and blunt', 'formal and tactful', 'technical and impersonal', 'archaic and ceremonial'], 1],
+          ['ក្នុងសំណេរអាគុយម៉ង់ “salient evidence” មានន័យថាភស្តុតាងដែល៖', ['មិនទាក់ទងនឹងប្រធានបទ', 'សំខាន់ និងពាក់ព័ន្ធដោយផ្ទាល់', 'ត្រូវបានប្រឌិត', 'ពិបាកអានតែគ្មានប្រយោជន៍'], 1]
+        ]
+      },
+      {
+        category: categories[2],
+        questions: [
+          ['គោលការណ៍ស្នូលនៃ Communicative Language Teaching គឺ៖', ['ការទន្ទេញតារាងវេយ្យាករណ៍ជាចម្បង', 'ការប្រើភាសាដើម្បីបំពេញគោលបំណងទំនាក់ទំនង', 'ការបកប្រែគ្រប់ប្រយោគទៅភាសាកំណើត', 'ការកែគ្រប់កំហុសភ្លាមៗ'], 1],
+          ['ក្នុង Task-Based Language Teaching សកម្មភាពស្នូលគួរតែ៖', ['មានលទ្ធផលជាក់ស្តែងដែលសិស្សសម្រេចតាមរយៈការប្រើភាសា', 'ផ្តោតតែលើការចម្លងពាក្យ', 'វាស់តែការបញ្ចេញសំឡេង', 'មិនអនុញ្ញាតឱ្យសិស្សពិភាក្សា'], 0],
+          ['តើ scaffolding មានគោលបំណងអ្វី?', ['ផ្តល់ជំនួយបណ្តោះអាសន្ន ហើយដកចេញបន្តិចម្តងៗពេលសិស្សឯករាជ្យ', 'ធ្វើកិច្ចការជំនួសសិស្ស', 'បន្ថយគោលដៅសិក្សាសម្រាប់គ្រប់គ្នា', 'ជៀសវាងការផ្តល់មតិកែលម្អ'], 0],
+          ['គ្រូផ្តល់អត្ថបទកម្រិតផ្សេងៗ ប៉ុន្តែគោលដៅសិក្សាដូចគ្នា។ នេះជាឧទាហរណ៍នៃ៖', ['differentiated instruction', 'summative testing', 'rote learning', 'contrastive analysis'], 0],
+          ['សិស្សនិយាយ “He go yesterday.” គ្រូឆ្លើយ “Yes, he went yesterday.” ដោយមិនបញ្ឈប់ការសន្ទនា។ នេះជា៖', ['recast', 'dictation', 'translation', 'summative feedback'], 0],
+          ['ហេតុអ្វីបានជា wait time បន្ទាប់ពីសួរសំណួរមានប្រយោជន៍?', ['វាផ្តល់ពេលឱ្យសិស្សគិត និងរៀបចំចម្លើយ', 'វាកាត់បន្ថយឱកាសចូលរួម', 'វាធានាថាគ្រូអាចឆ្លើយជំនួសសិស្ស', 'វាជំនួសការវាយតម្លៃទាំងអស់'], 0],
+          ['តាមគំនិត comprehensible input ការបញ្ចូលភាសាដែលមានប្រសិទ្ធភាពគួរតែ៖', ['លើសកម្រិតសិស្សយ៉ាងខ្លាំង', 'អាចយល់បាន និងលើសសមត្ថភាពបច្ចុប្បន្នបន្តិច', 'មានតែច្បាប់វេយ្យាករណ៍ដាច់ដោយឡែក', 'គ្មានបរិបទ ឬជំនួយន័យ'], 1],
+          ['តាម Output Hypothesis ការផលិតភាសាជួយសិស្សព្រោះវា៖', ['បង្ហាញចន្លោះចំណេះដឹង និងជំរុញឱ្យសាកល្បងទម្រង់ភាសា', 'លុបបំបាត់តម្រូវការស្តាប់', 'ធានាថាគ្មានកំហុស', 'ធ្វើឱ្យការបញ្ចូលភាសាមិនចាំបាច់'], 0],
+          ['ពេលសិស្សធ្វើកំហុសក្នុងសកម្មភាពនិយាយដោយសេរី គ្រូគួរធ្វើអ្វីជាមុន?', ['រំខានរាល់ពេលដើម្បីកែគ្រប់កំហុស', 'កត់កំហុសសំខាន់ៗ ហើយផ្តល់មតិកែលម្អក្រោយសកម្មភាព', 'បញ្ឈប់សកម្មភាពទាំងមូល', 'មិនផ្តល់មតិកែលម្អឡើយ'], 1],
+          ['សកម្មភាពមួយមាន “information gap” នៅពេល៖', ['សិស្សគ្រប់គ្នាមានព័ត៌មានដូចគ្នា', 'អ្នកចូលរួមត្រូវចែករំលែកព័ត៌មានខុសគ្នាដើម្បីបំពេញភារកិច្ច', 'គ្រូបង្ហាញចម្លើយមុនពេលសិស្សចាប់ផ្តើម', 'សិស្សធ្វើការតែម្នាក់ឯងដោយមិនទាក់ទងគ្នា'], 1]
+        ]
+      },
+      {
+        category: categories[3],
+        questions: [
+          ['តើ construct validity ពិនិត្យអ្វី?', ['តើការប្រឡងវាស់សមត្ថភាពដែលខ្លួនអះអាងថាវាស់ឬអត់', 'តើអ្នកដាក់ពិន្ទុយល់ស្របគ្នាឬអត់', 'តើសំណួរមានចំនួនប៉ុន្មាន', 'តើការប្រឡងមានរយៈពេលខ្លីឬអត់'], 0],
+          ['ការប្រឡងផ្តល់លទ្ធផលស្រដៀងគ្នាពេលធ្វើឡើងវិញក្រោមលក្ខខណ្ឌស្រដៀងគ្នា បង្ហាញពី៖', ['reliability', 'washback', 'authenticity', 'face value'], 0],
+          ['តើ criterion-referenced assessment ប្រៀបធៀបលទ្ធផលសិស្សនឹងអ្វី?', ['សមត្ថភាពរបស់សិស្សដទៃ', 'លក្ខណៈវិនិច្ឆ័យ ឬស្តង់ដារកំណត់ទុកជាមុន', 'ពិន្ទុមធ្យមថ្នាក់មុន', 'ចំនួនម៉ោងសិក្សា'], 1],
+          ['តើ norm-referenced interpretation បកស្រាយពិន្ទុដោយ៖', ['ប្រៀបធៀបនឹងស្តង់ដារជាក់លាក់តែមួយ', 'ប្រៀបធៀបទីតាំងរបស់អ្នកប្រឡងជាមួយក្រុមយោង', 'ពិនិត្យតែការរីកចម្រើនផ្ទាល់ខ្លួន', 'មិនប្រើក្រុមប្រៀបធៀបឡើយ'], 1],
+          ['ក្នុងសំណួរជ្រើសរើសចម្លើយ តើ distractor ល្អគួរតែ៖', ['មិនសមហេតុផលដើម្បីឱ្យងាយដកចេញ', 'ទាក់ទាញអ្នកដែលមានការយល់ច្រឡំជាក់លាក់ ប៉ុន្តែមិនត្រឹមត្រូវ', 'ដូចចម្លើយត្រឹមត្រូវគ្រប់ពាក្យ', 'វែងជាងចម្លើយផ្សេងៗជានិច្ច'], 1],
+          ['តើ washback effect សំដៅលើអ្វី?', ['ឥទ្ធិពលនៃការប្រឡងលើការបង្រៀន និងការរៀន', 'ភាពខុសគ្នារវាងអ្នកដាក់ពិន្ទុ', 'កំហុសបច្ចេកទេសក្នុងម៉ាស៊ីនស្កេន', 'ការបាត់បង់ពិន្ទុដោយសារមិនមកប្រឡង'], 0],
+          ['តើ analytic rubric មានលក្ខណៈពិសេសអ្វី?', ['ផ្តល់ពិន្ទុតែមួយសរុបដោយគ្មានលក្ខណៈវិនិច្ឆ័យ', 'ដាក់ពិន្ទុដាច់ដោយឡែកតាមលក្ខណៈវិនិច្ឆ័យច្រើន', 'ប្រើតែចម្លើយត្រូវ/ខុស', 'ប្រៀបធៀបសិស្សជាមួយគ្នាតែប៉ុណ្ណោះ'], 1],
+          ['តើ portfolio assessment មានអត្ថប្រយោជន៍សំខាន់អ្វី?', ['បង្ហាញស្នាដៃ និងវឌ្ឍនភាពរបស់សិស្សតាមពេលវេលា', 'វាស់តែការចងចាំនៅថ្ងៃប្រឡង', 'លុបបំបាត់តម្រូវការលក្ខណៈវិនិច្ឆ័យ', 'ធ្វើឱ្យមតិកែលម្អមិនចាំបាច់'], 0],
+          ['សម្រាប់សិស្សដែលមានពិការភាពអាន ការបន្ថែមពេលដោយមិនប្តូរគោលដៅដែលត្រូវវាស់ ជាទូទៅជា៖', ['accommodation', 'construct change', 'grade inflation', 'item banking'], 0],
+          ['តើ item discrimination index ជួយបង្ហាញអ្វី?', ['ថាតើសំណួរបែងចែកអ្នកមានសមត្ថភាពខ្ពស់ និងទាបបានកម្រិតណា', 'ថាតើសំណួរមានអក្ខរាវិរុទ្ធត្រឹមត្រូវឬអត់', 'ថាតើតេស្តមានប្រធានបទប៉ុន្មាន', 'ថាតើពេលប្រឡងសមស្របនឹងកាលវិភាគឬអត់'], 0]
+        ]
+      }
+    ];
+
+    let questionId = 1;
+    examSections.forEach((section) => {
+      section.questions.forEach(([question, options, correctIndex]) => {
+        questionBank.push(buildQuestion(questionId++, section.category, question, options, correctIndex));
+      });
+    });
+
+    const clozePassages = [
+      ['Effective teachers do not rely on intuition alone. They collect [[0]] from the classroom, analyze learner responses, and use the resulting [[1]] to refine instruction. This cycle of [[2]] practice helps teachers identify patterns rather than blame individuals. Over time, it can strengthen learner [[3]] and promote professional [[4]].', ['evidence', 'feedback', 'reflective', 'autonomy', 'growth', 'routine', 'silence'], ['evidence', 'feedback', 'reflective', 'autonomy', 'growth']],
+      ['When learners receive [[0]] input just beyond their current level, they can notice new forms in context. Meaningful [[1]] gives them opportunities to test hypotheses, while pushed [[2]] can reveal gaps in their [[3]]. Timely feedback then supports [[4]] rather than rote memorization.', ['comprehensible', 'interaction', 'output', 'interlanguage', 'revision', 'isolation', 'translation'], ['comprehensible', 'interaction', 'output', 'interlanguage', 'revision']],
+      ['A well-designed test should align with the [[0]] it intends to measure; otherwise, score interpretations may lack [[1]]. Consistent scoring contributes to [[2]], while a clear [[3]] improves transparency. Irrelevant reading demands can introduce construct-irrelevant variance and undermine [[4]].', ['construct', 'validity', 'reliability', 'rubric', 'fairness', 'fluency', 'intuition'], ['construct', 'validity', 'reliability', 'rubric', 'fairness']],
+      ['Effective lesson planning begins with measurable [[0]] and the evidence that would demonstrate learning. Teachers then sequence activities from supported practice toward greater [[1]]. This [[2]] approach helps ensure that classroom tasks align with intended outcomes. During the lesson, ongoing checks allow the teacher to [[3]] instruction and respond to learner [[4]].', ['objectives', 'independence', 'backward-design', 'adapt', 'needs', 'punish', 'memorize'], ['objectives', 'independence', 'backward-design', 'adapt', 'needs']],
+      ['Inclusive teaching recognizes that learners differ in prior knowledge, pace, and [[0]]. A teacher may [[1]] materials while maintaining shared learning goals. Appropriate [[2]] remove unnecessary barriers without lowering the construct being assessed. A respectful classroom also values learner [[3]] and builds meaningful [[4]] for everyone.', ['language background', 'differentiate', 'accommodations', 'identity', 'participation', 'uniformity', 'competition'], ['language background', 'differentiate', 'accommodations', 'identity', 'participation']],
+      ['In pronunciation teaching, a [[0]] is a sound category that can distinguish meaning. The words “ship” and “sheep” form a [[1]] because changing one vowel changes the word. Teachers can draw attention to [[2]] features such as voicing and word [[3]]. The goal is usually greater [[4]], not imitation of one single accent.', ['phoneme', 'minimal pair', 'segmental', 'stress', 'intelligibility', 'morpheme', 'spelling'], ['phoneme', 'minimal pair', 'segmental', 'stress', 'intelligibility']],
+      ['Academic vocabulary is most useful when learners understand both meaning and [[0]]. Teachers can present words in authentic contexts, highlight common [[1]], and compare shades of [[2]]. Learners should then retrieve and use the language in speaking and writing. This repeated, meaningful practice supports long-term [[3]] and more precise [[4]].', ['register', 'collocations', 'connotation', 'retention', 'expression', 'intonation', 'translation'], ['register', 'collocations', 'connotation', 'retention', 'expression']],
+      ['Formative assessment gathers evidence while learning is still in progress. Teachers use [[0]] questions, observation, and short tasks to identify misconceptions. Effective [[1]] tells learners what is working and what to do next. It should be specific and [[2]], not merely a mark. Learners can also use [[3]] to monitor progress and set [[4]].', ['elicitation', 'feedback', 'actionable', 'self-assessment', 'goals', 'ranking', 'punishment'], ['elicitation', 'feedback', 'actionable', 'self-assessment', 'goals']],
+      ['In [[0]] design, teachers begin with desired learning outcomes, decide what [[1]] would show achievement, and then plan instruction. This sequence makes [[2]] among objectives, assessment, and activities visible. A well-aligned course avoids teaching content that is never assessed or assessing skills that were never [[3]]. Periodic review supports curriculum [[4]].', ['backward', 'evidence', 'alignment', 'taught', 'improvement', 'guessing', 'decoration'], ['backward', 'evidence', 'alignment', 'taught', 'improvement']],
+      ['Action research enables teachers to investigate a focused classroom question systematically. The teacher gathers [[0]], plans an [[1]], observes its effects, and reflects on the results. This cycle can be repeated to refine practice. Strong inquiry protects learner [[2]], uses transparent methods, and connects conclusions to the available [[3]] rather than relying on [[4]].', ['data', 'intervention', 'confidentiality', 'evidence', 'assumptions', 'grades', 'intuition'], ['data', 'intervention', 'confidentiality', 'evidence', 'assumptions']]
+    ];
+
+    clozePassages.forEach(([passage, wordBank, answers]) => {
+      questionBank.push(buildClozeQuestion(questionId++, passage, wordBank, answers));
+    });
+
+    const suppliedQuestionGroups = [
+      {
+        category: categories[5],
+        questions: [
+          ['តើកិច្ចព្រមព្រៀងសន្តិភាពទីក្រុងប៉ារីសស្តីពីការបញ្ចប់ជម្លោះប្រដាប់អាវុធនៅកម្ពុជា ចុះហត្ថលេខានៅថ្ងៃខែឆ្នាំណា?', ['ថ្ងៃទី២៣ ខែតុលា ឆ្នាំ១៩៩១', 'ថ្ងៃទី០៧ ខែមករា ឆ្នាំ១៩៧៩', 'ថ្ងៃទី២៩ ខែធ្នូ ឆ្នាំ១៩៩៨', 'ថ្ងៃទី០៩ ខែវិច្ឆិកា ឆ្នាំ១៩៥៣'], 0, 'គិតដល់សន្ធិសញ្ញាអន្តរជាតិឆ្នាំ១៩៩១។'],
+          ['តើទន្លេធំៗចំនួនប៉ុន្មានដែលប្រសព្វគ្នានៅតំបន់ «ចតុមុខ» រាជធានីភ្នំពេញ?', ['ទន្លេមេគង្គលើ ទន្លេមេគង្គក្រោម ទន្លេសាប និងទន្លេបាសាក់', 'ទន្លេមេគង្គ ទន្លេសាប និងទន្លេសៀមរាប', 'ទន្លេបាសាក់ និងទន្លេមេគង្គតែពីរគត់', 'ទន្លេមេគង្គ ទន្លេសាប ទន្លេបាសាក់ និងទន្លេមង្គលបុរី'], 0, 'មានប្រព័ន្ធទន្លេធំៗចំនួន៤។'],
+          ['តើអង្គការយូណេស្កូ (UNESCO) បានដាក់បញ្ចូលប្រាសាទអង្គរវត្តជាបេតិកភណ្ឌពិភពលោកនៅឆ្នាំណា?', ['ឆ្នាំ១៩៩២', 'ឆ្នាំ១៩៥៣', 'ឆ្នាំ២០០១', 'ឆ្នាំ១៩៧៩'], 0, 'ស្ថិតនៅដើមទសវត្សរ៍ឆ្នាំ១៩៩០។'],
+          ['តើព្រះរាជាណាចក្រកម្ពុជាបច្ចុប្បន្នប្រកាន់យករបបនយោបាយអ្វី?', ['ប្រជាធិបតេយ្យសេរីពហុបក្ស និងរាជាធិបតេយ្យអាស្រ័យរដ្ឋធម្មនុញ្ញ', 'រដ្ឋធម្មនុញ្ញផ្តាច់ការ', 'សាធារណរដ្ឋប្រជាមានិត', 'រាជាធិបតេយ្យដាច់ខាត'], 0, 'អានមាត្រាទី១ នៃរដ្ឋធម្មនុញ្ញ។'],
+          ['តើខេត្តណាខ្លះនៅកម្ពុជាដែលស្ថិតនៅក្នុងតំបន់ឆ្នេរសមុទ្រ?', ['ខេត្តព្រះសីហនុ កំពត កែប និងកោះកុង', 'ខេត្តសៀមរាប បាត់ដំបង ពោធិ៍សាត់', 'ខេត្តស្វាយរៀង កំពង់ចាម កណ្តាល', 'ខេត្តមណ្ឌលគិរី រតនគិរី ស្ទឹងត្រែង'], 0, 'មានខេត្តចំនួន៤ដែលជាប់សមុទ្រ។'],
+          ['តើអ្វីជាកត្តាស្នូលនៃការអភិវឌ្ឍសង្គមជាតិ?', ['ការអប់រំ និងធនធានមនុស្សប្រកបដោយគុណភាពខ្ពស់', 'ការនាំចូលទំនិញបរទេសគ្រប់ប្រភេទ', 'ការបោះបង់ការសិក្សារបស់យុវជន', 'ការពឹងផ្អែកលើជំនួយបរទេសដាច់ខាត'], 0, 'គិតដល់ការវិនិយោគលើកុមារ និងយុវជន។', 20]
+        ]
+      },
+      {
+        category: categories[6],
+        questions: [
+          ['តើគោលបំណងចម្បងនៃការវាយតម្លៃដើម្បីទ្រទ្រង់ការរៀន (Formative Assessment) គឺដើម្បីអ្វី?', ['ប្រមូលភស្តុតាងពីការរីកចម្រើនរបស់សិស្ស និងកែតម្រូវការបង្រៀនទាន់ពេលវេលា', 'ផ្តល់និទ្ទេសបញ្ចប់ឆ្នាំសិក្សា', 'ដាក់ទណ្ឌកម្មសិស្សខ្សោយ', 'ជ្រើសរើសសិស្សប្រឡងថ្នាក់ជាតិ'], 0, 'វាធ្វើឡើងក្នុងពេលកំពុងបង្រៀន។'],
+          ['តើធាតុផ្សំសំខាន់ៗទាំង៣ក្នុងការរៀបចំផែនការបង្រៀន (Lesson Plan) រួមមានអ្វីខ្លះ?', ['វត្ថុបំណងមេរៀន សកម្មភាពរៀន និងការវាយតម្លៃ', 'ចំនួនទំព័រសៀវភៅ និងឈ្មោះនាយកសាលា', 'ពេលវេលាសម្រាក និងកីឡា', 'តម្លៃថវិកាសម្ភារៈ'], 0, 'គិតថាតើចង់ឱ្យសិស្សសម្រេចអ្វី និងធ្វើអ្វី។'],
+          ['តើគ្រូបង្រៀនល្អគួរមានអាកប្បកិរិយាបែបណា?', ['មានចិត្តស្មោះត្រង់ គ្មានការរើសអើង និងយកចិត្តទុកដាក់ខ្ពស់លើសិស្សគ្រប់រូប', 'ធ្វើបាបសិស្សណាដែលមិនស្តាប់បង្គាប់', 'បង្រៀនតែសិស្សណាដែលបង់ប្រាក់បន្ថែម', 'មិនខ្វល់ខ្វាយពីលទ្ធផលសិស្សខ្សោយ'], 0, 'គិតដល់ក្រមសីលធម៌ និងភាពស្មើគ្នា។', 23]
+        ]
+      },
+      {
+        category: categories[7],
+        questions: [
+          ['ក្នុង Microsoft Excel តើមុខងារណាប្រើសម្រាប់ស្វែងរកតម្លៃមធ្យម (Average)?', ['=AVERAGE(range)', '=SUM(range)', '=MAX(range)', '=COUNT(range)'], 0, 'កាត់ពាក្យពី Average។'],
+          ['ក្នុង HTML5 តើ tag ណាប្រើសម្រាប់កំណត់ internal style sheet នៅក្នុងឯកសារ HTML?', ['<style>', '<script>', '<css>', '<design>'], 0, 'ប្រើ element សម្រាប់ដាក់ក្បួន CSS។'],
+          ['ក្នុង JavaScript តើត្រូវប្រកាសអថេរយ៉ាងដូចម្តេច ដើម្បីមិនអាចកំណត់តម្លៃឡើងវិញបាន?', ['const', 'let', 'var', 'static'], 0, 'គិតដល់អថេរដែលមានតម្លៃថេរ។'],
+          ['តើប្រព័ន្ធណាមួយជួយការពារកុំព្យូទ័រពីមេរោគ (Malware)?', ['កម្មវិធីកំចាត់មេរោគ (Antivirus Software) និងការអាប់ដេតប្រព័ន្ធទៀងទាត់', 'បើកឯកសារចម្លែកពីអ៊ីមែលមិនស្គាល់ប្រភព', 'បិទប្រព័ន្ធសុវត្ថិភាព Firewall ទាំងស្រុង', 'មិនប្រើប្រាស់ពាក្យសម្ងាត់'], 0, 'ប្រើប្រាស់កម្មវិធីការពារ និងអាប់ដេតជាប្រចាំ។', 22]
+        ]
+      },
+      {
+        category: categories[8],
+        questions: [
+          ['ប្រសិនបើមានសិស្សម្នាក់តែងតែគេងលក់ក្នុងម៉ោងរៀន និងមិនសូវចូលរួម តើគ្រូគួរធ្វើអ្វីមុនគេ?', ['ដើរចូលទៅជិតដោយស្ងៀមស្ងាត់ ឬសួរសំណួរងាយៗដើម្បីទាក់ទាញចំណាប់អារម្មណ៍ដោយមិនបង្អាប់មុខ', 'ជេរប្រមាថមុខមិត្តភក្តិក្នុងថ្នាក់', 'បណ្តោយឱ្យគាត់គេងរហូតចប់ម៉ោង', 'បណ្តេញសិស្សចេញពីថ្នាក់រៀនភ្លាមៗ'], 0, 'ដោះស្រាយដោយភាពទន់ភ្លន់ និងវិជ្ជាជីវៈ។'],
+          ['ក្នុងករណីមានសិស្សពីរនាក់ឈ្លោះប្រកែក និងវាយគ្នាក្នុងថ្នាក់រៀន តើជំហានដំបូងរបស់គ្រូគឺអ្វី?', ['អន្តរាគមន៍ឃាត់ភ្លាមៗដើម្បីបញ្ឈប់អំពើហិង្សា និងរក្សាសុវត្ថិភាពក្នុងថ្នាក់', 'ឈរមើលរហូតដល់មានអ្នកឈ្នះអ្នកចាញ់', 'រត់ចេញពីបន្ទប់រៀនទៅហៅនាយកសាលា ដោយមិនជួយទប់ស្កាត់', 'សើចចំអកដាក់សិស្សទាំងពីរ'], 0, 'ការពារសុវត្ថិភាពសិស្សជាបន្ទាន់។'],
+          ['តើគ្រូគួរធ្វើដូចម្តេចពេលសិស្សមិនយល់មេរៀនសោះ?', ['ពន្យល់ឡើងវិញដោយប្រើឧទាហរណ៍ជាក់ស្តែងងាយយល់ និងវិធីសាស្ត្រផ្សេងគ្នា', 'ស្តីបន្ទោសសិស្សថាខ្វះសមត្ថភាពគិត', 'បង្រៀនរំលងទៅមុខយ៉ាងលឿន', 'បង្ខំឱ្យសិស្សទន្ទេញទាំងមិនយល់ន័យ'], 0, 'បង្រៀនបត់បែនតាមកម្រិត និងតម្រូវការរបស់សិស្ស។', 23]
+        ]
+      }
+    ];
+
+    suppliedQuestionGroups.forEach((group) => {
+      group.questions.forEach(([question, options, correctIndex, hint, repeat = 1]) => {
+        for (let copy = 0; copy < repeat; copy += 1) {
+          questionBank.push(buildQuestion(questionId++, group.category, question, options, correctIndex, hint));
+        }
+      });
+    });
+
+    const pastedQuestionGroups = [
+      {
+        category: categories[9],
+        questions: [
+          ['ប្រទេសកម្ពុជាស្ថិតនៅក្នុងតំបន់ណា?', ['អាស៊ីខាងកើត', 'អាស៊ីអាគ្នេយ៍', 'អាស៊ីខាងត្បូង', 'អាស៊ីកណ្តាល'], 1],
+          ['តើទន្លេធំមួយណាហូរកាត់ប្រទេសកម្ពុជា?', ['ទន្លេ Nile', 'ទន្លេ Amazon', 'ទន្លេមេគង្គ', 'ទន្លេ Yangtze'], 2],
+          ['បឹងធម្មជាតិដ៏ធំបំផុតរបស់កម្ពុជាគឺ?', ['បឹងយក្សឡោម', 'បឹងទន្លេសាប', 'បឹងកន្សែង', 'បឹងកំពង់ត្របែក'], 1],
+          ['ប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?', ['កំពត', 'ព្រះវិហារ', 'សៀមរាប', 'បាត់ដំបង'], 2],
+          ['តើភាសាផ្លូវការរបស់ប្រទេសកម្ពុជាគឺជាអ្វី?', ['ភាសាអង់គ្លេស', 'ភាសាខ្មែរ', 'ភាសាបារាំង', 'ភាសាចិន'], 1],
+          ['រូបិយប័ណ្ណជាតិរបស់កម្ពុជាគឺ?', ['បាត', 'ដុង', 'រៀល', 'យ័ន'], 2],
+          ['ប្រទេសកម្ពុជាមានព្រំដែនជាប់ប្រទេសណាខ្លះ?', ['ថៃ ឡាវ និងវៀតណាម', 'មីយ៉ាន់ម៉ា ថៃ និងឡាវ', 'វៀតណាម ម៉ាឡេស៊ី និងថៃ', 'ឡាវ ចិន និងវៀតណាម'], 0],
+          ['តើសមុទ្រដែលនៅភាគនិរតីនៃប្រទេសកម្ពុជាគឺ?', ['សមុទ្រចិនខាងត្បូង', 'ឈូងសមុទ្រថៃ', 'សមុទ្រអារ៉ាប់', 'សមុទ្រក្រហម'], 1],
+          ['តើប្រទេសកម្ពុជាស្ថិតនៅក្នុងតំបន់ពេលវេលាអ្វី?', ['UTC+5', 'UTC+6', 'UTC+7', 'UTC+8'], 2]
+        ]
+      },
+      {
+        category: categories[10],
+        questions: [
+          ['តើភពណាដែលស្ថិតនៅជិតព្រះអាទិត្យបំផុត?', ['ផែនដី', 'ភពអង្គារ', 'ភពពុធ', 'ភពសុក្រ'], 2],
+          ['ផែនដីវិលជុំវិញអ្វី?', ['ព្រះច័ន្ទ', 'ព្រះអាទិត្យ', 'ភពអង្គារ', 'ផ្កាយ'], 1],
+          ['តើផែនដីត្រូវការពេលប្រហែលប៉ុន្មានដើម្បីវិលជុំវិញព្រះអាទិត្យមួយជុំ?', ['២៤ ម៉ោង', '៣០ ថ្ងៃ', '៣៦៥ ថ្ងៃ', '១០០ ថ្ងៃ'], 2],
+          ['តើឧស្ម័នណាដែលមនុស្សត្រូវការសម្រាប់ដកដង្ហើម?', ['អុកស៊ីសែន', 'កាបូនឌីអុកស៊ីត', 'អាសូត', 'អ៊ីដ្រូសែន'], 0],
+          ['តើទឹកមានរូបមន្តគីមីអ្វី?', ['CO₂', 'O₂', 'H₂O', 'NaCl'], 2],
+          ['តើមនុស្សពេញវ័យជាទូទៅមានធ្មេញអចិន្ត្រៃយ៍ប៉ុន្មាន?', ['២០', '២៤', '២៨', '៣២'], 3],
+          ['តើសរីរាង្គណាដែលបូមឈាមទៅទូទាំងរាងកាយ?', ['សួត', 'បេះដូង', 'ថ្លើម', 'តម្រងនោម'], 1],
+          ['តើរុក្ខជាតិផលិតអាហារដោយដំណើរការអ្វី?', ['Respiration', 'Photosynthesis', 'Digestion', 'Evaporation'], 1],
+          ['តើព្រះអាទិត្យជាអ្វី?', ['ភព', 'ផ្កាយ', 'ព្រះច័ន្ទ', 'ផ្កាយដុះកន្ទុយ'], 1],
+          ['តើកម្លាំងដែលទាញវត្ថុចុះទៅផែនដីហៅថាអ្វី?', ['Friction', 'Gravity', 'Pressure', 'Magnetism'], 1]
+        ]
+      },
+      {
+        category: categories[11],
+        questions: [
+          ['តើ UNESCO ជាអង្គការដែលពាក់ព័ន្ធជាចម្បងនឹងអ្វី?', ['កីឡា', 'អប់រំ វិទ្យាសាស្ត្រ និងវប្បធម៌', 'ធនាគារ', 'ពាណិជ្ជកម្ម'], 1],
+          ['តើ ASEAN មានន័យថាអ្វី?', ['សមាគមប្រជាជាតិអាស៊ីអាគ្នេយ៍', 'សហភាពអឺរ៉ុប', 'អង្គការសហប្រជាជាតិ', 'សមាគមប្រទេសអាស៊ីខាងកើត'], 0],
+          ['តើ ASEAN ត្រូវបានបង្កើតនៅឆ្នាំណា?', ['១៩៥៧', '១៩៦៧', '១៩៧៧', '១៩៨៧'], 1],
+          ['តើអង្គការសហប្រជាជាតិហៅជាភាសាអង់គ្លេសថាអ្វី?', ['WHO', 'WTO', 'UN', 'UNESCO'], 2],
+          ['តើ UNICEF ផ្តោតសំខាន់លើអ្វី?', ['កុមារ', 'កីឡា', 'ពាណិជ្ជកម្ម', 'កសិកម្ម'], 0],
+          ['តើ WHO ពាក់ព័ន្ធជាចម្បងនឹងវិស័យអ្វី?', ['សុខភាព', 'អប់រំ', 'កីឡា', 'សេដ្ឋកិច្ច'], 0],
+          ['តើសិទ្ធិមនុស្សមានន័យជាទូទៅថាអ្វី?', ['សិទ្ធិរបស់មនុស្សដែលត្រូវបានទទួលស្គាល់ និងការពារ', 'សិទ្ធិរបស់រដ្ឋាភិបាលតែប៉ុណ្ណោះ', 'សិទ្ធិរបស់អ្នកមាន', 'សិទ្ធិរបស់គ្រូតែប៉ុណ្ណោះ'], 0],
+          ['តើការគោរពភាពខុសគ្នារបស់អ្នកដទៃមានសារៈសំខាន់អ្វី?', ['បង្កើនជម្លោះ', 'បង្កើនការរើសអើង', 'ជួយបង្កើតសង្គមដែលមានការគោរព និងសន្តិភាព', 'ធ្វើឱ្យមនុស្សឯកោ'], 2],
+          ['តើវប្បធម៌រួមមានអ្វីខ្លះ?', ['ភាសា', 'ប្រពៃណី', 'ជំនឿ និងសិល្បៈ', 'ទាំងអស់ខាងលើ'], 3],
+          ['តើការងារជាក្រុមល្អត្រូវការអ្វីជាចម្បង?', ['ការសហការ', 'ការប្រកួតប្រជែងតែប៉ុណ្ណោះ', 'ការមិនស្តាប់គ្នា', 'ការធ្វើការតែម្នាក់ឯង'], 0],
+          ['តើការសំពះខ្មែរជាទូទៅបង្ហាញអ្វី?', ['ការស្វាគមន៍ និងការគោរព', 'ការបដិសេធមិននិយាយ', 'ការប្រកួតប្រជែង', 'ការសុំទោសតែប៉ុណ្ណោះ'], 0],
+          ['ពេលសំពះជាការស្វាគមន៍ទូទៅ គួរធ្វើដូចម្តេច?', ['ផ្គុំបាតដៃនៅមុខទ្រូង ហើយឱនក្បាលបន្តិចដោយសមរម្យ', 'លើកដៃម្ខាងហើយបែរខ្នង', 'ឱនខ្លួនដល់ដីគ្រប់ករណី', 'ទះដៃខ្លាំងៗមុននិយាយ'], 0],
+          ['តាមទំនៀមពណ៌ប្រពៃណីមួយដែលគេនិយមលើកឡើង តើថ្ងៃអាទិត្យភ្ជាប់នឹងពណ៌អ្វី?', ['ក្រហម', 'ខៀវ', 'បៃតង', 'ស្វាយ'], 0],
+          ['តាមទំនៀមពណ៌ប្រពៃណីមួយ តើថ្ងៃចន្ទភ្ជាប់នឹងពណ៌អ្វី?', ['លឿង', 'ខ្មៅ', 'ទឹកក្រូច', 'ស'], 0],
+          ['តាមទំនៀមពណ៌ប្រពៃណីមួយ តើថ្ងៃអង្គារភ្ជាប់នឹងពណ៌អ្វី?', ['បៃតង', 'ស្វាយ', 'ក្រហម', 'លឿង'], 1],
+          ['តាមទំនៀមពណ៌ប្រពៃណីមួយ តើថ្ងៃពុធភ្ជាប់នឹងពណ៌អ្វី?', ['បៃតង', 'ខ្មៅ', 'ខៀវ', 'ក្រហម'], 0],
+          ['តាមទំនៀមពណ៌ប្រពៃណីមួយ តើថ្ងៃព្រហស្បតិ៍ភ្ជាប់នឹងពណ៌អ្វី?', ['ទឹកក្រូច', 'ស្វាយ', 'ខៀវ', 'ប្រផេះ'], 0],
+          ['តាមទំនៀមពណ៌ប្រពៃណីមួយ តើថ្ងៃសុក្រភ្ជាប់នឹងពណ៌អ្វី?', ['ខៀវ', 'លឿង', 'ខ្មៅ', 'បៃតង'], 0],
+          ['តាមទំនៀមពណ៌ប្រពៃណីមួយ តើថ្ងៃសៅរ៍ភ្ជាប់នឹងពណ៌អ្វី?', ['ខ្មៅ', 'ក្រហម', 'ស', 'ទឹកក្រូច'], 0],
+          ['តើការជ្រើសពណ៌សម្លៀកបំពាក់តាមថ្ងៃក្នុងទំនៀមប្រជាប្រិយ គួរយល់យ៉ាងដូចម្តេច?', ['ជាទំនៀម ឬជំនឿដែលប្រភពខ្លះអាចខុសគ្នា មិនមែនជាកាតព្វកិច្ច', 'ជាច្បាប់ដែលមនុស្សគ្រប់រូបត្រូវតែគោរព', 'ជាលក្ខខណ្ឌសម្រាប់ចូលសាលារៀន', 'ជាសញ្ញាបញ្ជាក់មុខរបររបស់មនុស្ស'], 0]
+        ]
+      },
+      {
+        category: categories[12],
+        questions: [
+          ['២៥ + ៣៥ = ប៉ុន្មាន?', ['៥០', '៥៥', '៦០', '៦៥'], 2],
+          ['១០០ − ៣៧ = ប៉ុន្មាន?', ['៥៣', '៦៣', '៦៧', '៧៣'], 1],
+          ['១២ × ៥ = ប៉ុន្មាន?', ['៥០', '៥៥', '៦០', '៦៥'], 2],
+          ['៨១ ÷ ៩ = ប៉ុន្មាន?', ['៧', '៨', '៩', '១០'], 2],
+          ['តើលេខបឋមមួយណា?', ['៩', '១៥', '១៧', '២១'], 2],
+          ['តើ ១/២ ស្មើប៉ុន្មានភាគរយ?', ['២៥%', '៤០%', '៥០%', '៧៥%'], 2],
+          ['ប្រសិនបើថ្ងៃនេះជាថ្ងៃច័ន្ទ តើ ៣ ថ្ងៃក្រោយជាថ្ងៃអ្វី?', ['អង្គារ', 'ពុធ', 'ព្រហស្បតិ៍', 'សុក្រ'], 2],
+          ['តើពាក្យ “Teacher” មានន័យថាអ្វី?', ['សិស្ស', 'គ្រូ', 'មេរៀន', 'សាលា'], 1],
+          ['តើ “Education” មានន័យថាអ្វី?', ['ការអប់រំ', 'ការងារ', 'ការធ្វើដំណើរ', 'ការកម្សាន្ត'], 0],
+          ['តើ “Knowledge” មានន័យថាអ្វី?', ['ជំនាញ', 'ចំណេះដឹង', 'សីលធម៌', 'បទពិសោធន៍'], 1]
+        ]
+      },
+      {
+        category: categories[13],
+        questions: [
+          ['តើការអានសៀវភៅជួយអ្វី?', ['បង្កើនចំណេះដឹង', 'បន្ថយចំណេះដឹង', 'បង្កើនការភ័យខ្លាច', 'មិនមានប្រយោជន៍'], 0],
+          ['តើការគិតវិភាគមានន័យដូចម្តេច?', ['ជឿគ្រប់ព័ត៌មានដោយមិនពិនិត្យ', 'ពិនិត្យ និងវិភាគព័ត៌មានមុនសម្រេចចិត្ត', 'មិនស្តាប់អ្នកដទៃ', 'ចម្លងគំនិតអ្នកដទៃ'], 1],
+          ['តើការទំនាក់ទំនងល្អត្រូវការអ្វី?', ['ស្តាប់ និងនិយាយឱ្យច្បាស់', 'និយាយតែម្នាក់ឯង', 'មិនស្តាប់', 'ប្រើពាក្យខ្លាំងៗ'], 0],
+          ['តើការគ្រប់គ្រងពេលវេលាមានសារៈសំខាន់អ្វី?', ['ជួយរៀបចំការងារឱ្យមានប្រសិទ្ធភាព', 'ធ្វើឱ្យការងារយឺត', 'បង្កើនការពន្យារពេល', 'មិនមានប្រយោជន៍'], 0],
+          ['តើការទទួលខុសត្រូវមានន័យដូចម្តេច?', ['គេចវេះពីការងារ', 'ទទួលស្គាល់ និងបំពេញភារកិច្ចរបស់ខ្លួន', 'បន្ទោសអ្នកដទៃ', 'មិនគោរពច្បាប់'], 1],
+          ['តើសីលធម៌មានតួនាទីអ្វីក្នុងសង្គម?', ['ជួយឱ្យមនុស្សប្រព្រឹត្តល្អ និងគោរពអ្នកដទៃ', 'បង្កើនជម្លោះ', 'បង្កើនការរើសអើង', 'បំបែកសង្គម'], 0],
+          ['តើការសហការមានន័យដូចម្តេច?', ['ធ្វើការតែម្នាក់ឯង', 'ធ្វើការរួមគ្នាដើម្បីសម្រេចគោលដៅ', 'ប្រកួតប្រជែងគ្នា', 'បដិសេធជំនួយ'], 1],
+          ['តើការគោរពច្បាប់មានសារៈសំខាន់អ្វី?', ['ជួយរក្សាសណ្តាប់ធ្នាប់សង្គម', 'បង្កើនភាពច្របូកច្របល់', 'បង្កើនជម្លោះ', 'មិនមានប្រយោជន៍'], 0],
+          ['តើសន្តិភាពមានន័យជាទូទៅថាអ្វី?', ['ការរស់នៅដោយគ្មានសង្គ្រាម និងអំពើហិង្សា', 'ការប្រយុទ្ធ', 'ការបែងចែក', 'ការរើសអើង'], 0],
+          ['តើការអប់រំមានគោលបំណងសំខាន់អ្វី?', ['ផ្តល់តែចំណេះដឹង', 'អភិវឌ្ឍចំណេះដឹង ជំនាញ សីលធម៌ និងសមត្ថភាពរបស់មនុស្ស', 'បង្កើតការប្រកួតប្រជែង', 'ឱ្យសិស្សចងចាំតែសៀវភៅ'], 1],
+          ['តើកម្ពុជាបានប្រកាសឯករាជ្យពីប្រទេសបារាំងនៅថ្ងៃខែឆ្នាំណា?', ['៩ វិច្ឆិកា ១៩៥៣', '២៣ តុលា ១៩៩១', '៧ មករា ១៩៧៩', '២៤ កញ្ញា ១៩៩៣'], 0],
+          ['តើរាជធានីរបស់ប្រទេសកម្ពុជាគឺទីក្រុងណា?', ['សៀមរាប', 'បាត់ដំបង', 'ភ្នំពេញ', 'កំពត'], 2],
+          ['ទន្លេសាបហូរបញ្ច្រាសទិសតាមរដូវជាចម្បងនៅពេលណា?', ['រដូវប្រាំង', 'រដូវវស្សា', 'រដូវរងា', 'រដូវស្លឹកឈើជ្រុះ'], 1],
+          ['តើកម្ពុជាបានចូលជាសមាជិកអាស៊ាននៅឆ្នាំណា?', ['១៩៩៥', '១៩៩៧', '១៩៩៩', '២០០១'], 2],
+          ['តើរូបិយប័ណ្ណផ្លូវការរបស់កម្ពុជាគឺអ្វី?', ['គីប', 'រៀល', 'បាត', 'ដុង'], 1],
+          ['រដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជាបច្ចុប្បន្នត្រូវបានអនុម័តនៅឆ្នាំណា?', ['១៩៨៩', '១៩៩១', '១៩៩៣', '១៩៩៨'], 2],
+          ['តើព្រះមហាក្សត្រអង្គណាដែលពាក់ព័ន្ធនឹងការសាងសង់ប្រាសាទអង្គរវត្ត?', ['ព្រះបាទជ័យវរ្ម័នទី៧', 'ព្រះបាទសូរ្យវរ្ម័នទី២', 'ព្រះបាទជ័យវរ្ម័នទី២', 'ព្រះបាទឥន្ទ្រវរ្ម័នទី១'], 1],
+          ['ទន្លេមេគង្គហូរចាក់ចូលសមុទ្រតាមតំបន់ដីសណ្តធំនៅប្រទេសណា?', ['ថៃ', 'ឡាវ', 'វៀតណាម', 'មីយ៉ាន់ម៉ា'], 2],
+          ['តើទ្វីបណាមានផ្ទៃដីធំបំផុតលើពិភពលោក?', ['អាហ្វ្រិក', 'អាស៊ី', 'អឺរ៉ុប', 'អាមេរិកខាងត្បូង'], 1],
+          ['តើខ្សែអេក្វាទ័របែងចែកផែនដីជាអឌ្ឍគោលណាខ្លះ?', ['ខាងកើត និងខាងលិច', 'ខាងជើង និងខាងត្បូង', 'ដីគោក និងសមុទ្រ', 'ត្រូពិច និងតំបន់ប៉ូល'], 1],
+          ['តើឧស្ម័នណាដែលរាងកាយមនុស្សប្រើប្រាស់ក្នុងការដកដង្ហើម?', ['អុកស៊ីសែន', 'កាបូនឌីអុកស៊ីត', 'អ៊ីដ្រូសែន', 'អេល្យូម'], 0],
+          ['នៅសម្ពាធបរិយាកាសធម្មតា ទឹកពុះនៅសីតុណ្ហភាពប្រហែលប៉ុន្មាន?', ['០ អង្សាសេ', '៥០ អង្សាសេ', '១០០ អង្សាសេ', '១៥០ អង្សាសេ'], 2],
+          ['តើស្ថានភាពរូបធាតុសំខាន់ៗបីមានអ្វីខ្លះ?', ['រឹង រាវ និងឧស្ម័ន', 'ក្តៅ ត្រជាក់ និងសើម', 'ដី ទឹក និងភ្លើង', 'ធ្ងន់ ស្រាល និងលឿន'], 0],
+          ['រុក្ខជាតិត្រូវការអ្វីខ្លះជាចម្បងសម្រាប់ធ្វើរស្មីសំយោគ?', ['ពន្លឺ ទឹក និងកាបូនឌីអុកស៊ីត', 'អុកស៊ីសែន អំបិល និងដីខ្សាច់', 'អាសូត និងស្ករតែប៉ុណ្ណោះ', 'កម្តៅ និងអំបិលតែប៉ុណ្ណោះ'], 0],
+          ['តើភពណាត្រូវបានគេស្គាល់ថាជា «ភពក្រហម»?', ['ភពសុក្រ', 'ភពអង្គារ', 'ភពព្រហស្បតិ៍', 'ភពសៅរ៍'], 1],
+          ['តើផ្កាយណាដែលនៅជិតផែនដីបំផុត?', ['ព្រះច័ន្ទ', 'ព្រះអាទិត្យ', 'ផ្កាយស៊ីរីស', 'ផ្កាយខាងជើង'], 1],
+          ['តើឯកតារង្វាស់កម្លាំងក្នុងប្រព័ន្ធ SI គឺអ្វី?', ['វ៉ាត់', 'ញូតុន', 'ប៉ាស្កាល់', 'ជូល'], 1],
+          ['តើលោហៈណាជាអ្នកចម្លងអគ្គិសនីបានល្អ និងប្រើញឹកញាប់ក្នុងខ្សែភ្លើង?', ['ស្ពាន់', 'ស្ពាន់ធ័រ', 'ស៊ីលីកា', 'កៅស៊ូ'], 0],
+          ['តើសរីរាង្គណាជួយឱ្យមនុស្សផ្លាស់ប្តូរឧស្ម័នក្នុងពេលដកដង្ហើម?', ['បេះដូង', 'សួត', 'ក្រពះ', 'លំពែង'], 1],
+          ['តើផ្លែឈើណាជាប្រភពទូទៅនៃវីតាមីន C?', ['ក្រូច', 'អង្ករ', 'សាច់គោ', 'ប្រេងឆា'], 0],
+          ['តើអង្គការសហប្រជាជាតិ (UN) ត្រូវបានបង្កើតនៅឆ្នាំណា?', ['១៩១៩', '១៩៣៩', '១៩៤៥', '១៩៦៧'], 2],
+          ['តើអង្គការ UNICEF ផ្តោតជាចម្បងលើការគាំពារក្រុមណា?', ['កុមារ', 'អ្នកជំនួញ', 'អត្តពលិក', 'អ្នកទេសចរ'], 0],
+          ['តើអង្គការ WHO ទទួលខុសត្រូវជាចម្បងលើវិស័យអ្វី?', ['សុខភាពសាធារណៈ', 'ពាណិជ្ជកម្មអន្តរជាតិ', 'អាកាសចរណ៍', 'កីឡាអូឡាំពិក'], 0],
+          ['ក្នុងរបបប្រជាធិបតេយ្យ ប្រជាពលរដ្ឋមានតួនាទីអ្វី?', ['ចូលរួមក្នុងការជ្រើសរើសតំណាង និងកិច្ចការសាធារណៈតាមច្បាប់', 'គោរពតែបញ្ជារបស់អ្នកមាន', 'បោះបង់សិទ្ធិបោះឆ្នោតទាំងស្រុង', 'គ្រប់គ្រងតុលាការដោយផ្ទាល់'], 0],
+          ['តើគោលការណ៍សិទ្ធិមនុស្សជាមូលដ្ឋានទទួលស្គាល់អ្វី?', ['មនុស្សមានសេចក្តីថ្លៃថ្នូរ និងសិទ្ធិស្មើគ្នា', 'សិទ្ធិមានតែអ្នកមាន', 'សិទ្ធិអាស្រ័យលើជនជាតិប៉ុណ្ណោះ', 'សិទ្ធិអាចដកហូតតាមចិត្តបាន'], 0],
+          ['ការបែងចែកអំណាចរដ្ឋជាទូទៅមានអំណាចណាខ្លះ?', ['នីតិបញ្ញត្តិ នីតិប្រតិបត្តិ និងតុលាការ', 'កសិកម្ម ឧស្សាហកម្ម និងពាណិជ្ជកម្ម', 'ជាតិ ខេត្ត និងឃុំ', 'សាធារណៈ ឯកជន និងគ្រួសារ'], 0],
+          ['តើការអភិវឌ្ឍប្រកបដោយចីរភាពមានន័យដូចម្តេច?', ['បំពេញតម្រូវការបច្ចុប្បន្នដោយមិនបំផ្លាញឱកាសរបស់មនុស្សជំនាន់ក្រោយ', 'ប្រើធនធានធម្មជាតិឱ្យអស់ឱ្យបានលឿន', 'ផ្តោតតែលើកំណើនសេដ្ឋកិច្ចក្នុងរយៈពេលខ្លី', 'បញ្ឈប់ការអភិវឌ្ឍទាំងអស់'], 0],
+          ['តើមាត្រដ្ឋានផែនទីបង្ហាញអ្វី?', ['ទំនាក់ទំនងរវាងចម្ងាយលើផែនទី និងចម្ងាយជាក់ស្តែង', 'កម្ពស់ភ្នំទាំងអស់', 'ចំនួនប្រជាជនក្នុងទីក្រុង', 'ទិសដៅខ្យល់ប្រចាំថ្ងៃ'], 0],
+          ['តើអាកាសធាតុ (weather) ខុសពីធាតុអាកាស (climate) ដូចម្តេច?', ['អាកាសធាតុសំដៅលើស្ថានភាពបរិយាកាសប្រចាំថ្ងៃ ខណៈធាតុអាកាសជាលំនាំរយៈពេលវែង', 'អាកាសធាតុជាលំនាំរាប់សតវត្ស ខណៈធាតុអាកាសប្រែប្រួលរាល់ម៉ោង', 'ពាក្យទាំងពីរមានន័យខុសគ្នាតែតំបន់ប្រើប្រាស់', 'អាកាសធាតុសំដៅតែលើភ្លៀង'], 0],
+          ['តើប្រភពថាមពលណាជាថាមពលកកើតឡើងវិញ?', ['ថាមពលព្រះអាទិត្យ', 'ធ្យូងថ្ម', 'ប្រេងកាត', 'ឧស្ម័នធម្មជាតិ'], 0],
+          ['តើ ១៥% នៃ ២០០ ស្មើប៉ុន្មាន?', ['២០', '២៥', '៣០', '៣៥'], 2],
+          ['តើប្រភាគ ៣/៤ ស្មើប៉ុន្មានភាគរយ?', ['២៥%', '៥០%', '៧៥%', '៨០%'], 2],
+          ['តើមធ្យមភាគនៃ ៤, ៦ និង ៨ គឺប៉ុន្មាន?', ['៥', '៦', '៧', '៨'], 1],
+          ['បន្តលំដាប់លេខ៖ ២, ៤, ៨, ១៦, ___។', ['២០', '២៤', '៣២', '៦៤'], 2],
+          ['ចតុកោណកែងមានបណ្តោយ ៥ សង់ទីម៉ែត្រ និងទទឹង ៣ សង់ទីម៉ែត្រ។ តើបរិមាត្រស្មើប៉ុន្មាន?', ['៨ សង់ទីម៉ែត្រ', '១៥ សង់ទីម៉ែត្រ', '១៦ សង់ទីម៉ែត្រ', '៣០ សង់ទីម៉ែត្រ'], 2],
+          ['តើ ០.២៥ សរសេរជាប្រភាគសាមញ្ញបានប៉ុន្មាន?', ['១/២', '១/៣', '១/៤', '៣/៤'], 2],
+          ['អនុបាតក្មេងប្រុសទៅក្មេងស្រីគឺ ២:៣ ហើយសិស្សសរុបមាន ២៥ នាក់។ តើមានក្មេងស្រីប៉ុន្មាននាក់?', ['១០', '១២', '១៥', '២០'], 2],
+          ['បើម៉ោងនេះ ៩:១៥ ព្រឹក តើ ២ ម៉ោង ៣០ នាទីក្រោយជាម៉ោងប៉ុន្មាន?', ['១១:១៥ ព្រឹក', '១១:៣០ ព្រឹក', '១១:៤៥ ព្រឹក', '១២:៤៥ រសៀល'], 2],
+          ['តើពាក្យណាជានាមក្នុងប្រយោគ “The students discussed the lesson”?', ['discussed', 'the', 'students', 'lesson discussed'], 2],
+          ['តើពាក្យណាមានន័យជិតនឹង “accurate”?', ['precise', 'careless', 'uncertain', 'ordinary'], 0],
+          ['ជ្រើសរើសប្រយោគដែលមានកិរិយាសព្ទត្រូវនឹងប្រធាន៖', ['The results supports the hypothesis.', 'The results support the hypothesis.', 'The results supporting the hypothesis.', 'The results has support the hypothesis.'], 1],
+          ['តើ past participle របស់កិរិយាសព្ទ “write” គឺមួយណា?', ['wrote', 'written', 'writing', 'writes'], 1],
+          ['ជ្រើសរើសប្រយោគអកម្ម (passive voice) ដែលត្រឹមត្រូវ៖', ['The committee prepared the report.', 'The report prepared the committee.', 'The report was prepared by the committee.', 'The report has prepare by the committee.'], 2],
+          ['បំពេញប្រយោគលក្ខខណ្ឌប្រភេទទី១៖ If she studies consistently, she ___ the examination.', ['passed', 'will pass', 'would pass', 'would have passed'], 1],
+          ['តើការប្រើសញ្ញាអព្ភន្តរសញ្ញាដកស្រង់មួយណាត្រឹមត្រូវ?', ['The teacher said, “Review the instructions carefully.”', 'The teacher said “Review the instructions carefully”.', 'The teacher said, Review the instructions carefully.', 'The teacher said “Review, the instructions carefully.”'], 0],
+          ['បើអ្នកអានត្រូវសន្និដ្ឋានន័យពាក្យមិនស្គាល់ពីប្រយោគជុំវិញ តើគាត់កំពុងប្រើយុទ្ធសាស្ត្រអ្វី?', ['ការទាយដោយមិនអានបរិបទ', 'ការប្រើតម្រុយពីបរិបទ', 'ការចម្លងពាក្យ', 'ការរំលងប្រយោគទាំងមូល'], 1],
+          ['ពេលប្រើគំនិត ឬពាក្យរបស់អ្នកនិពន្ធដទៃក្នុងការសរសេរ គួរធ្វើអ្វី?', ['ដកស្រង់ប្រភពឱ្យបានត្រឹមត្រូវ', 'លុបឈ្មោះអ្នកនិពន្ធចេញ', 'ប្តូរពាក្យមួយចំនួនដោយមិនបញ្ជាក់ប្រភព', 'បង្ហាញថាជាគំនិតផ្ទាល់ខ្លួន'], 0],
+          ['តើវិធីណាល្អបំផុតសម្រាប់ពិនិត្យភាពជឿទុកចិត្តបាននៃព័ត៌មានអនឡាញ?', ['ពិនិត្យអ្នកនិពន្ធ ភស្តុតាង កាលបរិច្ឆេទ និងប្រភពយោង', 'ជឿតាមចំនួនអ្នកចែករំលែក', 'ពិនិត្យតែរូបភាពក្នុងអត្ថបទ', 'ជ្រើសរើសលទ្ធផលដំបូងជានិច្ច'], 0],
+          ['តើមតិកែលម្អល្អសម្រាប់សិស្សគួរមានលក្ខណៈដូចម្តេច?', ['ច្បាស់លាស់ ទាក់ទងនឹងលក្ខណៈវិនិច្ឆ័យ និងបង្ហាញជំហានបន្ទាប់', 'ទូទៅ និងប្រាប់តែថាល្អឬអាក្រក់', 'ប្រៀបធៀបសិស្សជាមួយមិត្តភក្តិ', 'ផ្តោតលើកំហុសដោយមិនណែនាំ'], 0],
+          ['តើការបង្រៀបបែបបែងចែកតាមតម្រូវការសិស្ស (differentiated instruction) មានន័យអ្វី?', ['កែសម្រួលសម្ភារៈ ដំណើរការ ឬលទ្ធផលតាមតម្រូវការសិក្សាផ្សេងៗ', 'បង្រៀនសិស្សគ្រប់គ្នាដោយវិធីតែមួយជានិច្ច', 'ផ្តល់មេរៀនងាយតែដល់សិស្សពូកែ', 'លុបចោលគោលដៅសិក្សា'], 0],
+          ['តើគោលបំណងសិក្សាដែលអាចវាស់វែងបានគួរបញ្ជាក់អ្វី?', ['អ្វីដែលសិស្សអាចបង្ហាញ ឬធ្វើបានក្រោយមេរៀន', 'អ្វីដែលគ្រូចង់និយាយក្នុងថ្នាក់', 'ចំនួនទំព័រសៀវភៅដែលត្រូវអានតែប៉ុណ្ណោះ', 'អាកប្បកិរិយារបស់គ្រូ'], 0],
+          ['តើការរៀនសកម្ម (active learning) ជួយសិស្សដោយរបៀបណា?', ['ឱ្យសិស្សចូលរួមគិត ពិភាក្សា និងអនុវត្តចំណេះដឹង', 'ឱ្យសិស្សស្តាប់ដោយមិនចូលរួម', 'ជំនួសការរៀបចំមេរៀនទាំងអស់', 'ធានាថាសិស្សមិនធ្វើកំហុស'], 0],
+          ['តើវិធីណាជួយកាត់បន្ថយការពន្យារពេលពេលត្រៀមប្រឡង?', ['កំណត់គោលដៅតូចៗ និងរៀបចំកាលវិភាគសិក្សា', 'រង់ចាំដល់យប់មុនថ្ងៃប្រឡង', 'រៀនគ្រប់មុខវិជ្ជាពេលតែមួយ', 'ជៀសវាងការសម្រាកទាំងស្រុង'], 0],
+          ['បន្ទាប់ពីធ្វើសំណួរប្រឡងសាកល្បងខុស តើជំហានណាមានប្រយោជន៍បំផុត?', ['ពិនិត្យមូលហេតុនៃកំហុស ហើយហាត់លើចំណុចខ្វះខាត', 'ចងចាំតែអក្សរចម្លើយ', 'រំលងសំណួរទាំងអស់ដែលពិបាក', 'បន្ទោសពេលវេលាដោយមិនពិនិត្យវិធីរៀន'], 0],
+          ['តើការសម្រាកគ្រប់គ្រាន់មុនប្រឡងមានអត្ថប្រយោជន៍អ្វី?', ['ជួយការផ្តោតអារម្មណ៍ និងការចងចាំ', 'ធ្វើឱ្យការរៀនមិនចាំបាច់', 'ធានាចម្លើយត្រឹមត្រូវទាំងអស់', 'ជំនួសការហាត់អនុវត្ត'], 0],
+          ['តើអ្វីគួរធ្វើមុនពេលឆ្លើយសំណួរប្រឡងដែលមានសេចក្តីណែនាំច្រើនជំហាន?', ['អានសេចក្តីណែនាំឱ្យចប់ ហើយកំណត់អ្វីដែលសំណួរទាមទារ', 'ឆ្លើយភ្លាមៗតាមពាក្យដំបូង', 'មើលតែជម្រើសចម្លើយ', 'រំលងសេចក្តីណែនាំទាំងស្រុង'], 0],
+          ['តើការគ្រប់គ្រងពេលវេលាក្នុងការប្រឡងគួរចាប់ផ្តើមដោយអ្វី?', ['បែងចែកពេលតាមចំនួន និងពិន្ទុសំណួរ', 'ចំណាយពេលទាំងអស់លើសំណួរដំបូង', 'មិនមើលនាឡិកាទាល់តែសោះ', 'ឆ្លើយសំណួរចុងក្រោយមុនជានិច្ច'], 0],
+          ['ប្រសិនបើមិនប្រាកដលើចម្លើយ QCM តើវិធីណាសមស្រប?', ['ដកជម្រើសដែលខុសច្បាស់ចេញ រួចវាយតម្លៃជម្រើសនៅសល់', 'ជ្រើសរើសជម្រើសវែងបំផុតជានិច្ច', 'ប្តូរចម្លើយច្រើនដងដោយគ្មានហេតុផល', 'ទុកសំណួរទទេដោយមិនពិនិត្យពេលនៅសល់'], 0],
+          ['តើការពិនិត្យចម្លើយមុនប្រគល់ក្រដាសប្រឡងអាចជួយអ្វី?', ['រកឃើញកំហុសអចេតនា និងសំណួរដែលភ្លេចឆ្លើយ', 'ធានាថាពិន្ទុពេញដោយស្វ័យប្រវត្តិ', 'ជំនួសការអានសំណួរ', 'បង្កើនពេលប្រឡង'], 0],
+          ['តើអាកប្បកិរិយាណាជួយឱ្យការពិភាក្សាក្រុមមានប្រសិទ្ធភាព?', ['ស្តាប់យោបល់គ្នា និងផ្តល់ហេតុផលគាំទ្រគំនិត', 'និយាយកាត់អ្នកដទៃជានិច្ច', 'ទទួលយកតែគំនិតរបស់ខ្លួន', 'ចាកចេញពីកិច្ចការពេលមានការខ្វែងគំនិត'], 0],
+          ['តើការសម្រេចចិត្តដោយផ្អែកលើភស្តុតាងមានន័យដូចម្តេច?', ['ពិចារណាទិន្នន័យ និងប្រភពដែលអាចផ្ទៀងផ្ទាត់បាន', 'ធ្វើតាមពាក្យចចាមអារ៉ាម', 'ជ្រើសរើសតាមអារម្មណ៍តែប៉ុណ្ណោះ', 'យកមតិភាគច្រើនជាការពិតជានិច្ច'], 0],
+          ['បើប្រភពព័ត៌មានពីរផ្តល់ទិន្នន័យខុសគ្នា តើគួរធ្វើអ្វី?', ['ប្រៀបធៀបវិធីសាស្ត្រ និងពិនិត្យប្រភពឯករាជ្យបន្ថែម', 'ជ្រើសរើសប្រភពដែលស្របនឹងជំនឿខ្លួន', 'យកទិន្នន័យថ្មីជាងគេដោយមិនពិនិត្យ', 'បញ្ចូលតួលេខទាំងពីរដោយផ្ទាល់'], 0],
+          ['តើមូលហេតុសំខាន់នៃការកត់ត្រាពេលសិក្សាគឺអ្វី?', ['រៀបចំព័ត៌មានសំខាន់ៗ ដើម្បីពិនិត្យឡើងវិញ និងភ្ជាប់គំនិត', 'ចម្លងសៀវភៅទាំងមូលដោយមិនជ្រើសរើស', 'ជំនួសការអានមេរៀនទាំងស្រុង', 'បង្កើនចំនួនទំព័រកំណត់ត្រា'], 0],
+          ['តើសេចក្តីសង្ខេបល្អគួរធ្វើអ្វី?', ['បង្ហាញគំនិតសំខាន់ៗដោយខ្លី និងរក្សាន័យដើម', 'ចម្លងគ្រប់ប្រយោគដូចដើម', 'បន្ថែមមតិផ្ទាល់ខ្លួនទៅក្នុងអំណះអំណាង', 'លុបភស្តុតាងសំខាន់ៗចេញ'], 0],
+          ['តើសំណួរបើកចំហក្នុងការពិភាក្សាថ្នាក់រៀនមានប្រយោជន៍អ្វី?', ['ជំរុញឱ្យសិស្សពន្យល់ហេតុផល និងគិតស៊ីជម្រៅ', 'មានចម្លើយត្រូវតែមួយពាក្យជានិច្ច', 'កាត់បន្ថយការចូលរួមរបស់សិស្ស', 'ធ្វើឱ្យការពិភាក្សាមិនចាំបាច់'], 0],
+          ['តើការចូលរួមដោយស្មើភាពក្នុងក្រុមមានន័យដូចម្តេច?', ['សមាជិកគ្រប់រូបមានឱកាសចូលរួម និងទទួលខុសត្រូវ', 'មេក្រុមធ្វើកិច្ចការទាំងអស់', 'សមាជិកខ្លះមិនចាំបាច់ចូលរួម', 'ជ្រើសរើសតែអ្នកពូកែឱ្យនិយាយ'], 0],
+          ['តើអ្វីជាវិធីសមស្របក្នុងការដោះស្រាយការខ្វែងគំនិត?', ['ស្តាប់គ្នា ពិនិត្យហេតុផល និងស្វែងរកដំណោះស្រាយដោយគោរព', 'ប្រើសំឡេងខ្លាំងដើម្បីឈ្នះ', 'បដិសេធមិនស្តាប់ភស្តុតាង', 'ផ្សព្វផ្សាយការខ្វែងគំនិតដោយមិនពិនិត្យ'], 0],
+          ['តើសំណួរ “ហេតុអ្វី?” ជួយការរៀនយ៉ាងដូចម្តេច?', ['ជំរុញឱ្យពន្យល់ទំនាក់ទំនង និងហេតុផល', 'បង្ខំឱ្យឆ្លើយតែបាទឬទេ', 'ជំនួសភស្តុតាងទាំងអស់', 'ធ្វើឱ្យការចងចាំមិនចាំបាច់'], 0],
+          ['តើការកំណត់គោលដៅសិក្សា SMART គួរមានលក្ខណៈអ្វី?', ['ច្បាស់លាស់ អាចវាស់បាន អាចសម្រេចបាន ពាក់ព័ន្ធ និងមានកាលកំណត់', 'ទូលំទូលាយ មិនអាចវាស់បាន និងគ្មានពេលកំណត់', 'ផ្អែកលើគោលដៅរបស់អ្នកដទៃតែប៉ុណ្ណោះ', 'ផ្លាស់ប្តូររាល់ថ្ងៃដោយគ្មានផែនការ'], 0],
+          ['តើការរៀនចន្លោះពេល (spaced practice) មានន័យអ្វី?', ['រំលឹក និងហាត់មេរៀនជាច្រើនវគ្គដែលបំបែកដោយចន្លោះពេល', 'រៀនម្តងយូរខ្លាំងតែមួយលើក', 'អានចម្លើយមុនសំណួរគ្រប់ពេល', 'សិក្សាតែមេរៀនដែលចូលចិត្ត'], 0],
+          ['តើ active recall ជាវិធីសិក្សាបែបណា?', ['ព្យាយាមទាញព័ត៌មានចេញពីការចងចាំដោយមិនមើលសៀវភៅជាមុន', 'អានអត្ថបទដដែលៗដោយមិនសួរខ្លួនឯង', 'គូសពណ៌គ្រប់ប្រយោគ', 'ចម្លងមេរៀនទៅក្រដាសម្តងហើយម្តងទៀត'], 0],
+          ['តើការប្រៀបធៀបគំនិតពីប្រភពច្រើនជួយអ្វី?', ['កំណត់ចំណុចស្រដៀង ខុសគ្នា និងភាពរឹងមាំនៃភស្តុតាង', 'ធានាថាប្រភពទាំងអស់ត្រឹមត្រូវ', 'ជៀសវាងការគិតដោយខ្លួនឯង', 'លុបបំបាត់តម្រូវការយោងប្រភព'], 0],
+          ['តើការដាក់ពិន្ទុដោយយុត្តិធម៌គួរផ្អែកលើអ្វី?', ['លក្ខណៈវិនិច្ឆ័យដែលបានបញ្ជាក់ និងអនុវត្តស្មើគ្នា', 'ចំណូលចិត្តផ្ទាល់ខ្លួនរបស់អ្នកដាក់ពិន្ទុ', 'អាកប្បកិរិយាក្រៅពីគោលដៅប្រឡង', 'ការប្រៀបធៀបរូបរាងសំណេរ'], 0],
+          ['ពេលសិស្សធ្វើកំហុស តើមតិកែលម្អមានប្រសិទ្ធភាពគួរផ្តោតលើអ្វី?', ['កំហុសជាក់លាក់ មូលហេតុ និងវិធីកែលម្អបន្ទាប់', 'លក្ខណៈផ្ទាល់ខ្លួនរបស់សិស្ស', 'ការប្រៀបធៀបនឹងសិស្សដទៃ', 'ការរិះគន់ដោយគ្មានការណែនាំ'], 0],
+          ['តើការរក្សាភាពស្មោះត្រង់ក្នុងការប្រឡងមានន័យដូចម្តេច?', ['ធ្វើការដោយខ្លួនឯង និងមិនប្រើជំនួយដែលមិនអនុញ្ញាត', 'ចែករំលែកចម្លើយក្នុងពេលប្រឡង', 'ប្រើសម្ភារៈលាក់ដោយមិនស្នើសុំ', 'សរសេរឈ្មោះអ្នកដទៃលើក្រដាស'], 0],
+          ['ប្រសិនបើរកឃើញកំហុសក្នុងសំណួរប្រឡង តើគួរធ្វើអ្វី?', ['ជូនដំណឹងអ្នកគ្រប់គ្រងប្រឡងដោយស្ងប់ស្ងាត់ និងអនុវត្តតាមការណែនាំ', 'កែសំណួរដោយខ្លួនឯងលើក្រដាស', 'រំខានអ្នកប្រឡងផ្សេងៗ', 'ទុកចោលហើយស្មានចម្លើយ'], 0],
+          ['តើគោលបំណងនៃការប្រឡងសាកល្បងគឺអ្វី?', ['ស្គាល់ទម្រង់សំណួរ វាស់ការត្រៀមខ្លួន និងកំណត់ចំណុចត្រូវពង្រឹង', 'ធានាពិន្ទុដូចគ្នានៅថ្ងៃប្រឡងពិត', 'ជំនួសការរៀនមេរៀនទាំងអស់', 'ទន្ទេញលំដាប់ចម្លើយតែប៉ុណ្ណោះ'], 0],
+          ['តើគួរជ្រើសរើសសម្ភារៈសិក្សាដោយផ្អែកលើអ្វី?', ['ភាពត្រឹមត្រូវ ការពាក់ព័ន្ធ និងគោលដៅសិក្សា', 'រូបរាងសៀវភៅតែប៉ុណ្ណោះ', 'ចំនួនទំព័រច្រើនបំផុត', 'ការផ្សាយពាណិជ្ជកម្មតាមបណ្តាញសង្គម'], 0]
+        ]
+      }
+    ];
+
+    pastedQuestionGroups.forEach((group) => {
+      const groupQuestions = group.category === categories[13]
+        ? group.questions.slice(0, 60)
+        : group.questions;
+
+      groupQuestions.forEach(([question, options, correctIndex]) => {
+        questionBank.push(buildQuestion(questionId++, group.category, question, options, correctIndex));
+      });
+    });
+
+    const categoryToggle = document.getElementById('categoryToggle');
+    const categoryMenu = document.getElementById('categoryMenu');
+    const selectedCategoryLabel = document.getElementById('selectedCategory');
+    const questionsContainer = document.getElementById('questions');
+    const emptyState = document.getElementById('empty');
+    const pagination = document.getElementById('pagination');
+    const previousPageButton = document.getElementById('previousPage');
+    const nextPageButton = document.getElementById('nextPage');
+    const pageInfo = document.getElementById('pageInfo');
+    const totalBadge = document.getElementById('totalBadge');
+    const pageSize = 10;
+    let currentQuestions = questionBank;
+    let currentPage = 0;
+    let selectedCategory = 'all';
+
+    function toKhmerNumber(number) {
+      return String(number).replace(/\d/g, digit => '០១២៣៤៥៦៧៨៩'[Number(digit)]);
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[character]);
+    }
+
+    totalBadge.textContent = `សំណួរ ${toKhmerNumber(questionBank.length)}`;
+
+    function renderQuestions(list) {
+      questionsContainer.innerHTML = '';
+      emptyState.style.display = list.length ? 'none' : 'block';
+      const pageCount = Math.ceil(list.length / pageSize);
+      currentPage = Math.min(currentPage, Math.max(pageCount - 1, 0));
+      const pageQuestions = list.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+      pagination.style.display = pageCount > 1 ? 'flex' : 'none';
+      pageInfo.textContent = `ទំព័រ ${toKhmerNumber(currentPage + 1)} / ${toKhmerNumber(pageCount)}`;
+      previousPageButton.disabled = currentPage === 0;
+      nextPageButton.disabled = currentPage >= pageCount - 1;
+
+      pageQuestions.forEach((item) => {
+        const card = document.createElement('article');
+        card.className = 'card';
+
+        if (item.type === 'cloze') {
+          card.classList.add('cloze-card');
+          card.innerHTML = `
+            <div class="meta">
+              <span class="category">${item.category}</span>
+              <span class="qid">សំណួរទី ${toKhmerNumber(item.id)}</span>
             </div>
-            
-            <!-- Parents Info - Clean Layout -->
-            <div class="bg-amber-50/90 rounded-xl p-4 text-center border border-amber-200 my-4 shadow-sm">
-                <div class="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                        <p class="font-bold text-amber-800">ឪពុកម្តាយកូនកំណោះ</p>
-                        <p>លោក ខឹម តន</p>
-                        <p>អ្នកស្រី យុង ចន្ថា</p>
-                    </div>
-                    <div>
-                        <p class="font-bold text-amber-800">ឪពុកម្តាយកូនក្រមុំ</p>
-                        <p>លោក ផុក ច្រាន់</p>
-                        <p>អ្នកស្រី កប ទូច</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Names Center -->
-            <div class="text-center mb-5 bg-white/70 p-4 rounded-xl shadow-sm">
-                <h2 class="text-3xl font-bold text-amber-900" style="font-family:'Moul',serif;">ខឹម អូន</h2>
-                <div class="flex justify-center gap-2 text-rose-500 my-2 text-xl"><i class="fas fa-heartbeat"></i></div>
-                <h2 class="text-3xl font-bold text-amber-900" style="font-family:'Moul',serif;">ជ្រុន លក្ខិណា</h2>
-                <div class="mt-3 bg-amber-100 inline-block px-4 py-1.5 rounded-full text-amber-800 text-sm"><i class="far fa-calendar-alt"></i> ០១ មករា ២០២៩</div>
-                <div class="mt-2 text-amber-700 text-sm"><i class="fas fa-map-marker-alt"></i> ភូមិ ភ្នំដំរី, កំពត</div>
-                <p class="text-amber-600 text-sm mt-1"><i class="fas fa-clock"></i> ពិធីចាប់ផ្តើម ៦:៣០ព្រឹក ដល់ ១០:៣០យប់</p>
-            </div>
+            <p class="question">${item.question}</p>
+            <div class="word-bank"><span class="word-bank-label">ប្រអប់ពាក្យ៖</span></div>
+            <p class="passage"></p>
+            <button class="check-cloze" type="button" data-qid="${item.id}">ពិនិត្យចម្លើយ</button>
+            <div class="answer-box"></div>
+            <div class="status">សូមបំពេញចន្លោះទាំងអស់</div>
+          `;
 
-            <!-- GALLERY SECTION: វិចត្រសាល -->
-            <div class="my-6 bg-amber-50/80 rounded-2xl p-5 shadow-lg border border-amber-200">
-                <div class="text-center mb-4">
-                    <i class="fas fa-images text-amber-600 text-3xl"></i>
-                    <h2 class="text-2xl font-bold text-amber-800 inline-block ml-2" style="font-family:'Moul',serif;">វិចត្រសាល</h2>
-                    <p class="text-amber-700 text-sm mt-1">រូបភាពដ៏ស្រស់ស្អាតនៃស្នេហ៍យើង</p>
-                </div>
-                <div class="gallery-grid" id="galleryGrid"></div>
-                <p class="text-center text-amber-600 text-xs mt-3 italic">✨ ចុចលើរូបភាពដើម្បីមើលធំ ✨</p>
-            </div>
+          const wordBank = card.querySelector('.word-bank');
+          item.wordBank.forEach((word) => {
+            const chip = document.createElement('span');
+            chip.className = 'word-chip';
+            chip.textContent = word;
+            wordBank.appendChild(chip);
+          });
 
-            <!-- Calendar -->
-            <div class="my-6 bg-white p-4 rounded-xl shadow-md">
-                <h3 class="font-bold text-amber-800 text-xl text-center mb-3"><i class="fas fa-calendar-alt"></i> ប្រតិទិន មករា ២០២៩</h3>
-                <div class="overflow-x-auto">
-                    <table class="calendar-grid w-full">
-                        <thead><tr><th>អា</th><th>ច</th><th>អ</th><th>ព</th><th>ព</th><th>ស</th><th>ស</th></tr></thead>
-                        <tbody>
-                            <tr><td class="p-2"></td><td class="p-2"></td><td class="p-2"></td><td class="p-2"></td><td class="p-2"></td><td class="p-2"></td><td class="p-2"></td></tr>
-                            <tr><td class="p-2">31</td><td class="bg-yellow-300 font-bold rounded-full p-2">1</td><td class="p-2">2</td><td class="p-2">3</td><td class="p-2">4</td><td class="p-2">5</td><td class="p-2">6</td></tr>
-                            <tr><td class="p-2">7</td><td class="p-2">8</td><td class="p-2">9</td><td class="p-2">10</td><td class="p-2">11</td><td class="p-2">12</td><td class="p-2">13</td></tr>
-                            <tr><td class="p-2">14</td><td class="p-2">15</td><td class="p-2">16</td><td class="p-2">17</td><td class="p-2">18</td><td class="p-2">19</td><td class="p-2">20</td></tr>
-                            <tr><td class="p-2">21</td><td class="p-2">22</td><td class="p-2">23</td><td class="p-2">24</td><td class="p-2">25</td><td class="p-2">26</td><td class="p-2">27</td></tr>
-                            <tr><td class="p-2">28</td><td class="p-2">29</td><td class="p-2">30</td><td class="p-2">31</td><td class="p-2"> </td><td class="p-2"> </td><td class="p-2"> </td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="text-center mt-3">
-                    <button onclick="addToGoogleCalEvent()" class="bg-amber-700 text-white text-sm px-4 py-2 rounded-full shadow-md"><i class="fab fa-google"></i> បន្ថែមទៅកាលវិភាគ</button>
-                </div>
-            </div>
+          const passage = card.querySelector('.passage');
+          item.passage.split(/(\[\[\d+\]\])/g).forEach((part) => {
+            const match = part.match(/^\[\[(\d+)\]\]$/);
+            if (!match) {
+              passage.appendChild(document.createTextNode(part));
+              return;
+            }
 
-            <!-- Countdown + Map -->
-            <div class="grid grid-cols-1 gap-5 my-5">
-                <div class="bg-white/95 rounded-xl p-5 shadow-md border border-amber-200 text-center">
-                    <h3 class="font-bold text-amber-800 text-lg"><i class="fas fa-hourglass-half"></i> រាប់ថយដល់ថ្ងៃមង្គល</h3>
-                    <div class="grid grid-cols-4 gap-3 mt-3">
-                        <div><span id="cdDays" class="text-3xl font-bold text-rose-600">00</span><br/><span class="text-xs">ថ្ងៃ</span></div>
-                        <div><span id="cdHours" class="text-3xl font-bold text-rose-600">00</span><br/><span class="text-xs">ម៉ោង</span></div>
-                        <div><span id="cdMins" class="text-3xl font-bold text-rose-600">00</span><br/><span class="text-xs">នាទី</span></div>
-                        <div><span id="cdSecs" class="text-3xl font-bold text-rose-600">00</span><br/><span class="text-xs">វិនាទី</span></div>
-                    </div>
-                </div>
-                <div class="bg-white/95 rounded-xl p-4 shadow-md border border-amber-200">
-                    <h3 class="font-bold text-amber-800 text-lg text-center"><i class="fas fa-map-marked-alt"></i> ផែនទីទីតាំង</h3>
-                    <div id="weddingMap" class="mt-2"></div>
-                    <button onclick="openMapsExternal()" class="mt-3 bg-amber-600 text-white text-sm py-2 rounded-full w-full">បើកក្នុង Google Maps</button>
-                </div>
-            </div>
+            const gapIndex = Number(match[1]);
+            const gap = document.createElement('select');
+            gap.className = 'gap-select';
+            gap.dataset.gap = String(gapIndex);
+            gap.setAttribute('aria-label', `ចន្លោះទី ${toKhmerNumber(gapIndex + 1)}`);
 
-            <!-- QR ABA Blessing -->
-            <div class="bg-gradient-to-r from-amber-100 to-rose-100 rounded-xl p-5 text-center border border-amber-300 my-5 shadow-md">
-                <i class="fas fa-gift text-amber-600 text-3xl"></i>
-                <h3 class="font-bold text-amber-800 text-xl">💖 ABA ជូនពរ ចំណងដៃ 💖</h3>
-                <div class="qr-card my-3">
-                    <img src="images/qr.jpg" alt="ABA QR" width="100" height="100">
-                </div>
-                <p class="text-sm text-amber-700">ស្កេនតាម ABA Mobile ដើម្បីផ្ញើពរជ័យ</p>
-                <p class="text-base font-bold text-amber-800 mt-1">គណនី: ខឹម អូន</p>
-            </div>
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'ជ្រើសរើសពាក្យ';
+            gap.appendChild(placeholder);
 
-            <!-- RSVP Form -->
-            <div class="bg-white rounded-xl p-5 shadow-xl border border-amber-200 mt-4">
-                <h3 class="text-xl font-bold text-center text-amber-800">បញ្ជាក់ការចូលរួម & ផ្ញើជូនពរ</h3>
-                <p class="text-xs text-center text-amber-600 mb-3">ព័ត៌មាននឹងផ្ញើទៅគូស្នេហ៍តាម Telegram</p>
-                <form id="rsvpForm">
-                    <div class="mb-3"><label class="block text-amber-800 text-sm">ឈ្មោះពេញ <span class="text-red-500">*</span></label><input type="text" id="fullname" required class="w-full border border-amber-300 rounded-xl p-2.5 text-sm text-center bg-amber-50"></div>
-                    <div class="mb-3"><label class="block text-amber-800 text-sm">លេខទូរស័ព្ទ <span class="text-red-500">*</span></label><input type="tel" id="phone" required class="w-full border border-amber-300 rounded-xl p-2.5 text-sm text-center bg-amber-50"></div>
-                    <div class="mb-3"><label class="block text-amber-800 text-sm">ទីកន្លែងចូលរួម</label><select id="locationSelect" class="w-full border border-amber-300 rounded-xl p-2.5 text-sm text-center bg-amber-50"><option value="កំពត">🌴 បានចូលរួម</option><option value="មិនបានចូលរួម">🏡 មិនបានចូលរួម</option></select></div>
-                    <div class="mb-3"><label class="block text-amber-800 text-sm">ចំនួនភ្ញៀវ</label><input type="number" id="guestCount" min="1" max="10" value="1" class="w-full border border-amber-300 rounded-xl p-2.5 text-sm text-center bg-amber-50"></div>
-                    <div class="mb-4"><label class="block text-amber-800 text-sm">សារជូនពរ</label><textarea id="messageText" rows="2" class="w-full border border-amber-300 rounded-xl p-2.5 text-sm text-center bg-amber-50" placeholder="សូមអោយបានសុខសប្បាយ..."></textarea></div>
-                    <button type="submit" id="submitRsvpBtn" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3 rounded-full font-bold text-base flex items-center justify-center gap-2 active:scale-95 transition"><i class="fab fa-telegram"></i> ផ្ញើការបញ្ជាក់</button>
-                    <div id="formMsg" class="text-center text-xs mt-3"></div>
-                </form>
-            </div>
-            <div class="text-center text-amber-700 text-xs py-5">អរគុណដែលបានចែករំលែកភាពរីករាយជាមួយយើងខ្ញុំ</div>
-        </div>
-    </div>
+            item.wordBank.forEach((word) => {
+              const option = document.createElement('option');
+              option.value = word;
+              option.textContent = word;
+              gap.appendChild(option);
+            });
 
-    <!-- Lightbox Modal -->
-    <div id="lightbox" class="lightbox" onclick="closeLightbox()"><span class="close-lightbox" onclick="closeLightbox()">&times;</span><img class="lightbox-img" id="lightboxImg" src=""><div class="lightbox-caption" id="lightboxCaption"></div></div>
+            passage.appendChild(gap);
+          });
 
-     <script>
-        // Gallery with beautiful images
-        const galleryImages = [
-            { src: "https://i.pinimg.com/736x/25/e3/1d/25e31d6ec42c47d46496a854e4334528.jpg", caption: "💑 ស្នេហ៍របស់យើងចាប់ផ្តើម" },
-            { src: "https://i.pinimg.com/736x/6d/ea/32/6dea32ddae67271fb9948a37cc150399.jpg", caption: "🌹 ថ្ងៃដ៏ផ្អែមល្ហែម" },
-            { src: "https://i.pinimg.com/736x/79/d0/56/79d056ee100fa988483d5f2fc5d1bd3d.jpg", caption: "💍 ចំណងដៃអមតៈ" },
-            { src: "https://i.pinimg.com/736x/10/2e/7f/102e7f58d05cca42945b87251c82deb0.jpg", caption: "🌸 និទាឃរដូវនៃក្តីស្រលាញ់" }
-        ];
-        function buildGallery() { const container = document.getElementById('galleryGrid'); if(!container) return; container.innerHTML = ''; galleryImages.forEach((img, idx) => { const item = document.createElement('div'); item.className = 'gallery-item'; item.onclick = (e) => { e.stopPropagation(); openLightbox(img.src, img.caption); }; item.innerHTML = `<img src="${img.src}" alt="gallery" loading="lazy"><div class="gallery-overlay">${img.caption}</div>`; container.appendChild(item); }); }
-        function openLightbox(src, cap) { const lb = document.getElementById('lightbox'); document.getElementById('lightboxImg').src = src; document.getElementById('lightboxCaption').innerText = cap; lb.classList.add('active'); document.body.style.overflow = 'hidden'; }
-        function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); document.body.style.overflow = ''; }
-        const musicAudio = document.getElementById('bgMusic'), musicBtn = document.getElementById('musicFloatBtn'), musicIcon = document.getElementById('musicIconFloat'); let musicActive = false;
-        function toggleMusic() { if(musicActive) { musicAudio.pause(); musicBtn.classList.remove('playing'); musicIcon.classList.remove('fa-pause'); musicIcon.classList.add('fa-music'); } else { musicAudio.play().catch(e=>console.log); musicBtn.classList.add('playing'); musicIcon.classList.remove('fa-music'); musicIcon.classList.add('fa-pause'); } musicActive = !musicActive; }
-        function createSparklesOnCircle() { const circle = document.querySelector('.circle'); if(!circle) return; setInterval(() => { const star = document.createElement('span'); star.className = 'sparkle'; star.textContent = '✨'; star.style.left = Math.random()*100+'%'; star.style.top = Math.random()*100+'%'; circle.appendChild(star); setTimeout(()=>star.remove(),1500); }, 600); }
-        function burstConfetti() { const icons = []; for(let i=0;i<80;i++) { const el = document.createElement('div'); el.textContent = icons[Math.floor(Math.random()*icons.length)]; el.style.cssText = `position:fixed; left:${Math.random()*100}vw; top:-20px; font-size:${Math.random()*18+14}px; z-index:9999; pointer-events:none;`; document.body.appendChild(el); el.animate([{transform:'translateY(0) rotate(0deg)',opacity:1},{transform:`translateY(${window.innerHeight+120}px) rotate(${Math.random()*500-250}deg)`,opacity:0}],{duration:2500}); setTimeout(()=>el.remove(),2500); } }
-        const BOT_TOKEN = "7568652737:AAEkGFkFs-eUxLoBb0vXxN7WnzBMFS6sNUE", CHAT_ID = "6444898588";
-        async function sendTelegramRSVP(name, phone, location, guests, msg) { const payload = `🎉 *ការបញ្ជាក់ចូលរួម* 🎉\n✅ *ឈ្មោះ:* ${name}\n📞 *ទូរស័ព្ទ:* ${phone}\n📍 *ស្ថានភាព:* ${location}\n👥 *ភ្ញៀវ:* ${guests}\n💬 *សារ:* ${msg||"គ្មាន"}`; try { const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:CHAT_ID,text:payload,parse_mode:'Markdown'})}); const data = await res.json(); return data.ok?{success:true}:{success:false,error:data.description}; } catch(e){return{success:false,error:e.message};} }
-        let leafletMap=false; function initMapPanel() { if(leafletMap) return; const mapDiv = document.getElementById('weddingMap'); if(!mapDiv) return; const map = L.map('weddingMap').setView([10.590998,104.482338],15); L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map); L.marker([10.590998,104.482338]).addTo(map).bindPopup("📍 ផ្ទះកូនក្រមុំ").openPopup(); leafletMap=true; }
-        function openMapsExternal(){ window.open('https://www.google.com/maps?q=10.590998,104.482338','_blank'); }
-        function addToGoogleCalEvent(){ window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent("មង្គលការ ខឹម អូន & ជ្រុន លក្ខិណា")}&dates=20290101T233000/20290101T153000&location=${encodeURIComponent("ភូមិភ្នំដំរី, កំពត")}`,'_blank'); }
-        let countdownInterval=null; function startCountdown(){ if(countdownInterval) clearInterval(countdownInterval); const target=new Date("January 1, 2029 06:30:00 GMT+07:00").getTime(); const refresh=()=>{ const diff=target-Date.now(); if(diff<=0){ ['cdDays','cdHours','cdMins','cdSecs'].forEach(id=>document.getElementById(id).innerText='00'); if(countdownInterval) clearInterval(countdownInterval); return; } document.getElementById('cdDays').innerText=Math.floor(diff/86400000).toString().padStart(2,'0'); document.getElementById('cdHours').innerText=Math.floor((diff%86400000)/3600000).toString().padStart(2,'0'); document.getElementById('cdMins').innerText=Math.floor((diff%3600000)/60000).toString().padStart(2,'0'); document.getElementById('cdSecs').innerText=Math.floor((diff%60000)/1000).toString().padStart(2,'0'); }; refresh(); countdownInterval=setInterval(refresh,1000); }
-        function openFullDetails(){ document.getElementById('fullInvitePanel').classList.add('open'); document.body.style.overflow='hidden'; if(!leafletMap) setTimeout(()=>initMapPanel(),200); startCountdown(); buildGallery(); }
-        function closeFullPanel(){ document.getElementById('fullInvitePanel').classList.remove('open'); document.body.style.overflow=''; }
-        document.getElementById('rsvpForm').addEventListener('submit', async(e)=>{ e.preventDefault(); const name=document.getElementById('fullname').value.trim(); const phone=document.getElementById('phone').value.trim(); if(!name||!phone){ document.getElementById('formMsg').innerHTML='<span class="text-red-500">សូមបំពេញឈ្មោះ និងលេខទូរស័ព្ទ</span>'; return; } const btn=document.getElementById('submitRsvpBtn'); btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-pulse"></i> កំពុងផ្ញើ...'; const res=await sendTelegramRSVP(name,phone,document.getElementById('locationSelect').value,document.getElementById('guestCount').value,document.getElementById('messageText').value.trim()); if(res.success){ document.getElementById('formMsg').innerHTML='<span class="text-green-600">✅ បានផ្ញើការបញ្ជាក់! អរគុណ!</span>'; burstConfetti(); document.getElementById('rsvpForm').reset(); document.getElementById('guestCount').value='1'; } else { document.getElementById('formMsg').innerHTML=`<span class="text-red-500">❌ ${res.error}</span>`; } btn.disabled=false; btn.innerHTML='<i class="fab fa-telegram"></i> ផ្ញើការបញ្ជាក់'; setTimeout(()=>{ if(document.getElementById('formMsg').innerText.includes('បានផ្ញើ')) document.getElementById('formMsg').innerHTML=''; },4000); });
-        document.getElementById('openInviteBtn').addEventListener('click',(e)=>{ e.stopPropagation(); openFullDetails(); });
-        window.onload = () => { createSparklesOnCircle(); for(let i=0;i<35;i++){ const p=document.createElement('div'); p.className='floating-particle'; p.innerHTML=['🌸','✨','💖','🌺','💐','🌹'][Math.floor(Math.random()*6)]; p.style.left=Math.random()*100+'%'; p.style.animationDuration=8+Math.random()*12+'s'; p.style.fontSize=12+Math.random()*16+'px'; p.style.opacity=0.3+Math.random()*0.5; document.body.appendChild(p); } };
-    </script>
+          questionsContainer.appendChild(card);
+          return;
+        }
+
+        const optionsMarkup = item.options.map((option, index) => `
+          <button class="option" type="button" data-qid="${item.id}" data-index="${index}">
+            <span class="letter">${['ក', 'ខ', 'គ', 'ឃ'][index] || toKhmerNumber(index + 1)}</span>
+            <span>${escapeHtml(option)}</span>
+          </button>
+        `).join('');
+
+        card.innerHTML = `
+          <div class="meta">
+            <span class="category">${item.category}</span>
+            <span class="qid">សំណួរទី ${toKhmerNumber(item.id)}</span>
+          </div>
+          <p class="question">${item.question}</p>
+          <div class="options">${optionsMarkup}</div>
+          ${item.hint ? `<p class="hint">ជំនួយស្មារតី៖ ${item.hint}</p>` : ''}
+          <div class="answer-box"></div>
+          <div class="status">សូមជ្រើសរើសចម្លើយមួយ</div>
+        `;
+
+        questionsContainer.appendChild(card);
+      });
+
+      questionsContainer.querySelectorAll('.option').forEach((button) => {
+        button.addEventListener('click', () => {
+          const qid = Number(button.dataset.qid);
+          const selectedIndex = Number(button.dataset.index);
+          const question = questionBank.find(q => q.id === qid);
+
+          if (!question) return;
+
+          const parent = button.closest('.card');
+          const answerBox = parent.querySelector('.answer-box');
+          const status = parent.querySelector('.status');
+
+          parent.querySelectorAll('.option').forEach((opt) => {
+            const idx = Number(opt.dataset.index);
+            opt.classList.toggle('selected', idx === selectedIndex);
+          });
+
+          const correct = selectedIndex === question.correctIndex;
+          const text = correct
+            ? `ត្រឹមត្រូវ៖ ${question.options[question.correctIndex]}`
+            : `មិនត្រឹមត្រូវទេ។ ចម្លើយត្រឹមត្រូវ៖ ${question.options[question.correctIndex]}`;
+
+          answerBox.textContent = text;
+          answerBox.className = `answer-box ${correct ? 'correct' : 'wrong'}`;
+          status.textContent = correct ? 'ចម្លើយត្រឹមត្រូវ' : 'ចម្លើយមិនត្រឹមត្រូវ';
+        });
+      });
+
+      questionsContainer.querySelectorAll('.card').forEach((card) => {
+        const gaps = [...card.querySelectorAll('.gap-select')];
+        if (!gaps.length) return;
+
+        const updateWordOptions = () => {
+          const chosenWords = new Set(gaps.map(gap => gap.value).filter(Boolean));
+          gaps.forEach((gap) => {
+            [...gap.options].forEach((option) => {
+              option.disabled = Boolean(option.value && option.value !== gap.value && chosenWords.has(option.value));
+            });
+          });
+        };
+
+        gaps.forEach(gap => gap.addEventListener('change', updateWordOptions));
+
+        card.querySelector('.check-cloze').addEventListener('click', (event) => {
+          const questionId = Number(event.currentTarget.dataset.qid);
+          const question = questionBank.find(item => item.id === questionId);
+          const answerBox = card.querySelector('.answer-box');
+          const status = card.querySelector('.status');
+
+          if (gaps.some(gap => !gap.value)) {
+            answerBox.textContent = 'សូមបំពេញចន្លោះទាំងអស់ជាមុនសិន។';
+            answerBox.className = 'answer-box wrong';
+            status.textContent = 'នៅមានចន្លោះមិនទាន់បំពេញ';
+            return;
+          }
+
+          const correctCount = gaps.filter((gap, index) => gap.value === question.answers[index]).length;
+          const allCorrect = correctCount === question.answers.length;
+          answerBox.textContent = allCorrect
+            ? `ត្រឹមត្រូវទាំងអស់! ${toKhmerNumber(correctCount)} / ${toKhmerNumber(question.answers.length)}`
+            : `ត្រឹមត្រូវ ${toKhmerNumber(correctCount)} / ${toKhmerNumber(question.answers.length)}។ ចម្លើយ៖ ${question.answers.join(' · ')}`;
+          answerBox.className = `answer-box ${allCorrect ? 'correct' : 'wrong'}`;
+          status.textContent = allCorrect ? 'អ្នកបានបំពេញត្រឹមត្រូវទាំងអស់' : 'សូមពិនិត្យចម្លើយឡើងវិញ';
+        });
+      });
+    }
+
+    function filterQuestions() {
+      const filtered = selectedCategory === 'all'
+        ? questionBank
+        : questionBank.filter(item => item.category === selectedCategory);
+
+      currentQuestions = filtered;
+      currentPage = 0;
+      renderQuestions(filtered);
+    }
+
+    previousPageButton.addEventListener('click', () => {
+      if (currentPage > 0) {
+        currentPage -= 1;
+        renderQuestions(currentQuestions);
+      }
+    });
+
+    nextPageButton.addEventListener('click', () => {
+      if (currentPage < Math.ceil(currentQuestions.length / pageSize) - 1) {
+        currentPage += 1;
+        renderQuestions(currentQuestions);
+      }
+    });
+
+    const categoryOptions = [
+      { value: 'all', label: 'គ្រប់ប្រភេទ' },
+      ...categories.map(category => ({ value: category, label: category }))
+    ];
+
+    categoryOptions.forEach(({ value, label }) => {
+      const option = document.createElement('button');
+      option.className = 'category-option';
+      option.type = 'button';
+      option.dataset.category = value;
+      option.textContent = label;
+      option.setAttribute('aria-pressed', String(value === selectedCategory));
+      option.addEventListener('click', () => {
+        selectedCategory = value;
+        selectedCategoryLabel.textContent = label;
+        categoryMenu.querySelectorAll('.category-option').forEach((button) => {
+          button.setAttribute('aria-pressed', String(button.dataset.category === selectedCategory));
+        });
+        categoryMenu.hidden = true;
+        categoryToggle.setAttribute('aria-expanded', 'false');
+        filterQuestions();
+      });
+      categoryMenu.appendChild(option);
+    });
+
+    categoryToggle.addEventListener('click', () => {
+      const isExpanded = categoryToggle.getAttribute('aria-expanded') === 'true';
+      categoryToggle.setAttribute('aria-expanded', String(!isExpanded));
+      categoryMenu.hidden = isExpanded;
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.category-picker')) {
+        categoryMenu.hidden = true;
+        categoryToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !categoryMenu.hidden) {
+        categoryMenu.hidden = true;
+        categoryToggle.setAttribute('aria-expanded', 'false');
+        categoryToggle.focus();
+      }
+    });
+
+    const backgroundImages = ['images/1.png', 'images/2.png', 'images/3.png'];
+    let currentBackgroundIndex = 0;
+
+    backgroundImages.forEach((imagePath) => {
+      const image = new Image();
+      image.src = imagePath;
+    });
+
+    window.setInterval(() => {
+      currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundImages.length;
+      document.documentElement.style.backgroundImage = `url("${backgroundImages[currentBackgroundIndex]}")`;
+    }, 10000);
+
+    renderQuestions(questionBank);
+  </script>
 </body>
 </html>
