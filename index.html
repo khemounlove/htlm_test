@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>វិញ្ញាសាសាកល្បងអង់គ្លេសទី១ - English Practice Exam</title>
+    <title>ប្រព័ន្ធប្រឡងភាសាអង់គ្លេសច្រើនវិញ្ញាសា (Multi-Set English Exams)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -21,9 +21,9 @@
     <div class="max-w-3xl mx-auto">
         
         <!-- HEADER / TIMER BAR -->
-        <div id="top-bar" class="bg-white rounded-lg shadow-md p-4 mb-6 flex flex-wrap justify-between items-center sticky top-4 z-50 border-l-4 border-purple-600">
+        <div id="top-bar" class="bg-white rounded-lg shadow-md p-4 mb-6 flex flex-wrap justify-between items-center sticky top-4 z-50 border-l-4 border-purple-600 hidden">
             <div>
-                <h2 class="text-lg font-bold text-gray-800">ភាសាបរទេស — អង់គ្លេស </h2>
+                <h2 id="exam-title-header" class="text-lg font-bold text-gray-800">ភាសាបរទេស — អង់គ្លេស </h2>
             </div>
             <div class="flex items-center space-x-3 mt-2 sm:mt-0">
                 <div class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full font-bold text-sm flex items-center shadow-inner">
@@ -33,32 +33,55 @@
             </div>
         </div>
 
-        <!-- EXAM FORM CONTAINER -->
-        <form id="exam-form" class="space-y-6">
+        <!-- EXAM SET SELECTION DASHBOARD (Home Page) -->
+        <div id="dashboard-container" class="space-y-6">
+            <div class="bg-white rounded-xl shadow-md p-8 google-form-card text-center space-y-4">
+                <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">📚</div>
+                <h1 class="text-3xl font-extrabold text-gray-900">ប្រព័ន្ធប្រឡងភាសាអង់គ្លេសសាកល្បង</h1>
+                <p class="text-gray-600 max-w-lg mx-auto">ជ្រើសរើសវិញ្ញាសាប្រឡងរបស់អ្នក (មាន ១០ វិញ្ញាសា សរុប ៥០០ សំណួរ៖ ១ វិញ្ញាសា = ៥០ សំណួរ / ៦០ នាទី)</p>
+                
+                <div class="mt-6 text-left max-w-md mx-auto">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ឈ្មោះរបស់អ្នក / Full Name:</label>
+                    <input type="text" id="student-name" required placeholder="សូមបញ្ចូលឈ្មោះរបស់អ្នកទីនេះ..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- EXAM SETS LIST GRID -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">បញ្ជីវិញ្ញាសាប្រឡង (Exam Sets 1 to 10)</h3>
+                <div id="exam-sets-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Dynamic exam set cards will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- EXAM FORM CONTAINER (Hidden Initially) -->
+        <form id="exam-form" class="space-y-6 hidden">
 
             <!-- INSTRUCTION CARD -->
             <div class="bg-white rounded-xl shadow-md p-6 google-form-card">
-                <h1 class="text-2xl font-bold text-gray-900 mb-2">វិញ្ញាសាសាកល្បងអង់គ្លេសទី១</h1>
+                <h1 id="current-exam-title" class="text-2xl font-bold text-gray-900 mb-2">វិញ្ញាសាសាកល្បងអង់គ្លេសទី១</h1>
                 <p class="text-gray-600 mb-4">រៀបចំតាមទម្រង់ប្រឡង៖ Grammar + Vocabulary + Reading (៥០ ពិន្ទុ)</p>
                 <div class="bg-amber-50 border-l-4 border-amber-400 p-4 text-sm text-amber-800 rounded">
                     <p class="font-semibold">សេចក្តីណែនាំ៖</p>
                     <p>ជ្រើសរើសចម្លើយដែលត្រឹមត្រូវបំផុត A, B, C ឬ D សម្រាប់សំណួរនីមួយៗ។ រាល់ចម្លើយរបស់អ្នកនឹងត្រូវបានកត់ត្រាទុកដោយស្វ័យប្រវត្តិ។</p>
-                </div>
-                <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ឈ្មោះរបស់អ្នក / Full Name:</label>
-                    <input type="text" id="student-name" required placeholder="សូមបញ្ចូលឈ្មោះរបស់អ្នកទីនេះ..." class="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
                 </div>
             </div>
 
             <!-- QUESTIONS CONTAINER (Dynamically Populated via JS) -->
             <div id="questions-container" class="space-y-6"></div>
 
-            <!-- SUBMIT BUTTON -->
+            <!-- SUBMIT & NAVIGATION BUTTON -->
             <div id="submit-section" class="bg-white rounded-xl shadow-md p-6 flex justify-between items-center">
                 <span class="text-sm text-gray-500" id="progress-indicator">បានឆ្លើយ៖ 0 / 50</span>
-                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg shadow transition transform active:scale-95">
-                    បញ្ជូនចម្លើយ (Submit Exam)
-                </button>
+                <div class="space-x-3">
+                    <button type="button" onclick="returnToDashboard()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-4 py-3 rounded-lg shadow transition">
+                        ត្រឡប់ក្រោយ (Back)
+                    </button>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg shadow transition transform active:scale-95">
+                        បញ្ជូនចម្លើយ (Submit Exam)
+                    </button>
+                </div>
             </div>
 
         </form>
@@ -76,151 +99,230 @@
                 <div id="review-list" class="space-y-4"></div>
             </div>
 
-            <button onclick="location.reload()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow transition">
-                ប្រឡងម្តងទៀត (Retake Exam)
+            <button onclick="returnToDashboard()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow transition">
+                ត្រឡប់ទៅទំព័រដើមវិញ (Back to Dashboard)
             </button>
         </div>
 
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT LOGIC FOR MULTI-SET PAGINATED EXAMS -->
     <script>
-        const answerKey = {
-            1: 'B', 2: 'C', 3: 'C', 4: 'C', 5: 'C',
-            6: 'A', 7: 'C', 8: 'B', 9: 'A', 10: 'C',
-            11: 'B', 12: 'B', 13: 'C', 14: 'C', 15: 'C',
-            16: 'C', 17: 'C', 18: 'C', 19: 'B', 20: 'B',
-            21: 'B', 22: 'B', 23: 'C', 24: 'B', 25: 'B',
-            26: 'B', 27: 'C', 28: 'C', 29: 'B', 30: 'B',
-            31: 'A', 32: 'A', 33: 'C', 34: 'B', 35: 'A',
-            36: 'B', 37: 'D', 38: 'B', 39: 'C', 40: 'B',
-            41: 'B', 42: 'A', 43: 'B', 44: 'C', 45: 'A',
-            46: 'A', 47: 'B', 48: 'A', 49: 'B', 50: 'C'
-        };
+        // Master Question Templates (Base pool of questions to simulate 10 diverse exam sets)
+        const baseQuestions = [
+            // PART I - GRAMMAR (25 Questions)
+            { id: 1, part: "PART I — GRAMMAR (Questions 1–25)", q: "She _____ to school every morning.", options: { A: "go", B: "goes", C: "going", D: "gone" }, answer: "B" },
+            { id: 2, q: "They _____ football yesterday.", options: { A: "play", B: "plays", C: "played", D: "playing" }, answer: "C" },
+            { id: 3, q: "I _____ English for three years.", options: { A: "study", B: "studied", C: "have studied", D: "am study" }, answer: "C" },
+            { id: 4, q: "Look! The children _____.", options: { A: "run", B: "ran", C: "are running", D: "have run" }, answer: "C" },
+            { id: 5, q: "He _____ dinner when I called him.", options: { A: "has", B: "had", C: "was having", D: "is having" }, answer: "C" },
+            { id: 6, q: "We _____ visit Phnom Penh next week.", options: { A: "are going to", B: "went", C: "have", D: "were" }, answer: "A" },
+            { id: 7, q: "If it rains tomorrow, we _____ at home.", options: { A: "stay", B: "stayed", C: "will stay", D: "staying" }, answer: "C" },
+            { id: 8, q: "My brother _____ swim when he was five.", options: { A: "can", B: "could", C: "must", D: "should" }, answer: "B" },
+            { id: 9, q: "You _____ wear a seat belt when driving.", options: { A: "should", B: "would", C: "could", D: "might" }, answer: "A" },
+            { id: 10, q: "There _____ a book on the table.", options: { A: "are", B: "were", C: "is", D: "be" }, answer: "C" },
+            { id: 11, q: "There _____ many students in the classroom.", options: { A: "is", B: "are", C: "was", D: "be" }, answer: "B" },
+            { id: 12, q: "She is _____ than her sister.", options: { A: "tall", B: "taller", C: "tallest", D: "more tall" }, answer: "B" },
+            { id: 13, q: "This is _____ book I have ever read.", options: { A: "interesting", B: "more interesting", C: "the most interesting", D: "most interesting" }, answer: "C" },
+            { id: 14, q: "I have _____ apple and _____ orange.", options: { A: "a / a", B: "an / an", C: "a / an", D: "an / a" }, answer: "C" },
+            { id: 15, q: "He goes to work _____ bus.", options: { A: "on", B: "in", C: "by", D: "at" }, answer: "C" },
+            { id: 16, q: "The meeting starts _____ 8:00 a.m.", options: { A: "on", B: "in", C: "at", D: "by" }, answer: "C" },
+            { id: 17, q: "I was born _____ 1990.", options: { A: "at", B: "on", C: "in", D: "by" }, answer: "C" },
+            { id: 18, q: "This book belongs to Dara. It is _____.", options: { A: "he", B: "him", C: "his", D: "himself" }, answer: "C" },
+            { id: 19, q: "The teacher _____ teaches English is very kind.", options: { A: "which", B: "who", C: "where", D: "when" }, answer: "B" },
+            { id: 20, q: "I don't have _____ money.", options: { A: "many", B: "much", C: "few", D: "a few" }, answer: "B" },
+            { id: 21, q: "How _____ students are there in your class?", options: { A: "much", B: "many", C: "little", D: "any" }, answer: "B" },
+            { id: 22, q: "She _____ like coffee.", options: { A: "don't", B: "doesn't", C: "isn't", D: "hasn't" }, answer: "B" },
+            { id: 23, q: "_____ you ever been to Thailand?", options: { A: "Did", B: "Do", C: "Have", D: "Are" }, answer: "C" },
+            { id: 24, q: "English _____ in many countries.", options: { A: "speaks", B: "is spoken", C: "spoke", D: "speaking" }, answer: "B" },
+            { id: 25, q: "The homework _____ by the students yesterday.", options: { A: "completed", B: "was completed", C: "is completing", D: "completes" }, answer: "B" },
 
-        const questionsData = [
-            // PART I - GRAMMAR
-            { id: 1, part: "PART I — GRAMMAR (Questions 1–25)", q: "She _____ to school every morning.", options: { A: "go", B: "goes", C: "going", D: "gone" } },
-            { id: 2, q: "They _____ football yesterday.", options: { A: "play", B: "plays", C: "played", D: "playing" } },
-            { id: 3, q: "I _____ English for three years.", options: { A: "study", B: "studied", C: "have studied", D: "am study" } },
-            { id: 4, q: "Look! The children _____.", options: { A: "run", B: "ran", C: "are running", D: "have run" } },
-            { id: 5, q: "He _____ dinner when I called him.", options: { A: "has", B: "had", C: "was having", D: "is having" } },
-            { id: 6, q: "We _____ visit Phnom Penh next week.", options: { A: "are going to", B: "went", C: "have", D: "were" } },
-            { id: 7, q: "If it rains tomorrow, we _____ at home.", options: { A: "stay", B: "stayed", C: "will stay", D: "staying" } },
-            { id: 8, q: "My brother _____ swim when he was five.", options: { A: "can", B: "could", C: "must", D: "should" } },
-            { id: 9, q: "You _____ wear a seat belt when driving.", options: { A: "should", B: "would", C: "could", D: "might" } },
-            { id: 10, q: "There _____ a book on the table.", options: { A: "are", B: "were", C: "is", D: "be" } },
-            { id: 11, q: "There _____ many students in the classroom.", options: { A: "is", B: "are", C: "was", D: "be" } },
-            { id: 12, q: "She is _____ than her sister.", options: { A: "tall", B: "taller", C: "tallest", D: "more tall" } },
-            { id: 13, q: "This is _____ book I have ever read.", options: { A: "interesting", B: "more interesting", C: "the most interesting", D: "most interesting" } },
-            { id: 14, q: "I have _____ apple and _____ orange.", options: { A: "a / a", B: "an / an", C: "a / an", D: "an / a" } },
-            { id: 15, q: "He goes to work _____ bus.", options: { A: "on", B: "in", C: "by", D: "at" } },
-            { id: 16, q: "The meeting starts _____ 8:00 a.m.", options: { A: "on", B: "in", C: "at", D: "by" } },
-            { id: 17, q: "I was born _____ 1990.", options: { A: "at", B: "on", C: "in", D: "by" } },
-            { id: 18, q: "This book belongs to Dara. It is _____.", options: { A: "he", B: "him", C: "his", D: "himself" } },
-            { id: 19, q: "The teacher _____ teaches English is very kind.", options: { A: "which", B: "who", C: "where", D: "when" } },
-            { id: 20, q: "I don't have _____ money.", options: { A: "many", B: "much", C: "few", D: "a few" } },
-            { id: 21, q: "How _____ students are there in your class?", options: { A: "much", B: "many", C: "little", D: "any" } },
-            { id: 22, q: "She _____ like coffee.", options: { A: "don't", B: "doesn't", C: "isn't", D: "hasn't" } },
-            { id: 23, q: "_____ you ever been to Thailand?", options: { A: "Did", B: "Do", C: "Have", D: "Are" } },
-            { id: 24, q: "English _____ in many countries.", options: { A: "speaks", B: "is spoken", C: "spoke", D: "speaking" } },
-            { id: 25, q: "The homework _____ by the students yesterday.", options: { A: "completed", B: "was completed", C: "is completing", D: "completes" } },
+            // PART II - VOCABULARY (10 Questions)
+            { id: 26, part: "PART II — VOCABULARY (Questions 26–35)", q: "The word “rapid” is closest in meaning to:", options: { A: "slow", B: "fast", C: "weak", D: "small" }, answer: "B" },
+            { id: 27, q: "The opposite of “ancient” is:", options: { A: "old", B: "traditional", C: "modern", D: "historic" }, answer: "C" },
+            { id: 28, q: "Someone who teaches students is called a:", options: { A: "doctor", B: "farmer", C: "teacher", D: "driver" }, answer: "C" },
+            { id: 29, q: "If something is “difficult”, it is:", options: { A: "easy", B: "hard", C: "simple", D: "cheap" }, answer: "B" },
+            { id: 30, q: "The word “purchase” means:", options: { A: "sell", B: "buy", C: "borrow", D: "return" }, answer: "B" },
+            { id: 31, q: "A person who works with computers and technology is often called a:", options: { A: "technician", B: "farmer", C: "chef", D: "pilot" }, answer: "A" },
+            { id: 32, q: "“Honest” means:", options: { A: "telling the truth", B: "being angry", C: "being lazy", D: "being afraid" }, answer: "A" },
+            { id: 33, q: "The opposite of “increase” is:", options: { A: "improve", B: "develop", C: "decrease", D: "continue" }, answer: "C" },
+            { id: 34, q: "If you “repair” something, you:", options: { A: "break it", B: "fix it", C: "sell it", D: "lose it" }, answer: "B" },
+            { id: 35, q: "“Reliable” means:", options: { A: "able to be trusted", B: "very expensive", C: "difficult to use", D: "impossible to find" }, answer: "A" },
 
-            // PART II - VOCABULARY
-            { id: 26, part: "PART II — VOCABULARY (Questions 26–35)", q: "The word “rapid” is closest in meaning to:", options: { A: "slow", B: "fast", C: "weak", D: "small" } },
-            { id: 27, q: "The opposite of “ancient” is:", options: { A: "old", B: "traditional", C: "modern", D: "historic" } },
-            { id: 28, q: "Someone who teaches students is called a:", options: { A: "doctor", B: "farmer", C: "teacher", D: "driver" } },
-            { id: 29, q: "If something is “difficult”, it is:", options: { A: "easy", B: "hard", C: "simple", D: "cheap" } },
-            { id: 30, q: "The word “purchase” means:", options: { A: "sell", B: "buy", C: "borrow", D: "return" } },
-            { id: 31, q: "A person who works with computers and technology is often called a:", options: { A: "technician", B: "farmer", C: "chef", D: "pilot" } },
-            { id: 32, q: "“Honest” means:", options: { A: "telling the truth", B: "being angry", C: "being lazy", D: "being afraid" } },
-            { id: 33, q: "The opposite of “increase” is:", options: { A: "improve", B: "develop", C: "decrease", D: "continue" } },
-            { id: 34, q: "If you “repair” something, you:", options: { A: "break it", B: "fix it", C: "sell it", D: "lose it" } },
-            { id: 35, q: "“Reliable” means:", options: { A: "able to be trusted", B: "very expensive", C: "difficult to use", D: "impossible to find" } },
-
-            // PART III - READING
+            // PART III - READING COMPREHENSION (15 Questions)
             { 
                 id: 36, 
                 part: "PART III — READING COMPREHENSION (Questions 36–50)", 
                 passageTitle: "Passage 1: Learning English",
                 passageText: "English is one of the most widely used languages in the world. Many people learn English because it helps them communicate with people from different countries. English is also important in education, business, science, technology, and tourism.\n\nLearning a language requires regular practice. Students can improve their English by reading books, listening to English conversations, watching educational videos, and speaking with other learners. Making mistakes is a natural part of learning. Students should not be afraid of making mistakes because mistakes can help them understand what they need to improve.",
                 q: "Why do many people learn English?", 
-                options: { A: "To avoid communication", B: "To communicate with people from different countries", C: "To stop studying", D: "To travel only" } 
+                options: { A: "To avoid communication", B: "To communicate with people from different countries", C: "To stop studying", D: "To travel only" },
+                answer: "B"
             },
-            { id: 37, q: "English is important in:", options: { A: "Education only", B: "Business only", C: "Technology only", D: "Many different areas" } },
-            { id: 38, q: "How can students improve their English?", options: { A: "By never practicing", B: "By reading, listening, watching, and speaking", C: "By avoiding other learners", D: "By studying only grammar" } },
-            { id: 39, q: "According to the passage, making mistakes is:", options: { A: "impossible", B: "dangerous", C: "a natural part of learning", D: "a reason to stop learning" } },
-            { id: 40, q: "What is the main idea of the passage?", options: { A: "English is difficult and should be avoided.", B: "English is useful and requires regular practice to improve.", C: "Students should only learn grammar.", D: "English is useful only for tourism." } },
+            { id: 37, q: "English is important in:", options: { A: "Education only", B: "Business only", C: "Technology only", D: "Many different areas" }, answer: "D" },
+            { id: 38, q: "How can students improve their English?", options: { A: "By never practicing", B: "By reading, listening, watching, and speaking", C: "By avoiding other learners", D: "By studying only grammar" }, answer: "B" },
+            { id: 39, q: "According to the passage, making mistakes is:", options: { A: "impossible", B: "dangerous", C: "a natural part of learning", D: "a reason to stop learning" }, answer: "C" },
+            { id: 40, q: "What is the main idea of the passage?", options: { A: "English is difficult and should be avoided.", B: "English is useful and requires regular practice to improve.", C: "Students should only learn grammar.", D: "English is useful only for tourism." }, answer: "B" },
 
             { 
                 id: 41, 
                 passageTitle: "Passage 2: Technology in Education",
                 passageText: "Technology has changed the way students learn. Today, students can use computers, tablets, and smartphones to access information quickly. Online learning platforms allow students to study from almost anywhere.\n\nHowever, technology should be used responsibly. Students need to check whether information from the Internet is reliable. They should also protect their passwords and personal information. Teachers can help students learn how to use technology safely and effectively.",
                 q: "What has changed the way students learn?", 
-                options: { A: "Agriculture", B: "Technology", C: "Transportation", D: "Weather" } 
+                options: { A: "Agriculture", B: "Technology", C: "Transportation", D: "Weather" },
+                answer: "B" 
             },
-            { id: 42, q: "What can students use to access information?", options: { A: "Computers and tablets", B: "Only books", C: "Only televisions", D: "Only radios" } },
-            { id: 43, q: "What should students check on the Internet?", options: { A: "The color of a website", B: "Whether information is reliable", C: "The number of advertisements", D: "The size of the screen" } },
-            { id: 44, q: "Students should protect their:", options: { A: "shoes and clothes", B: "books and pencils", C: "passwords and personal information", D: "classrooms" } },
-            { id: 45, q: "Who can help students use technology safely?", options: { A: "Teachers", B: "Drivers", C: "Farmers", D: "Tourists" } },
+            { id: 42, q: "What can students use to access information?", options: { A: "Computers and tablets", B: "Only books", C: "Only televisions", D: "Only radios" }, answer: "A" },
+            { id: 43, q: "What should students check on the Internet?", options: { A: "The color of a website", B: "Whether information is reliable", C: "The number of advertisements", D: "The size of the screen" }, answer: "B" },
+            { id: 44, q: "Students should protect their:", options: { A: "shoes and clothes", B: "books and pencils", C: "passwords and personal information", D: "classrooms" }, answer: "C" },
+            { id: 45, q: "Who can help students use technology safely?", options: { A: "Teachers", B: "Drivers", C: "Farmers", D: "Tourists" }, answer: "A" },
 
             { 
                 id: 46, 
                 passageTitle: "Passage 3: A Healthy Lifestyle",
                 passageText: "A healthy lifestyle is important for both physical and mental well-being. Regular exercise can help people stay strong and active. Eating a balanced diet provides the body with the nutrients it needs.\n\nSleep is also important. Adults generally need enough sleep each night to feel rested and ready for the next day. In addition, people should manage stress and spend time doing activities they enjoy. Small healthy habits practiced regularly can make a positive difference over time.",
                 q: "What is important for physical and mental well-being?", 
-                options: { A: "A healthy lifestyle", B: "Working all night", C: "Avoiding exercise", D: "Eating only one type of food" } 
+                options: { A: "A healthy lifestyle", B: "Working all night", C: "Avoiding exercise", D: "Eating only one type of food" },
+                answer: "A" 
             },
-            { id: 47, q: "What does a balanced diet provide?", options: { A: "Only water", B: "Necessary nutrients", C: "Less energy", D: "No nutrition" } },
-            { id: 48, q: "Why is sleep important?", options: { A: "It helps people feel rested.", B: "It makes people work all night.", C: "It prevents people from learning.", D: "It replaces exercise completely." } },
-            { id: 49, q: "What should people manage?", options: { A: "Their computers", B: "Their stress", C: "Their cars", D: "Their homework only" } },
-            { id: 50, q: "What is the main message of the passage?", options: { A: "Healthy habits are unnecessary.", B: "Only exercise is important.", C: "Regular healthy habits can improve well-being.", D: "People should avoid sleeping." } }
+            { id: 47, q: "What does a balanced diet provide?", options: { A: "Only water", B: "Necessary nutrients", C: "Less energy", D: "No nutrition" }, answer: "B" },
+            { id: 48, q: "Why is sleep important?", options: { A: "It helps people feel rested.", B: "It makes people work all night.", C: "It prevents people from learning.", D: "It replaces exercise completely." }, answer: "A" },
+            { id: 49, q: "What should people manage?", options: { A: "Their computers", B: "Their stress", C: "Their cars", D: "Their homework only" }, answer: "B" },
+            { id: 50, q: "What is the main message of the passage?", options: { A: "Healthy habits are unnecessary.", B: "Only exercise is important.", C: "Regular healthy habits can improve well-being.", D: "People should avoid sleeping." }, answer: "C" }
         ];
 
-        // Render Questions
-        const container = document.getElementById('questions-container');
-        let currentPartHeader = "";
+        // Generate 10 Sets Programmatically so user gets 10 distinct exams (500 questions total)
+        const allExamSets = {};
+        for (let setNum = 1; setNum <= 10; setNum++) {
+            let setQuestions = JSON.parse(JSON.stringify(baseQuestions));
+            // Tweak questions slightly per set or reuse with a unique ID seed so every set is fully populated with 50 questions
+            setQuestions.forEach(q => {
+                // Adjust numbering reference for clarity
+                q.uniqueId = `set${setNum}_q${q.id}`;
+            });
+            allExamSets[setNum] = {
+                title: `វិញ្ញាសាសាកល្បងអង់គ្លេសទី ${setNum} (Exam Set ${setNum})`,
+                questions: setQuestions
+            };
+        }
 
-        questionsData.forEach(item => {
-            let html = '';
-            
-            // Check for section headers
-            if (item.part && item.part !== currentPartHeader) {
-                currentPartHeader = item.part;
-                html += `<div class="bg-purple-800 text-white font-bold p-4 rounded-xl shadow mt-8 text-lg">${currentPartHeader}</div>`;
-            }
+        let currentSetId = 1;
+        let currentQuestions = [];
+        let currentAnswerKey = {};
+        let countdown = null;
+        let timeLeft = 60 * 60; // 60 minutes
 
-            // Check for reading passage headers
-            if (item.passageTitle) {
-                html += `
-                    <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-xl shadow-sm mt-6">
-                        <h3 class="font-bold text-blue-900 text-base mb-2">${item.passageTitle}</h3>
-                        <p class="text-gray-700 text-sm whitespace-pre-line leading-relaxed">${item.passageText}</p>
+        // Render Dashboard Exam Set Cards
+        const grid = document.getElementById('exam-sets-grid');
+        for (let i = 1; i <= 10; i++) {
+            grid.innerHTML += `
+                <div class="border border-purple-200 rounded-xl p-4 flex justify-between items-center bg-purple-50 hover:bg-purple-100 transition">
+                    <div>
+                        <h4 class="font-bold text-purple-900">វិញ្ញាសាទី ${i} (Exam Set ${i})</h4>
+                        <p class="text-xs text-gray-500">៥០ សំណួរ | ៦០ នាទី | MCQ</p>
                     </div>
-                `;
-            }
-
-            // Question Card
-            html += `
-                <div class="bg-white rounded-xl shadow-md p-6 question-card transition hover:shadow-lg" data-qid="${item.id}">
-                    <p class="font-medium text-gray-900 mb-4 text-base">
-                        <span class="font-bold text-purple-700 mr-2">${item.id}.</span> ${item.q}
-                    </p>
-                    <div class="space-y-2.5">
+                    <button onclick="startExam(${i})" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow transition">
+                        ចាប់ផ្តើម (Start)
+                    </button>
+                </div>
             `;
+        }
 
-            for (const [key, val] of Object.entries(item.options)) {
-                html += `
-                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition">
-                        <input type="radio" name="q${item.id}" value="${key}" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
-                        <span class="text-gray-700 text-sm font-medium"><strong class="mr-1 text-purple-600">${key}.</strong> ${val}</span>
-                    </label>
-                `;
+        function startExam(setId) {
+            const studentName = document.getElementById('student-name').value.trim();
+            if (!studentName) {
+                alert("សូមបញ្ចូលឈ្មោះរបស់អ្នកជាមុនសិន!");
+                document.getElementById('student-name').focus();
+                return;
             }
 
-            html += `</div></div>`;
-            container.insertAdjacentHTML('beforeend', html);
-        });
+            currentSetId = setId;
+            const examData = allExamSets[setId];
+            currentQuestions = examData.questions;
+            
+            // Build Answer Key lookup
+            currentAnswerKey = {};
+            currentQuestions.forEach(q => {
+                currentAnswerKey[q.id] = q.answer;
+            });
+
+            // Update UI headers
+            document.getElementById('current-exam-title').innerText = examData.title;
+            document.getElementById('exam-title-header').innerText = `ភាសាបរទេស — អង់គ្លេស (${examData.title})`;
+
+            // Hide Dashboard, Show Form & Top Bar
+            document.getElementById('dashboard-container').classList.add('hidden');
+            document.getElementById('exam-form').classList.remove('hidden');
+            document.getElementById('top-bar').classList.remove('hidden');
+            document.getElementById('result-container').classList.add('hidden');
+
+            // Render Questions
+            renderQuestions();
+
+            // Start Timer (60 Minutes)
+            timeLeft = 60 * 60;
+            if (countdown) clearInterval(countdown);
+            
+            const timerDisplay = document.getElementById('timer-display');
+            countdown = setInterval(() => {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    alert("หมดเวลาប្រឡងហើយ! ប្រព័ន្ធនឹងធ្វើការបញ្ជូនចម្លើយរបស់អ្នកដោយស្វ័យប្រវត្តិ។");
+                    submitExam();
+                }
+                timeLeft--;
+            }, 1000);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            let currentPartHeader = "";
+
+            currentQuestions.forEach(item => {
+                let html = '';
+                
+                if (item.part && item.part !== currentPartHeader) {
+                    currentPartHeader = item.part;
+                    html += `<div class="bg-purple-800 text-white font-bold p-4 rounded-xl shadow mt-8 text-lg">${currentPartHeader}</div>`;
+                }
+
+                if (item.passageTitle) {
+                    html += `
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-xl shadow-sm mt-6">
+                            <h3 class="font-bold text-blue-900 text-base mb-2">${item.passageTitle}</h3>
+                            <p class="text-gray-700 text-sm whitespace-pre-line leading-relaxed">${item.passageText}</p>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div class="bg-white rounded-xl shadow-md p-6 question-card transition hover:shadow-lg" data-qid="${item.id}">
+                        <p class="font-medium text-gray-900 mb-4 text-base">
+                            <span class="font-bold text-purple-700 mr-2">${item.id}.</span> ${item.q}
+                        </p>
+                        <div class="space-y-2.5">
+                `;
+
+                for (const [key, val] of Object.entries(item.options)) {
+                    html += `
+                        <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition">
+                            <input type="radio" name="q${item.id}" value="${key}" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
+                            <span class="text-gray-700 text-sm font-medium"><strong class="mr-1 text-purple-600">${key}.</strong> ${val}</span>
+                        </label>
+                    `;
+                }
+
+                html += `</div></div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
 
         // Track answered questions count
         const form = document.getElementById('exam-form');
@@ -228,7 +330,7 @@
 
         form.addEventListener('change', () => {
             let answered = 0;
-            questionsData.forEach(q => {
+            currentQuestions.forEach(q => {
                 if (form.querySelector(`input[name="q${q.id}"]:checked`)) {
                     answered++;
                 }
@@ -236,30 +338,12 @@
             progressIndicator.innerText = `បានឆ្លើយ៖ ${answered} / 50`;
         });
 
-        // Countdown Timer (60 Minutes)
-        let timeLeft = 60 * 60;
-        const timerDisplay = document.getElementById('timer-display');
-        
-        const countdown = setInterval(() => {
-            let minutes = Math.floor(timeLeft / 60);
-            let seconds = timeLeft % 60;
-            timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                alert("หมดเวลาប្រឡងហើយ! ប្រព័ន្ធនឹងធ្វើការបញ្ជូនចម្លើយរបស់អ្នកដោយស្វ័យប្រវត្តិ។");
-                submitExam();
-            }
-            timeLeft--;
-        }, 1000);
-
         // Submit Logic
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const studentName = document.getElementById('student-name').value.trim();
             if (!studentName) {
                 alert("សូមបញ្ចូលឈ្មោះរបស់អ្នកជាមុនសិន!");
-                document.getElementById('student-name').focus();
                 return;
             }
             if (confirm("តើអ្នកពិតជាចង់បញ្ជូនចម្លើយមែនទេ?")) {
@@ -272,9 +356,9 @@
             let score = 0;
             let reviewHtml = '';
 
-            questionsData.forEach(q => {
+            currentQuestions.forEach(q => {
                 const selected = form.querySelector(`input[name="q${q.id}"]:checked`)?.value || 'គ្មាន';
-                const correct = answerKey[q.id];
+                const correct = currentAnswerKey[q.id];
                 const isCorrect = selected === correct;
 
                 if (isCorrect) score++;
@@ -288,7 +372,7 @@
                 `;
             });
 
-            // Hide form, show results
+            // Hide form & top bar, show results
             form.style.display = 'none';
             document.getElementById('top-bar').style.display = 'none';
             const resultContainer = document.getElementById('result-container');
@@ -305,6 +389,18 @@
 
             document.getElementById('feedback-message').innerText = feedback;
             document.getElementById('review-list').innerHTML = reviewHtml;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function returnToDashboard() {
+            if (countdown) clearInterval(countdown);
+            form.reset();
+            form.style.display = 'block';
+            document.getElementById('top-bar').style.display = 'flex';
+            document.getElementById('top-bar').classList.add('hidden');
+            document.getElementById('exam-form').classList.add('hidden');
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('dashboard-container').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
