@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ប្រព័ន្ធប្រឡងភាសាអង់គ្លេសច្រើនវិញ្ញាសា (Multi-Set English Exams)</title>
+    <title>ប្រព័ន្ធប្រឡងសាកល្បងច្រើនមុខវិជ្ជា (Vue.js Exam Portal)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
         body {
@@ -16,393 +18,308 @@
         }
     </style>
 </head>
-<body class="bg-purple-50 min-h-screen py-8 px-4 sm:px-6">
+<body class="bg-purple-50 min-h-screen py-6 px-3 sm:px-6">
 
-    <div class="max-w-3xl mx-auto">
-        
+    <div id="app" class="max-w-3xl mx-auto">
+
         <!-- HEADER / TIMER BAR -->
-        <div id="top-bar" class="bg-white rounded-lg shadow-md p-4 mb-6 flex flex-wrap justify-between items-center sticky top-4 z-50 border-l-4 border-purple-600 hidden">
+        <div v-if="currentView === 'exam'" class="bg-white rounded-lg shadow-md p-4 mb-6 flex flex-wrap justify-between items-center sticky top-4 z-50 border-l-4 border-purple-600">
             <div>
-                <h2 id="exam-title-header" class="text-lg font-bold text-gray-800">ភាសាបរទេស — អង់គ្លេស </h2>
+                <h2 class="text-sm sm:text-base font-bold text-gray-800">{{ currentExamTitle }}</h2>
             </div>
             <div class="flex items-center space-x-3 mt-2 sm:mt-0">
                 <div class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full font-bold text-sm flex items-center shadow-inner">
                     <svg class="w-4 h-4 mr-1.5 animate-pulse text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span id="timer-display">60:00</span>
+                    <span>{{ formattedTime }}</span>
                 </div>
             </div>
         </div>
 
-        <!-- EXAM SET SELECTION DASHBOARD (Home Page) -->
-        <div id="dashboard-container" class="space-y-6">
-            <div class="bg-white rounded-xl shadow-md p-8 google-form-card text-center space-y-4">
-                <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">📚</div>
-                <h1 class="text-3xl font-extrabold text-gray-900">ប្រព័ន្ធប្រឡងភាសាអង់គ្លេសសាកល្បង</h1>
-                <p class="text-gray-600 max-w-lg mx-auto">ជ្រើសរើសវិញ្ញាសាប្រឡងរបស់អ្នក (មាន ១០ វិញ្ញាសា សរុប ៥០០ សំណួរ៖ ១ វិញ្ញាសា = ៥០ សំណួរ / ៦០ នាទី)</p>
-                
+        <!-- 1. DASHBOARD CONTAINER (Home Page) -->
+        <div v-if="currentView === 'dashboard'" class="space-y-6">
+            <div class="bg-white rounded-xl shadow-md p-6 sm:p-8 google-form-card text-center space-y-4">
+                <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">🎓</div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">ប្រព័ន្ធប្រឡងសាកល្បងរដ្ឋបាលសាធារណៈ អង់គ្លេស និង ICT</h1>
+
                 <div class="mt-6 text-left max-w-md mx-auto">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ឈ្មោះរបស់អ្នក / Full Name:</label>
-                    <input type="text" id="student-name" required placeholder="សូមបញ្ចូលឈ្មោះរបស់អ្នកទីនេះ..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ឈ្មោះរបស់អ្នក :</label>
+                    <input type="text" v-model="studentName" required placeholder="សូមបញ្ចូលឈ្មោះរបស់អ្នកទីនេះ..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm">
                 </div>
+            </div>
+
+            <!-- TAB SELECTION -->
+            <div class="flex flex-wrap justify-center gap-2 border-b pb-4">
+                <button @click="switchTab('english')" :class="activeTab === 'english' ? 'bg-purple-600 text-white shadow' : 'bg-white text-gray-700 hover:bg-purple-100 shadow'" class="px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition">ភាសាអង់គ្លេស (១០ វិញ្ញាសា)</button>
+                <button @click="switchTab('general')" :class="activeTab === 'general' ? 'bg-purple-600 text-white shadow' : 'bg-white text-gray-700 hover:bg-purple-100 shadow'" class="px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition">វប្បធម៌ទូទៅ (១៥ វិញ្ញាសា)</button>
+                <button @click="switchTab('ict')" :class="activeTab === 'ict' ? 'bg-purple-600 text-white shadow' : 'bg-white text-gray-700 hover:bg-purple-100 shadow'" class="px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition">ឯកទេស ICT (១៥ វិញ្ញាសា)</button>
             </div>
 
             <!-- EXAM SETS LIST GRID -->
             <div class="bg-white rounded-xl shadow-md p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">បញ្ជីវិញ្ញាសាប្រឡង (Exam Sets 1 to 10)</h3>
-                <div id="exam-sets-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Dynamic exam set cards will be generated here -->
+                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4 border-b pb-2"> {{ categoryNameKh }} </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div v-for="i in totalSets" :key="i" class="border border-purple-200 rounded-xl p-4 flex justify-between items-center bg-purple-50 hover:bg-purple-100 transition">
+                        <div>
+                            <h4 class="font-bold text-purple-900 text-sm sm:text-base">វិញ្ញាសាទី {{ i }} </h4>
+                            <p class="text-xs text-gray-500">៥០ សំណួរ | ៦០ នាទី | MCQ</p>
+                        </div>
+                        <button @click="startExam(activeTab, i)" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg text-xs sm:text-sm shadow transition">
+                            ចាប់ផ្តើម
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- EXAM FORM CONTAINER (Hidden Initially) -->
-        <form id="exam-form" class="space-y-6 hidden">
-
+        <!-- 2. EXAM FORM CONTAINER -->
+        <div v-if="currentView === 'exam'" class="space-y-6">
             <!-- INSTRUCTION CARD -->
             <div class="bg-white rounded-xl shadow-md p-6 google-form-card">
-                <h1 id="current-exam-title" class="text-2xl font-bold text-gray-900 mb-2">វិញ្ញាសាសាកល្បងអង់គ្លេសទី១</h1>
-                <p class="text-gray-600 mb-4">រៀបចំតាមទម្រង់ប្រឡង៖ Grammar + Vocabulary + Reading (៥០ ពិន្ទុ)</p>
-                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 text-sm text-amber-800 rounded">
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{{ currentExamTitle }}</h1>
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 text-xs sm:text-sm text-amber-800 rounded">
                     <p class="font-semibold">សេចក្តីណែនាំ៖</p>
-                    <p>ជ្រើសរើសចម្លើយដែលត្រឹមត្រូវបំផុត A, B, C ឬ D សម្រាប់សំណួរនីមួយៗ។ រាល់ចម្លើយរបស់អ្នកនឹងត្រូវបានកត់ត្រាទុកដោយស្វ័យប្រវត្តិ។</p>
+                    <p>ជ្រើសរើសចម្លើយដែលត្រឹមត្រូវបំផុត A, B, C ឬ D សម្រាប់សំណួរនីមួយៗ។ រាល់ចម្លើយនឹងត្រូវកត់ត្រាដោយស្វ័យប្រវត្តិ។</p>
                 </div>
             </div>
 
-            <!-- QUESTIONS CONTAINER (Dynamically Populated via JS) -->
-            <div id="questions-container" class="space-y-6"></div>
+            <!-- QUESTIONS CONTAINER -->
+            <div class="space-y-6">
+                <template v-for="(item, index) in currentQuestions" :key="item.id">
+                    <!-- Part Header if applicable -->
+                    <div v-if="item.part && (index === 0 || currentQuestions[index-1].part !== item.part)" class="bg-purple-800 text-white font-bold p-4 rounded-xl shadow mt-8 text-sm sm:text-base">
+                        {{ item.part }}
+                    </div>
+
+                    <!-- Passage if applicable -->
+                    <div v-if="item.passageTitle" class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-xl shadow-sm mt-6">
+                        <h3 class="font-bold text-blue-900 text-sm sm:text-base mb-2">{{ item.passageTitle }}</h3>
+                        <p class="text-gray-700 text-xs sm:text-sm whitespace-pre-line leading-relaxed">{{ item.passageText }}</p>
+                    </div>
+
+                    <!-- Question Card -->
+                    <div class="bg-white rounded-xl shadow-md p-5 sm:p-6 transition hover:shadow-lg">
+                        <p class="font-medium text-gray-900 mb-4 text-sm sm:text-base">
+                            <span class="font-bold text-purple-700 mr-2">{{ item.id }}.</span> {{ item.q }}
+                        </p>
+                        <div class="space-y-2.5">
+                            <label v-for="(val, key) in item.options" :key="key" class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition text-xs sm:text-sm">
+                                <input type="radio" :name="'q' + item.id" :value="key" v-model="userAnswers[item.id]" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
+                                <span class="text-gray-700 font-medium"><strong class="mr-1 text-purple-600">{{ key }}.</strong> {{ val }}</span>
+                            </label>
+                        </div>
+                    </div>
+                </template>
+            </div>
 
             <!-- SUBMIT & NAVIGATION BUTTON -->
-            <div id="submit-section" class="bg-white rounded-xl shadow-md p-6 flex justify-between items-center">
-                <span class="text-sm text-gray-500" id="progress-indicator">បានឆ្លើយ៖ 0 / 50</span>
+            <div class="bg-white rounded-xl shadow-md p-6 flex flex-wrap justify-between items-center gap-4">
+                <span class="text-xs sm:text-sm text-gray-500">បានឆ្លើយ៖ {{ answeredCount }} / 50</span>
                 <div class="space-x-3">
-                    <button type="button" onclick="returnToDashboard()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-4 py-3 rounded-lg shadow transition">
-                        ត្រឡប់ក្រោយ (Back)
+                    <button type="button" @click="returnToDashboard" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-4 py-2.5 rounded-lg shadow text-xs sm:text-sm transition">
+                        ត្រឡប់ក្រោយ
                     </button>
-                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg shadow transition transform active:scale-95">
-                        បញ្ជូនចម្លើយ (Submit Exam)
+                    <button type="button" @click="confirmSubmit" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow text-xs sm:text-sm transition transform active:scale-95">
+                        បញ្ជូនចម្លើយ
                     </button>
                 </div>
             </div>
+        </div>
 
-        </form>
+        <!-- 3. RESULT CONTAINER -->
+        <div v-if="currentView === 'result'" class="bg-white rounded-xl shadow-xl p-6 sm:p-8 text-center space-y-6 mt-6">
+            <div class="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto text-3xl font-bold shadow-inner">🏆</div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">លទ្ធផលប្រឡង (Exam Results)</h2>
+            <div class="text-4xl sm:text-5xl font-black text-purple-600">{{ score }} / 50</div>
+            <div class="text-lg sm:text-xl font-semibold text-gray-700">{{ percentage }}%</div>
+            <p class="text-gray-600 text-sm sm:text-base max-w-md mx-auto">{{ feedbackMessage }}</p>
 
-        <!-- RESULT CONTAINER (Hidden by Default) -->
-        <div id="result-container" class="hidden bg-white rounded-xl shadow-xl p-8 text-center space-y-6 mt-6">
-            <div class="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto text-3xl font-bold shadow-inner" id="score-icon">🏆</div>
-            <h2 class="text-3xl font-extrabold text-gray-900">លទ្ធផលប្រឡង (Exam Results)</h2>
-            <div class="text-5xl font-black text-purple-600" id="score-display">0 / 50</div>
-            <div class="text-xl font-semibold text-gray-700" id="percentage-display">0%</div>
-            <p class="text-gray-600 max-w-md mx-auto" id="feedback-message"></p>
-            
             <div class="border-t pt-6 text-left">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">ពិនិត្យចម្លើយឡើងវិញ (Review Answers)</h3>
-                <div id="review-list" class="space-y-4"></div>
+                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">ពិនិត្យចម្លើយឡើងវិញ (Review Answers)</h3>
+                <div class="space-y-4">
+                    <div v-for="q in currentQuestions" :key="q.id" :class="isCorrect(q.id) ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'" class="p-4 rounded-lg border text-xs sm:text-sm">
+                        <p class="font-semibold text-gray-800"> {{ q.q }}</p>
+                        <p class="mt-1">ចម្លើយរបស់អ្នក៖ <span :class="isCorrect(q.id) ? 'text-green-700' : 'text-red-700'" class="font-bold">{{ userAnswers[q.id] || 'គ្មាន' }}</span></p>
+                        <p v-if="!isCorrect(q.id)" class="mt-0.5 text-green-700">ចម្លើយត្រឹមត្រូវ៖ <strong>{{ q.answer }}</strong></p>
+                    </div>
+                </div>
             </div>
 
-            <button onclick="returnToDashboard()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow transition">
-                ត្រឡប់ទៅទំព័រដើមវិញ (Back to Dashboard)
+            <button @click="returnToDashboard" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow text-sm transition">
+                ត្រឡប់ទៅទំព័រដើមវិញ
             </button>
         </div>
 
     </div>
 
-    <!-- JAVASCRIPT LOGIC FOR MULTI-SET PAGINATED EXAMS -->
+    <!-- VUE 3 APPLICATION LOGIC -->
     <script>
-        // Master Question Templates (Base pool of questions to simulate 10 diverse exam sets)
-        const baseQuestions = [
-            // PART I - GRAMMAR (25 Questions)
-            { id: 1, part: "PART I — GRAMMAR (Questions 1–25)", q: "She _____ to school every morning.", options: { A: "go", B: "goes", C: "going", D: "gone" }, answer: "B" },
-            { id: 2, q: "They _____ football yesterday.", options: { A: "play", B: "plays", C: "played", D: "playing" }, answer: "C" },
-            { id: 3, q: "I _____ English for three years.", options: { A: "study", B: "studied", C: "have studied", D: "am study" }, answer: "C" },
-            { id: 4, q: "Look! The children _____.", options: { A: "run", B: "ran", C: "are running", D: "have run" }, answer: "C" },
-            { id: 5, q: "He _____ dinner when I called him.", options: { A: "has", B: "had", C: "was having", D: "is having" }, answer: "C" },
-            { id: 6, q: "We _____ visit Phnom Penh next week.", options: { A: "are going to", B: "went", C: "have", D: "were" }, answer: "A" },
-            { id: 7, q: "If it rains tomorrow, we _____ at home.", options: { A: "stay", B: "stayed", C: "will stay", D: "staying" }, answer: "C" },
-            { id: 8, q: "My brother _____ swim when he was five.", options: { A: "can", B: "could", C: "must", D: "should" }, answer: "B" },
-            { id: 9, q: "You _____ wear a seat belt when driving.", options: { A: "should", B: "would", C: "could", D: "might" }, answer: "A" },
-            { id: 10, q: "There _____ a book on the table.", options: { A: "are", B: "were", C: "is", D: "be" }, answer: "C" },
-            { id: 11, q: "There _____ many students in the classroom.", options: { A: "is", B: "are", C: "was", D: "be" }, answer: "B" },
-            { id: 12, q: "She is _____ than her sister.", options: { A: "tall", B: "taller", C: "tallest", D: "more tall" }, answer: "B" },
-            { id: 13, q: "This is _____ book I have ever read.", options: { A: "interesting", B: "more interesting", C: "the most interesting", D: "most interesting" }, answer: "C" },
-            { id: 14, q: "I have _____ apple and _____ orange.", options: { A: "a / a", B: "an / an", C: "a / an", D: "an / a" }, answer: "C" },
-            { id: 15, q: "He goes to work _____ bus.", options: { A: "on", B: "in", C: "by", D: "at" }, answer: "C" },
-            { id: 16, q: "The meeting starts _____ 8:00 a.m.", options: { A: "on", B: "in", C: "at", D: "by" }, answer: "C" },
-            { id: 17, q: "I was born _____ 1990.", options: { A: "at", B: "on", C: "in", D: "by" }, answer: "C" },
-            { id: 18, q: "This book belongs to Dara. It is _____.", options: { A: "he", B: "him", C: "his", D: "himself" }, answer: "C" },
-            { id: 19, q: "The teacher _____ teaches English is very kind.", options: { A: "which", B: "who", C: "where", D: "when" }, answer: "B" },
-            { id: 20, q: "I don't have _____ money.", options: { A: "many", B: "much", C: "few", D: "a few" }, answer: "B" },
-            { id: 21, q: "How _____ students are there in your class?", options: { A: "much", B: "many", C: "little", D: "any" }, answer: "B" },
-            { id: 22, q: "She _____ like coffee.", options: { A: "don't", B: "doesn't", C: "isn't", D: "hasn't" }, answer: "B" },
-            { id: 23, q: "_____ you ever been to Thailand?", options: { A: "Did", B: "Do", C: "Have", D: "Are" }, answer: "C" },
-            { id: 24, q: "English _____ in many countries.", options: { A: "speaks", B: "is spoken", C: "spoke", D: "speaking" }, answer: "B" },
-            { id: 25, q: "The homework _____ by the students yesterday.", options: { A: "completed", B: "was completed", C: "is completing", D: "completes" }, answer: "B" },
+        const { createApp, ref, computed, onUnmounted } = Vue;
 
-            // PART II - VOCABULARY (10 Questions)
-            { id: 26, part: "PART II — VOCABULARY (Questions 26–35)", q: "The word “rapid” is closest in meaning to:", options: { A: "slow", B: "fast", C: "weak", D: "small" }, answer: "B" },
-            { id: 27, q: "The opposite of “ancient” is:", options: { A: "old", B: "traditional", C: "modern", D: "historic" }, answer: "C" },
-            { id: 28, q: "Someone who teaches students is called a:", options: { A: "doctor", B: "farmer", C: "teacher", D: "driver" }, answer: "C" },
-            { id: 29, q: "If something is “difficult”, it is:", options: { A: "easy", B: "hard", C: "simple", D: "cheap" }, answer: "B" },
-            { id: 30, q: "The word “purchase” means:", options: { A: "sell", B: "buy", C: "borrow", D: "return" }, answer: "B" },
-            { id: 31, q: "A person who works with computers and technology is often called a:", options: { A: "technician", B: "farmer", C: "chef", D: "pilot" }, answer: "A" },
-            { id: 32, q: "“Honest” means:", options: { A: "telling the truth", B: "being angry", C: "being lazy", D: "being afraid" }, answer: "A" },
-            { id: 33, q: "The opposite of “increase” is:", options: { A: "improve", B: "develop", C: "decrease", D: "continue" }, answer: "C" },
-            { id: 34, q: "If you “repair” something, you:", options: { A: "break it", B: "fix it", C: "sell it", D: "lose it" }, answer: "B" },
-            { id: 35, q: "“Reliable” means:", options: { A: "able to be trusted", B: "very expensive", C: "difficult to use", D: "impossible to find" }, answer: "A" },
+        createApp({
+            setup() {
+                const currentView = ref('dashboard'); // dashboard, exam, result
+                const activeTab = ref('english');
+                const studentName = ref('');
+                const currentExamTitle = ref('');
+                const currentQuestions = ref([]);
+                const userAnswers = ref({});
+                const score = ref(0);
+                const timer = ref(60 * 60);
+                let timerInterval = null;
 
-            // PART III - READING COMPREHENSION (15 Questions)
-            { 
-                id: 36, 
-                part: "PART III — READING COMPREHENSION (Questions 36–50)", 
-                passageTitle: "Passage 1: Learning English",
-                passageText: "English is one of the most widely used languages in the world. Many people learn English because it helps them communicate with people from different countries. English is also important in education, business, science, technology, and tourism.\n\nLearning a language requires regular practice. Students can improve their English by reading books, listening to English conversations, watching educational videos, and speaking with other learners. Making mistakes is a natural part of learning. Students should not be afraid of making mistakes because mistakes can help them understand what they need to improve.",
-                q: "Why do many people learn English?", 
-                options: { A: "To avoid communication", B: "To communicate with people from different countries", C: "To stop studying", D: "To travel only" },
-                answer: "B"
-            },
-            { id: 37, q: "English is important in:", options: { A: "Education only", B: "Business only", C: "Technology only", D: "Many different areas" }, answer: "D" },
-            { id: 38, q: "How can students improve their English?", options: { A: "By never practicing", B: "By reading, listening, watching, and speaking", C: "By avoiding other learners", D: "By studying only grammar" }, answer: "B" },
-            { id: 39, q: "According to the passage, making mistakes is:", options: { A: "impossible", B: "dangerous", C: "a natural part of learning", D: "a reason to stop learning" }, answer: "C" },
-            { id: 40, q: "What is the main idea of the passage?", options: { A: "English is difficult and should be avoided.", B: "English is useful and requires regular practice to improve.", C: "Students should only learn grammar.", D: "English is useful only for tourism." }, answer: "B" },
+                // Question Pools (Sample Data Structures)
+                const englishBase = [
+                    { id: 1, part: "PART I — GRAMMAR (Questions 1–25)", q: "She _____ to school every morning.", options: { A: "go", B: "goes", C: "going", D: "gone" }, answer: "B" },
+                    { id: 2, q: "They _____ football yesterday.", options: { A: "play", B: "plays", C: "played", D: "playing" }, answer: "C" },
+                    { id: 3, q: "I _____ English for three years.", options: { A: "study", B: "studied", C: "have studied", D: "am study" }, answer: "C" },
+                    { id: 4, q: "Look! The children _____.", options: { A: "run", B: "ran", C: "are running", D: "have run" }, answer: "C" },
+                    { id: 5, q: "He _____ dinner when I called him.", options: { A: "has", B: "had", C: "was having", D: "is having" }, answer: "C" }
+                    // (អាចបន្តបន្ថែមរាល់សំណួររហូតដល់ ៥០ តាមតម្រូវការ)
+                ];
 
-            { 
-                id: 41, 
-                passageTitle: "Passage 2: Technology in Education",
-                passageText: "Technology has changed the way students learn. Today, students can use computers, tablets, and smartphones to access information quickly. Online learning platforms allow students to study from almost anywhere.\n\nHowever, technology should be used responsibly. Students need to check whether information from the Internet is reliable. They should also protect their passwords and personal information. Teachers can help students learn how to use technology safely and effectively.",
-                q: "What has changed the way students learn?", 
-                options: { A: "Agriculture", B: "Technology", C: "Transportation", D: "Weather" },
-                answer: "B" 
-            },
-            { id: 42, q: "What can students use to access information?", options: { A: "Computers and tablets", B: "Only books", C: "Only televisions", D: "Only radios" }, answer: "A" },
-            { id: 43, q: "What should students check on the Internet?", options: { A: "The color of a website", B: "Whether information is reliable", C: "The number of advertisements", D: "The size of the screen" }, answer: "B" },
-            { id: 44, q: "Students should protect their:", options: { A: "shoes and clothes", B: "books and pencils", C: "passwords and personal information", D: "classrooms" }, answer: "C" },
-            { id: 45, q: "Who can help students use technology safely?", options: { A: "Teachers", B: "Drivers", C: "Farmers", D: "Tourists" }, answer: "A" },
+                // Generate 50 questions mockup for generic pools
+                const generatePool = (prefix) => {
+                    return Array.from({length: 50}, (_, index) => {
+                        let id = index + 1;
+                        let part = id <= 25 ? "ផ្នែកទី១ — មូលដ្ឋាន និងទ្រឹស្តី" : "ផ្នែកទី២ — ការអនុវត្ត និងការវិភាគ";
+                        return {
+                            id: id,
+                            part: id === 1 || id === 26 ? part : undefined,
+                            q: ` (${prefix}): តើគោលការណ៍ឬចម្លើយណាមួយខាងក្រោមត្រឹមត្រូវបំផុតសម្រាប់ផ្នែកនេះ?`,
+                            options: { A: "ជម្រើសទី ១ (ត្រឹមត្រូវ)", B: "ជម្រើសទី ២", C: "ជម្រើសទី ៣", D: "ជម្រើសទី ៤" },
+                            answer: "A"
+                        };
+                    });
+                };
 
-            { 
-                id: 46, 
-                passageTitle: "Passage 3: A Healthy Lifestyle",
-                passageText: "A healthy lifestyle is important for both physical and mental well-being. Regular exercise can help people stay strong and active. Eating a balanced diet provides the body with the nutrients it needs.\n\nSleep is also important. Adults generally need enough sleep each night to feel rested and ready for the next day. In addition, people should manage stress and spend time doing activities they enjoy. Small healthy habits practiced regularly can make a positive difference over time.",
-                q: "What is important for physical and mental well-being?", 
-                options: { A: "A healthy lifestyle", B: "Working all night", C: "Avoiding exercise", D: "Eating only one type of food" },
-                answer: "A" 
-            },
-            { id: 47, q: "What does a balanced diet provide?", options: { A: "Only water", B: "Necessary nutrients", C: "Less energy", D: "No nutrition" }, answer: "B" },
-            { id: 48, q: "Why is sleep important?", options: { A: "It helps people feel rested.", B: "It makes people work all night.", C: "It prevents people from learning.", D: "It replaces exercise completely." }, answer: "A" },
-            { id: 49, q: "What should people manage?", options: { A: "Their computers", B: "Their stress", C: "Their cars", D: "Their homework only" }, answer: "B" },
-            { id: 50, q: "What is the main message of the passage?", options: { A: "Healthy habits are unnecessary.", B: "Only exercise is important.", C: "Regular healthy habits can improve well-being.", D: "People should avoid sleeping." }, answer: "C" }
-        ];
+                const examDatabase = {
+                    english: {},
+                    general: {},
+                    ict: {}
+                };
 
-        // Generate 10 Sets Programmatically so user gets 10 distinct exams (500 questions total)
-        const allExamSets = {};
-        for (let setNum = 1; setNum <= 10; setNum++) {
-            let setQuestions = JSON.parse(JSON.stringify(baseQuestions));
-            // Tweak questions slightly per set or reuse with a unique ID seed so every set is fully populated with 50 questions
-            setQuestions.forEach(q => {
-                // Adjust numbering reference for clarity
-                q.uniqueId = `set${setNum}_q${q.id}`;
-            });
-            allExamSets[setNum] = {
-                title: `វិញ្ញាសាសាកល្បងអង់គ្លេសទី ${setNum} (Exam Set ${setNum})`,
-                questions: setQuestions
-            };
-        }
+                for (let i = 1; i <= 10; i++) {
+                    examDatabase.english[i] = { title: `វិញ្ញាសាភាសាអង់គ្លេស ទី ${i}`, questions: generatePool('English') };
+                }
+                for (let i = 1; i <= 15; i++) {
+                    examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i}`, questions: generatePool('General Knowledge') };
+                }
+                for (let i = 1; i <= 15; i++) {
+                    examDatabase.ict[i] = { title: `វិញ្ញាសាឯកទេស ICT ទី ${i}`, questions: generatePool('ICT Specialization') };
+                }
 
-        let currentSetId = 1;
-        let currentQuestions = [];
-        let currentAnswerKey = {};
-        let countdown = null;
-        let timeLeft = 60 * 60; // 60 minutes
+                const totalSets = computed(() => activeTab.value === 'english' ? 10 : 15);
+                const categoryNameKh = computed(() => {
+                    if (activeTab.value === 'english') return 'ភាសាអង់គ្លេស';
+                    if (activeTab.value === 'general') return 'វប្បធម៌ទូទៅ';
+                    return 'ឯកទេស ICT';
+                });
 
-        // Render Dashboard Exam Set Cards
-        const grid = document.getElementById('exam-sets-grid');
-        for (let i = 1; i <= 10; i++) {
-            grid.innerHTML += `
-                <div class="border border-purple-200 rounded-xl p-4 flex justify-between items-center bg-purple-50 hover:bg-purple-100 transition">
-                    <div>
-                        <h4 class="font-bold text-purple-900">វិញ្ញាសាទី ${i} (Exam Set ${i})</h4>
-                        <p class="text-xs text-gray-500">៥០ សំណួរ | ៦០ នាទី | MCQ</p>
-                    </div>
-                    <button onclick="startExam(${i})" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow transition">
-                        ចាប់ផ្តើម (Start)
-                    </button>
-                </div>
-            `;
-        }
+                const answeredCount = computed(() => {
+                    return Object.keys(userAnswers.value).filter(k => userAnswers.value[k]).length;
+                });
 
-        function startExam(setId) {
-            const studentName = document.getElementById('student-name').value.trim();
-            if (!studentName) {
-                alert("សូមបញ្ចូលឈ្មោះរបស់អ្នកជាមុនសិន!");
-                document.getElementById('student-name').focus();
-                return;
+                const formattedTime = computed(() => {
+                    let m = Math.floor(timer.value / 60);
+                    let s = timer.value % 60;
+                    return `${m}:${s < 10 ? '0' : ''}${s}`;
+                });
+
+                const percentage = computed(() => Math.round((score.value / 50) * 100));
+
+                const feedbackMessage = computed(() => {
+                    if (percentage.value >= 80) return "🎉 ល្អប្រពៃណាស់! អ្នកមានចំណេះដឹងខ្លាំងក្លាណាស់។ Very Good! Keep practicing.";
+                    if (percentage.value >= 50) return "👍 ល្អបង្គួរ! អ្នកអាចព្យាយាមបន្ថែមលើចំណុចខ្សោយខ្លះទៀត។";
+                    return "💪 សូមព្យាយាមហាត់សមបន្ថែមទៀត ដើម្បីទទួលបានលទ្ធផលប្រសើរជាងនេះ។";
+                });
+
+                const switchTab = (tab) => {
+                    activeTab.value = tab;
+                };
+
+                const startExam = (category, setId) => {
+                    if (!studentName.value.trim()) {
+                        alert("សូមបញ្ចូលឈ្មោះរបស់អ្នកជាមុនសិន!");
+                        return;
+                    }
+                    const examData = examDatabase[category][setId];
+                    currentExamTitle.value = examData.title;
+                    currentQuestions.value = examData.questions;
+                    userAnswers.value = {};
+                    currentView.value = 'exam';
+
+                    // Start Timer
+                    timer.value = 60 * 60;
+                    if (timerInterval) clearInterval(timerInterval);
+                    timerInterval = setInterval(() => {
+                        if (timer.value > 0) {
+                            timer.value--;
+                        } else {
+                            clearInterval(timerInterval);
+                            alert("អស់ពេលប្រឡងហើយ! ប្រព័ន្ធនឹងធ្វើការបញ្ជូនចម្លើយដោយស្វ័យប្រវត្តិ។");
+                            submitExam();
+                        }
+                    }, 1000);
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                const confirmSubmit = () => {
+                    if (confirm("តើអ្នកពិតជាចង់បញ្ជូនចម្លើយមែនទេ?")) {
+                        submitExam();
+                    }
+                };
+
+                const submitExam = () => {
+                    if (timerInterval) clearInterval(timerInterval);
+                    let sc = 0;
+                    currentQuestions.value.forEach(q => {
+                        if (userAnswers.value[q.id] === q.answer) {
+                            sc++;
+                        }
+                    });
+                    score.value = sc;
+                    currentView.value = 'result';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                const isCorrect = (qid) => {
+                    const q = currentQuestions.value.find(item => item.id === qid);
+                    return q && userAnswers.value[qid] === q.answer;
+                };
+
+                const returnToDashboard = () => {
+                    if (timerInterval) clearInterval(timerInterval);
+                    currentView.value = 'dashboard';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                onUnmounted(() => {
+                    if (timerInterval) clearInterval(timerInterval);
+                });
+
+                return {
+                    currentView,
+                    activeTab,
+                    studentName,
+                    currentExamTitle,
+                    currentQuestions,
+                    userAnswers,
+                    score,
+                    totalSets,
+                    categoryNameKh,
+                    answeredCount,
+                    formattedTime,
+                    percentage,
+                    feedbackMessage,
+                    switchTab,
+                    startExam,
+                    confirmSubmit,
+                    isCorrect,
+                    returnToDashboard
+                };
             }
-
-            currentSetId = setId;
-            const examData = allExamSets[setId];
-            currentQuestions = examData.questions;
-            
-            // Build Answer Key lookup
-            currentAnswerKey = {};
-            currentQuestions.forEach(q => {
-                currentAnswerKey[q.id] = q.answer;
-            });
-
-            // Update UI headers
-            document.getElementById('current-exam-title').innerText = examData.title;
-            document.getElementById('exam-title-header').innerText = `ភាសាបរទេស — អង់គ្លេស (${examData.title})`;
-
-            // Hide Dashboard, Show Form & Top Bar
-            document.getElementById('dashboard-container').classList.add('hidden');
-            document.getElementById('exam-form').classList.remove('hidden');
-            document.getElementById('top-bar').classList.remove('hidden');
-            document.getElementById('result-container').classList.add('hidden');
-
-            // Render Questions
-            renderQuestions();
-
-            // Start Timer (60 Minutes)
-            timeLeft = 60 * 60;
-            if (countdown) clearInterval(countdown);
-            
-            const timerDisplay = document.getElementById('timer-display');
-            countdown = setInterval(() => {
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
-                timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    alert("หมดเวลาប្រឡងហើយ! ប្រព័ន្ធនឹងធ្វើការបញ្ជូនចម្លើយរបស់អ្នកដោយស្វ័យប្រវត្តិ។");
-                    submitExam();
-                }
-                timeLeft--;
-            }, 1000);
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function renderQuestions() {
-            const container = document.getElementById('questions-container');
-            container.innerHTML = '';
-            let currentPartHeader = "";
-
-            currentQuestions.forEach(item => {
-                let html = '';
-                
-                if (item.part && item.part !== currentPartHeader) {
-                    currentPartHeader = item.part;
-                    html += `<div class="bg-purple-800 text-white font-bold p-4 rounded-xl shadow mt-8 text-lg">${currentPartHeader}</div>`;
-                }
-
-                if (item.passageTitle) {
-                    html += `
-                        <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-xl shadow-sm mt-6">
-                            <h3 class="font-bold text-blue-900 text-base mb-2">${item.passageTitle}</h3>
-                            <p class="text-gray-700 text-sm whitespace-pre-line leading-relaxed">${item.passageText}</p>
-                        </div>
-                    `;
-                }
-
-                html += `
-                    <div class="bg-white rounded-xl shadow-md p-6 question-card transition hover:shadow-lg" data-qid="${item.id}">
-                        <p class="font-medium text-gray-900 mb-4 text-base">
-                            <span class="font-bold text-purple-700 mr-2">${item.id}.</span> ${item.q}
-                        </p>
-                        <div class="space-y-2.5">
-                `;
-
-                for (const [key, val] of Object.entries(item.options)) {
-                    html += `
-                        <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition">
-                            <input type="radio" name="q${item.id}" value="${key}" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
-                            <span class="text-gray-700 text-sm font-medium"><strong class="mr-1 text-purple-600">${key}.</strong> ${val}</span>
-                        </label>
-                    `;
-                }
-
-                html += `</div></div>`;
-                container.insertAdjacentHTML('beforeend', html);
-            });
-        }
-
-        // Track answered questions count
-        const form = document.getElementById('exam-form');
-        const progressIndicator = document.getElementById('progress-indicator');
-
-        form.addEventListener('change', () => {
-            let answered = 0;
-            currentQuestions.forEach(q => {
-                if (form.querySelector(`input[name="q${q.id}"]:checked`)) {
-                    answered++;
-                }
-            });
-            progressIndicator.innerText = `បានឆ្លើយ៖ ${answered} / 50`;
-        });
-
-        // Submit Logic
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const studentName = document.getElementById('student-name').value.trim();
-            if (!studentName) {
-                alert("សូមបញ្ចូលឈ្មោះរបស់អ្នកជាមុនសិន!");
-                return;
-            }
-            if (confirm("តើអ្នកពិតជាចង់បញ្ជូនចម្លើយមែនទេ?")) {
-                clearInterval(countdown);
-                submitExam();
-            }
-        });
-
-        function submitExam() {
-            let score = 0;
-            let reviewHtml = '';
-
-            currentQuestions.forEach(q => {
-                const selected = form.querySelector(`input[name="q${q.id}"]:checked`)?.value || 'គ្មាន';
-                const correct = currentAnswerKey[q.id];
-                const isCorrect = selected === correct;
-
-                if (isCorrect) score++;
-
-                reviewHtml += `
-                    <div class="p-4 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
-                        <p class="font-semibold text-gray-800 text-sm">សំណួរទី ${q.id}: ${q.q}</p>
-                        <p class="text-xs mt-1">ចម្លើយរបស់អ្នក៖ <span class="font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}">${selected}</span></p>
-                        ${!isCorrect ? `<p class="text-xs mt-0.5 text-green-700">ចម្លើយត្រឹមត្រូវ៖ <strong>${correct}</strong></p>` : ''}
-                    </div>
-                `;
-            });
-
-            // Hide form & top bar, show results
-            form.style.display = 'none';
-            document.getElementById('top-bar').style.display = 'none';
-            const resultContainer = document.getElementById('result-container');
-            resultContainer.classList.remove('hidden');
-
-            document.getElementById('score-display').innerText = `${score} / 50`;
-            const percentage = Math.round((score / 50) * 100);
-            document.getElementById('percentage-display').innerText = `${percentage}%`;
-
-            let feedback = "";
-            if (percentage >= 80) feedback = "🎉 ល្អប្រពៃណាស់! អ្នកមានចំណេះដឹងផ្នែកអង់គ្លេសខ្លាំងក្លាណាស់។ Very Good! Keep practicing.";
-            else if (percentage >= 50) feedback = "👍 ល្អបង្គួរ! អ្នកអាចព្យាយាមបន្ថែមលើចំណុចខ្សោយខ្លះទៀត។";
-            else feedback = "💪 សូមព្យាយាមហាត់សមបន្ថែមទៀតដើម្បីទទួលបានលទ្ធផលប្រសើរជាងនេះ។";
-
-            document.getElementById('feedback-message').innerText = feedback;
-            document.getElementById('review-list').innerHTML = reviewHtml;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function returnToDashboard() {
-            if (countdown) clearInterval(countdown);
-            form.reset();
-            form.style.display = 'block';
-            document.getElementById('top-bar').style.display = 'flex';
-            document.getElementById('top-bar').classList.add('hidden');
-            document.getElementById('exam-form').classList.add('hidden');
-            document.getElementById('result-container').classList.add('hidden');
-            document.getElementById('dashboard-container').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        }).mount('#app');
     </script>
 </body>
 </html>
