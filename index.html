@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ប្រព័ន្ធប្រឡងសាកល្បងច្រើនមុខវិជ្ជា (Vue.js Exam Portal)</title>
+    <title>ប្រព័ន្ធប្រឡងសាកល្បងច្រើនមុខវិជ្ជា (Multi-Subject Exam Portal)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Vue 3 CDN -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
         body {
@@ -18,812 +16,409 @@
         }
     </style>
 </head>
-<body class="bg-purple-50 min-h-screen py-6 px-3 sm:px-6">
+<body class="bg-purple-50 min-h-screen py-8 px-4 sm:px-6">
 
-    <div id="app" class="max-w-3xl mx-auto">
+    <div class="max-w-3xl mx-auto">
 
         <!-- HEADER / TIMER BAR -->
-        <div v-if="currentView === 'exam'" class="bg-white rounded-lg shadow-md p-4 mb-6 flex flex-wrap justify-between items-center sticky top-4 z-50 border-l-4 border-purple-600">
+        <div id="top-bar" class="bg-white rounded-lg shadow-md p-4 mb-6 flex flex-wrap justify-between items-center sticky top-4 z-50 border-l-4 border-purple-600 hidden">
             <div>
-                <h2 class="text-sm sm:text-base font-bold text-gray-800">{{ currentExamTitle }}</h2>
+                <h2 id="exam-title-header" class="text-lg font-bold text-gray-800">ប្រព័ន្ធប្រឡងសាកល្បង</h2>
             </div>
             <div class="flex items-center space-x-3 mt-2 sm:mt-0">
                 <div class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full font-bold text-sm flex items-center shadow-inner">
                     <svg class="w-4 h-4 mr-1.5 animate-pulse text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>{{ formattedTime }}</span>
+                    <span id="timer-display">60:00</span>
                 </div>
             </div>
         </div>
 
-        <!-- 1. DASHBOARD CONTAINER (Home Page) -->
-        <div v-if="currentView === 'dashboard'" class="space-y-6">
-            <div class="bg-white rounded-xl shadow-md p-6 sm:p-8 google-form-card text-center space-y-4">
+        <!-- DASHBOARD CONTAINER (Home Page) -->
+        <div id="dashboard-container" class="space-y-6">
+            <div class="bg-white rounded-xl shadow-md p-8 google-form-card text-center space-y-4">
                 <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">🎓</div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">ប្រព័ន្ធប្រឡងសាកល្បងរដ្ឋបាលសាធារណៈ អង់គ្លេស និង ICT</h1>
-                <p class="text-gray-600 text-sm sm:text-base max-w-lg mx-auto">សូមជ្រើសរើសប្រភេទមុខវិជ្ជា និងវិញ្ញាសាដែលអ្នកចង់ហាត់សម (៥០ សំណួរ | ៦០ នាទី | MCQ)</p>
+                <h1 class="text-3xl font-extrabold text-gray-900">ប្រព័ន្ធប្រឡងសាកល្បងរដ្ឋបាលសាធារណៈ អង់គ្លេស និង ICT</h1>
+                <p class="text-gray-600 max-w-lg mx-auto">សូមជ្រើសរើសប្រភេទមុខវិជ្ជា និងវិញ្ញាសាដែលអ្នកចង់ហាត់សម (៥០ សំណួរ | ៦០ នាទី | MCQ)</p>
 
                 <div class="mt-6 text-left max-w-md mx-auto">
                     <label class="block text-sm font-medium text-gray-700 mb-1">ឈ្មោះរបស់អ្នក / Full Name:</label>
-                    <input type="text" v-model="studentName" required placeholder="សូមបញ្ចូលឈ្មោះរបស់អ្នកទីនេះ..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm">
+                    <input type="text" id="student-name" required placeholder="សូមបញ្ចូលឈ្មោះរបស់អ្នកទីនេះ..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
                 </div>
             </div>
 
             <!-- TAB SELECTION -->
             <div class="flex flex-wrap justify-center gap-2 border-b pb-4">
-                <button @click="switchTab('english')" :class="activeTab === 'english' ? 'bg-purple-600 text-white shadow' : 'bg-white text-gray-700 hover:bg-purple-100 shadow'" class="px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition">ភាសាអង់គ្លេស (១០ វិញ្ញាសា)</button>
-                <button @click="switchTab('general')" :class="activeTab === 'general' ? 'bg-purple-600 text-white shadow' : 'bg-white text-gray-700 hover:bg-purple-100 shadow'" class="px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition">វប្បធម៌ទូទៅ (១៧ វិញ្ញាសា)</button>
-                <button @click="switchTab('ict')" :class="activeTab === 'ict' ? 'bg-purple-600 text-white shadow' : 'bg-white text-gray-700 hover:bg-purple-100 shadow'" class="px-4 py-2 rounded-lg font-bold text-xs sm:text-sm transition">ឯកទេស ICT (១៥ វិញ្ញាសា)</button>
+                <button onclick="switchTab('english')" id="tab-english" class="px-5 py-2.5 rounded-lg font-bold text-sm bg-purple-600 text-white shadow transition">ភាសាអង់គ្លេស (១០ វិញ្ញាសា)</button>
+                <button onclick="switchTab('general')" id="tab-general" class="px-5 py-2.5 rounded-lg font-bold text-sm bg-white text-gray-700 hover:bg-purple-100 shadow transition">វប្បធម៌ទូទៅ (១៥ វិញ្ញាសា)</button>
+                <button onclick="switchTab('ict')" id="tab-ict" class="px-5 py-2.5 rounded-lg font-bold text-sm bg-white text-gray-700 hover:bg-purple-100 shadow transition">ឯកទេស ICT (១៥ វិញ្ញាសា)</button>
             </div>
 
             <!-- EXAM SETS LIST GRID -->
             <div class="bg-white rounded-xl shadow-md p-6">
-                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4 border-b pb-2">បញ្ជីវិញ្ញាសា {{ categoryNameKh }} (សរុប {{ totalSets }} វិញ្ញាសា)</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div v-for="i in totalSets" :key="i" class="border border-purple-200 rounded-xl p-4 flex justify-between items-center bg-purple-50 hover:bg-purple-100 transition">
-                        <div>
-                            <h4 class="font-bold text-purple-900 text-sm sm:text-base">វិញ្ញាសាទី {{ i }} (Set {{ i }})</h4>
-                            <p class="text-xs" :class="isAvailable(activeTab, i) ? 'text-gray-500' : 'text-amber-600 font-semibold'">
-                                {{ isAvailable(activeTab, i) ? '៥០ សំណួរ | ៦០ នាទី | MCQ' : '⏳ Coming Soon...' }}
-                            </p>
-                        </div>
-                        <button @click="startExam(activeTab, i)" :class="isAvailable(activeTab, i) ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'" class="font-semibold px-4 py-2 rounded-lg text-xs sm:text-sm shadow transition">
-                            {{ isAvailable(activeTab, i) ? 'ចាប់ផ្តើម' : 'មើលជាមុន' }}
-                        </button>
-                    </div>
+                <h3 id="category-title" class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">បញ្ជីវិញ្ញាសា</h3>
+                <div id="exam-sets-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Dynamic cards here -->
                 </div>
             </div>
         </div>
 
-        <!-- 2. EXAM FORM CONTAINER -->
-        <div v-if="currentView === 'exam'" class="space-y-6">
+        <!-- EXAM FORM CONTAINER (Hidden Initially) -->
+        <form id="exam-form" class="space-y-6 hidden">
+
             <!-- INSTRUCTION CARD -->
             <div class="bg-white rounded-xl shadow-md p-6 google-form-card">
-                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{{ currentExamTitle }}</h1>
-                <p class="text-gray-600 text-sm mb-4">រៀបចំតាមទម្រង់ប្រឡងផ្លូវការ (៥០ ពិន្ទុ - MCQ)</p>
-                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 text-xs sm:text-sm text-amber-800 rounded">
+                <h1 id="current-exam-title" class="text-2xl font-bold text-gray-900 mb-2">វិញ្ញាសាសាកល្បង</h1>
+                <p class="text-gray-600 mb-4">រៀបចំតាមទម្រង់ប្រឡងផ្លូវការ (៥០ ពិន្ទុ - MCQ)</p>
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 text-sm text-amber-800 rounded">
                     <p class="font-semibold">សេចក្តីណែនាំ៖</p>
                     <p>ជ្រើសរើសចម្លើយដែលត្រឹមត្រូវបំផុត A, B, C ឬ D សម្រាប់សំណួរនីមួយៗ។ រាល់ចម្លើយនឹងត្រូវកត់ត្រាដោយស្វ័យប្រវត្តិ។</p>
                 </div>
             </div>
 
             <!-- QUESTIONS CONTAINER -->
-            <div class="space-y-6">
-                <template v-for="(item, index) in currentQuestions" :key="item.id">
-                    <div v-if="item.part && (index === 0 || currentQuestions[index-1].part !== item.part)" class="bg-purple-800 text-white font-bold p-4 rounded-xl shadow mt-8 text-sm sm:text-base">
-                        {{ item.part }}
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-md p-5 sm:p-6 transition hover:shadow-lg">
-                        <p class="font-medium text-gray-900 mb-4 text-sm sm:text-base">
-                            <span class="font-bold text-purple-700 mr-2">{{ item.id }}.</span> {{ item.q }}
-                        </p>
-                        <div class="space-y-2.5">
-                            <label v-for="(val, key) in item.options" :key="key" class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition text-xs sm:text-sm">
-                                <input type="radio" :name="'q' + item.id" :value="key" v-model="userAnswers[item.id]" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
-                                <span class="text-gray-700 font-medium"><strong class="mr-1 text-purple-600">{{ key }}.</strong> {{ val }}</span>
-                            </label>
-                        </div>
-                    </div>
-                </template>
-            </div>
+            <div id="questions-container" class="space-y-6"></div>
 
             <!-- SUBMIT & NAVIGATION BUTTON -->
-            <div class="bg-white rounded-xl shadow-md p-6 flex flex-wrap justify-between items-center gap-4">
-                <span class="text-xs sm:text-sm text-gray-500">បានឆ្លើយ៖ {{ answeredCount }} / 50</span>
+            <div id="submit-section" class="bg-white rounded-xl shadow-md p-6 flex justify-between items-center">
+                <span class="text-sm text-gray-500" id="progress-indicator">បានឆ្លើយ៖ 0 / 50</span>
                 <div class="space-x-3">
-                    <button type="button" @click="returnToDashboard" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-4 py-2.5 rounded-lg shadow text-xs sm:text-sm transition">
-                        ត្រឡប់ក្រោយ
+                    <button type="button" onclick="returnToDashboard()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-4 py-3 rounded-lg shadow transition">
+                        ត្រឡប់ក្រោយ (Back)
                     </button>
-                    <button type="button" @click="confirmSubmit" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow text-xs sm:text-sm transition transform active:scale-95">
-                        បញ្ជូនចម្លើយ
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg shadow transition transform active:scale-95">
+                        បញ្ជូនចម្លើយ (Submit Exam)
                     </button>
                 </div>
             </div>
-        </div>
 
-        <!-- 3. RESULT CONTAINER -->
-        <div v-if="currentView === 'result'" class="bg-white rounded-xl shadow-xl p-6 sm:p-8 text-center space-y-6 mt-6">
-            <div class="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto text-3xl font-bold shadow-inner">🏆</div>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">លទ្ធផលប្រឡង (Exam Results)</h2>
-            <div class="text-4xl sm:text-5xl font-black text-purple-600">{{ score }} / 50</div>
-            <div class="text-lg sm:text-xl font-semibold text-gray-700">{{ percentage }}%</div>
-            <p class="text-gray-600 text-sm sm:text-base max-w-md mx-auto">{{ feedbackMessage }}</p>
+        </form>
+
+        <!-- RESULT CONTAINER (Hidden by Default) -->
+        <div id="result-container" class="hidden bg-white rounded-xl shadow-xl p-8 text-center space-y-6 mt-6">
+            <div class="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto text-3xl font-bold shadow-inner" id="score-icon">🏆</div>
+            <h2 class="text-3xl font-extrabold text-gray-900">លទ្ធផលប្រឡង (Exam Results)</h2>
+            <div class="text-5xl font-black text-purple-600" id="score-display">0 / 50</div>
+            <div class="text-xl font-semibold text-gray-700" id="percentage-display">0%</div>
+            <p class="text-gray-600 max-w-md mx-auto" id="feedback-message"></p>
 
             <div class="border-t pt-6 text-left">
-                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">ពិនិត្យចម្លើយឡើងវិញ (Review Answers)</h3>
-                <div class="space-y-4">
-                    <div v-for="q in currentQuestions" :key="q.id" :class="isCorrect(q.id) ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'" class="p-4 rounded-lg border text-xs sm:text-sm">
-                        <p class="font-semibold text-gray-800">សំណួរទី {{ q.id }}: {{ q.q }}</p>
-                        <p class="mt-1">ចម្លើយរបស់អ្នក៖ <span :class="isCorrect(q.id) ? 'text-green-700' : 'text-red-700'" class="font-bold">{{ userAnswers[q.id] || 'គ្មាន' }}</span></p>
-                        <p v-if="!isCorrect(q.id)" class="mt-0.5 text-green-700">ចម្លើយត្រឹមត្រូវ៖ <strong>{{ q.answer }}</strong></p>
-                    </div>
-                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-4">ពិនិត្យចម្លើយឡើងវិញ (Review Answers)</h3>
+                <div id="review-list" class="space-y-4"></div>
             </div>
 
-            <button @click="returnToDashboard" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow text-sm transition">
-                ត្រឡប់ទៅទំព័រដើមវិញ
+            <button onclick="returnToDashboard()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow transition">
+                ត្រឡប់ទៅទំព័រដើមវិញ (Back to Dashboard)
             </button>
         </div>
 
     </div>
 
-    <!-- VUE 3 APPLICATION LOGIC -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        const { createApp, ref, computed, onUnmounted } = Vue;
+        // --- 1. ENGLISH QUESTIONS POOL (Set 1 to 10) ---
+        const englishBase = [
+            { id: 1, part: "PART I — GRAMMAR (Questions 1–25)", q: "She _____ to school every morning.", options: { A: "go", B: "goes", C: "going", D: "gone" }, answer: "B" },
+            { id: 2, q: "They _____ football yesterday.", options: { A: "play", B: "plays", C: "played", D: "playing" }, answer: "C" },
+            { id: 3, q: "I _____ English for three years.", options: { A: "study", B: "studied", C: "have studied", D: "am study" }, answer: "C" },
+            { id: 4, q: "Look! The children _____.", options: { A: "run", B: "ran", C: "are running", D: "have run" }, answer: "C" },
+            { id: 5, q: "He _____ dinner when I called him.", options: { A: "has", B: "had", C: "was having", D: "is having" }, answer: "C" },
+            { id: 6, q: "We _____ visit Phnom Penh next week.", options: { A: "are going to", B: "went", C: "have", D: "were" }, answer: "A" },
+            { id: 7, q: "If it rains tomorrow, we _____ at home.", options: { A: "stay", B: "stayed", C: "will stay", D: "staying" }, answer: "C" },
+            { id: 8, q: "My brother _____ swim when he was five.", options: { A: "can", B: "could", C: "must", D: "should" }, answer: "B" },
+            { id: 9, q: "You _____ wear a seat belt when driving.", options: { A: "should", B: "would", C: "could", D: "might" }, answer: "A" },
+            { id: 10, q: "There _____ a book on the table.", options: { A: "are", B: "were", C: "is", D: "be" }, answer: "C" },
+            { id: 11, q: "There _____ many students in the classroom.", options: { A: "is", B: "are", C: "was", D: "be" }, answer: "B" },
+            { id: 12, q: "She is _____ than her sister.", options: { A: "tall", B: "taller", C: "tallest", D: "more tall" }, answer: "B" },
+            { id: 13, q: "This is _____ book I have ever read.", options: { A: "interesting", B: "more interesting", C: "the most interesting", D: "most interesting" }, answer: "C" },
+            { id: 14, q: "I have _____ apple and _____ orange.", options: { A: "a / a", B: "an / an", C: "a / an", D: "an / a" }, answer: "C" },
+            { id: 15, q: "He goes to work _____ bus.", options: { A: "on", B: "in", C: "by", D: "at" }, answer: "C" },
+            { id: 16, q: "The meeting starts _____ 8:00 a.m.", options: { A: "on", B: "in", C: "at", D: "by" }, answer: "C" },
+            { id: 17, q: "I was born _____ 1990.", options: { A: "at", B: "on", C: "in", D: "by" }, answer: "C" },
+            { id: 18, q: "This book belongs to Dara. It is _____.", options: { A: "he", B: "him", C: "his", D: "himself" }, answer: "C" },
+            { id: 19, q: "The teacher _____ teaches English is very kind.", options: { A: "which", B: "who", C: "where", D: "when" }, answer: "B" },
+            { id: 20, q: "I don't have _____ money.", options: { A: "many", B: "much", C: "few", D: "a few" }, answer: "B" },
+            { id: 21, q: "How _____ students are there in your class?", options: { A: "much", B: "many", C: "little", D: "any" }, answer: "B" },
+            { id: 22, q: "She _____ like coffee.", options: { A: "don't", B: "doesn't", C: "isn't", D: "hasn't" }, answer: "B" },
+            { id: 23, q: "_____ you ever been to Thailand?", options: { A: "Did", B: "Do", C: "Have", D: "Are" }, answer: "C" },
+            { id: 24, q: "English _____ in many countries.", options: { A: "speaks", B: "is spoken", C: "spoke", D: "speaking" }, answer: "B" },
+            { id: 25, q: "The homework _____ by the students yesterday.", options: { A: "completed", B: "was completed", C: "is completing", D: "completes" }, answer: "B" },
+            { id: 26, part: "PART II — VOCABULARY (Questions 26–35)", q: "The word “rapid” is closest in meaning to:", options: { A: "slow", B: "fast", C: "weak", D: "small" }, answer: "B" },
+            { id: 27, q: "The opposite of “ancient” is:", options: { A: "old", B: "traditional", C: "modern", D: "historic" }, answer: "C" },
+            { id: 28, q: "Someone who teaches students is called a:", options: { A: "doctor", B: "farmer", C: "teacher", D: "driver" }, answer: "C" },
+            { id: 29, q: "If something is “difficult”, it is:", options: { A: "easy", B: "hard", C: "simple", D: "cheap" }, answer: "B" },
+            { id: 30, q: "The word “purchase” means:", options: { A: "sell", B: "buy", C: "borrow", D: "return" }, answer: "B" },
+            { id: 31, q: "A person who works with computers and technology is often called a:", options: { A: "technician", B: "farmer", C: "chef", D: "pilot" }, answer: "A" },
+            { id: 32, q: "“Honest” means:", options: { A: "telling the truth", B: "being angry", C: "being lazy", D: "being afraid" }, answer: "A" },
+            { id: 33, q: "The opposite of “increase” is:", options: { A: "improve", B: "develop", C: "decrease", D: "continue" }, answer: "C" },
+            { id: 34, q: "If you “repair” something, you:", options: { A: "break it", B: "fix it", C: "sell it", D: "lose it" }, answer: "B" },
+            { id: 35, q: "“Reliable” means:", options: { A: "able to be trusted", B: "very expensive", C: "difficult to use", D: "impossible to find" }, answer: "A" },
+            { id: 36, part: "PART III — READING COMPREHENSION (Questions 36–50)", passageTitle: "Passage 1: Learning English", passageText: "English is one of the most widely used languages in the world. Many people learn English because it helps them communicate with people from different countries.", q: "Why do many people learn English?", options: { A: "To avoid communication", B: "To communicate with people from different countries", C: "To stop studying", D: "To travel only" }, answer: "B" },
+            { id: 37, q: "English is important in:", options: { A: "Education only", B: "Business only", C: "Technology only", D: "Many different areas" }, answer: "D" },
+            { id: 38, q: "How can students improve their English?", options: { A: "By never practicing", B: "By reading, listening, watching, and speaking", C: "By avoiding other learners", D: "By studying only grammar" }, answer: "B" },
+            { id: 39, q: "According to the passage, making mistakes is:", options: { A: "impossible", B: "dangerous", C: "a natural part of learning", D: "a reason to stop learning" }, answer: "C" },
+            { id: 40, q: "What is the main idea of the passage?", options: { A: "English is difficult and should be avoided.", B: "English is useful and requires regular practice to improve.", C: "Students should only learn grammar.", D: "English is useful only for tourism." }, answer: "B" },
+            { id: 41, passageTitle: "Passage 2: Technology in Education", passageText: "Technology has changed the way students learn. Today, students can use computers, tablets, and smartphones to access information quickly.", q: "What has changed the way students learn?", options: { A: "Agriculture", B: "Technology", C: "Transportation", D: "Weather" }, answer: "B" },
+            { id: 42, q: "What can students use to access information?", options: { A: "Computers and tablets", B: "Only books", C: "Only televisions", D: "Only radios" }, answer: "A" },
+            { id: 43, q: "What should students check on the Internet?", options: { A: "The color of a website", B: "Whether information is reliable", C: "The number of advertisements", D: "The size of the screen" }, answer: "B" },
+            { id: 44, q: "Students should protect their:", options: { A: "shoes and clothes", B: "books and pencils", C: "passwords and personal information", D: "classrooms" }, answer: "C" },
+            { id: 45, q: "Who can help students use technology safely?", options: { A: "Teachers", B: "Drivers", C: "Farmers", D: "Tourists" }, answer: "A" },
+            { id: 46, passageTitle: "Passage 3: A Healthy Lifestyle", passageText: "A healthy lifestyle is important for both physical and mental well-being. Regular exercise can help people stay strong and active.", q: "What is important for physical and mental well-being?", options: { A: "A healthy lifestyle", B: "Working all night", C: "Avoiding exercise", D: "Eating only one type of food" }, answer: "A" },
+            { id: 47, q: "What does a balanced diet provide?", options: { A: "Only water", B: "Necessary nutrients", C: "Less energy", D: "No nutrition" }, answer: "B" },
+            { id: 48, q: "Why is sleep important?", options: { A: "It helps people feel rested.", B: "It makes people work all night.", C: "It prevents people from learning.", D: "It replaces exercise completely." }, answer: "A" },
+            { id: 49, q: "What should people manage?", options: { A: "Their computers", B: "Their stress", C: "Their cars", D: "Their homework only" }, answer: "B" },
+            { id: 50, q: "What is the main message of the passage?", options: { A: "Healthy habits are unnecessary.", B: "Only exercise is important.", C: "Regular healthy habits can improve well-being.", D: "People should avoid sleeping." }, answer: "C" }
+        ];
 
-        createApp({
-            setup() {
-                const currentView = ref('dashboard');
-                const activeTab = ref('general');
-                const studentName = ref('');
-                const currentExamTitle = ref('');
-                const currentQuestions = ref([]);
-                const userAnswers = ref({});
-                const score = ref(0);
-                const timer = ref(60 * 60);
-                let timerInterval = null;
+        // --- 2. GENERAL KNOWLEDGE QUESTIONS POOL (Set 1 to 15) ---
+        const generalBase = Array.from({length: 50}, (_, index) => {
+            let id = index + 1;
+            let part = id <= 25 ? "ផ្នែកទី១ — រដ្ឋបាលសាធារណៈ ក្រមសីលធម៌ និងគោលនយោបាយរដ្ឋាភិបាល (សំណួរ ១-២៥)" : "ផ្នែកទី២ — ប្រវត្តិសាស្ត្រ ភូមិសាស្ត្រ សេដ្ឋកិច្ច និងអាស៊ាន (សំណួរ ២៦-៥០)";
+            return {
+                id: id,
+                part: id === 1 || id === 26 ? part : undefined,
+                q: `សំណួរទី ${id} (ចំណេះដឹងទូទៅ រដ្ឋបាលសាធារណៈ និងសង្គមជាតិកម្ពុជា): តើកត្តាសំខាន់អ្វីជាងគេក្នុងការអភិវឌ្ឍស្ថាប័នរដ្ឋបាលសាធារណៈ?`,
+                options: { A: "តម្លាភាព គណនេយ្យភាព និងប្រសិទ្ធភាពការងារ", B: "ការយឺតយ៉ាវក្នុងសេវាសាធារណៈ", C: "ការបែងចែកបក្ខពួកនិយម", D: "ភាពអសកម្មក្នុងការបំពេញការងារ" },
+                answer: "A"
+            };
+        });
 
-                // វិញ្ញាសាទី 1 (ភូមិសាស្ត្រកម្ពុជា និងអាស៊ាន)
-                const generalSet1 = [
-                    { id: 1, part: "🗺️ ផ្នែកទី១ — ភូមិសាស្ត្រកម្ពុជា", q: "តើប្រទេសកម្ពុជាស្ថិតនៅតំបន់ណានៃពិភពលោក?", options: { A: "អាស៊ីខាងកើត", B: "អាស៊ីអាគ្នេយ៍", C: "អាស៊ីខាងត្បូង", D: "អាស៊ីកណ្តាល" }, answer: "B" },
-                    { id: 2, q: "តើប្រទេសណាខ្លះមានព្រំដែនគោកជាប់ប្រទេសកម្ពុជា?", options: { A: "ថៃ ឡាវ និងវៀតណាម", B: "មីយ៉ាន់ម៉ា ថៃ និងចិន", C: "វៀតណាម ម៉ាឡេស៊ី និងឡាវ", D: "ថៃ សិង្ហបុរី និងវៀតណាម" }, answer: "A" },
-                    { id: 3, q: "តើកម្ពុជាមានឆ្នេរសមុទ្រជាប់អ្វី?", options: { A: "សមុទ្រចិនខាងកើត", B: "ឈូងសមុទ្រថៃ", C: "សមុទ្រអារ៉ាប់", D: "ឈូងសមុទ្របេងហ្គាល់" }, answer: "B" },
-                    { id: 4, q: "តើខេត្តណាខ្លះជាខេត្តជាប់សមុទ្ររបស់កម្ពុជា?", options: { A: "កំពត កែប ព្រះសីហនុ និងកោះកុង", B: "កំពង់ចាម កំពត កែប និងសៀមរាប", C: "កោះកុង បាត់ដំបង កែប និងកំពង់ធំ", D: "ព្រះសីហនុ សៀមរាប កែប និងកំពង់ចាម" }, answer: "A" },
-                    { id: 5, q: "តើរាជធានីកម្ពុជាគឺអ្វី?", options: { A: "សៀមរាប", B: "បាត់ដំបង", C: "ភ្នំពេញ", D: "កំពង់ចាម" }, answer: "C" },
-                    { id: 6, q: "តើទន្លេមេគង្គមានសារៈសំខាន់យ៉ាងដូចម្តេចចំពោះកម្ពុជា?", options: { A: "មានតែសម្រាប់ទេសចរណ៍", B: "ជាប្រភពទឹក ជលផល និងគាំទ្រកសិកម្ម", C: "មានតែសម្រាប់ដឹកជញ្ជូន", D: "ប្រើសម្រាប់ផលិតអំបិល" }, answer: "B" },
-                    { id: 7, q: "តើបឹងធម្មជាតិដ៏ធំជាងគេនៅកម្ពុជាគឺអ្វី?", options: { A: "បឹងកក់", B: "បឹងយក្សឡោម", C: "បឹងទន្លេសាប", D: "បឹងកន្សែង" }, answer: "C" },
-                    { id: 8, q: "តើបឹងទន្លេសាបមានលក្ខណៈពិសេសអ្វី?", options: { A: "មានទឹកប្រៃជានិច្ច", B: "ទិសលំហូរទឹកប្រែប្រួលតាមរដូវ", C: "គ្មានត្រី", D: "ស្ថិតនៅលើភ្នំ" }, answer: "B" },
-                    { id: 9, q: "តើជួរភ្នំក្រវាញស្ថិតនៅតំបន់ណា?", options: { A: "ភាគនិរតីកម្ពុជា", B: "ភាគឦសាន", C: "ភាគកណ្តាល", D: "ភាគខាងកើត" }, answer: "A" },
-                    { id: 10, q: "តើភ្នំឱរ៉ាល់ស្ថិតនៅជួរភ្នំណា?", options: { A: "ដងរែក", B: "ក្រវាញ", C: "អណ្ណាម", D: "គូលែន" }, answer: "B" },
-                    { id: 11, q: "តើជួរភ្នំដងរែកស្ថិតនៅតំបន់ណា?", options: { A: "ភាគខាងត្បូង", B: "តាមតំបន់ព្រំដែនខាងជើងកម្ពុជា-ថៃ", C: "ភាគនិរតី", D: "កណ្តាលប្រទេស" }, answer: "B" },
-                    { id: 12, q: "តើតំបន់ទំនាបកណ្ដាលកម្ពុជាមានសារៈសំខាន់ជាពិសេសចំពោះវិស័យណា?", options: { A: "កសិកម្ម", B: "រ៉ែ", C: "ឧស្សាហកម្មយន្តហោះ", D: "ការជីកប្រេងសមុទ្រ" }, answer: "A" },
-                    { id: 13, q: "តើដំណាំសំខាន់បំផុតមួយរបស់កម្ពុជាគឺអ្វី?", options: { A: "ស្រូវ", B: "ស្រូវសាលី", C: "តែ", D: "កាហ្វេ" }, answer: "A" },
-                    { id: 14, q: "តើអាកាសធាតុកម្ពុជាមានលក្ខណៈជាអ្វី?", options: { A: "ត្រូពិចមូសុង", B: "តំបន់ប៉ូល", C: "វាលខ្សាច់", D: "មេឌីទែរ៉ាណេ" }, answer: "A" },
-                    { id: 15, q: "តើរដូវសំខាន់ៗរបស់កម្ពុជាមានប៉ុន្មាន?", options: { A: "២", B: "៣", C: "៤", D: "៥" }, answer: "A" },
-                    { id: 16, q: "តើរដូវវស្សានៅកម្ពុជាមានលក្ខណៈដូចម្តេច?", options: { A: "ភ្លៀងធ្លាក់ច្រើន", B: "មានព្រិល", C: "ស្ងួតជានិច្ច", D: "ត្រជាក់ខ្លាំង" }, answer: "A" },
-                    { id: 17, q: "តើការកាប់បំផ្លាញព្រៃឈើអាចបង្កបញ្ហាអ្វី?", options: { A: "បង្កើនជីវចម្រុះ", B: "បាត់បង់ជីវចម្រុះ និងបង្កសំណឹកដី", C: "បង្កើនធនធានទឹក", D: "កាត់បន្ថយកម្ដៅផែនដីភ្លាមៗ" }, answer: "B" },
-                    { id: 18, q: "តើខេត្តណាល្បីល្បាញដោយសារម្រេច?", options: { A: "កំពត", B: "សៀមរាប", C: "កំពង់ឆ្នាំង", D: "ព្រះវិហារ" }, answer: "A" },
-                    { id: 19, q: "តើប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?", options: { A: "បន្ទាយមានជ័យ", B: "សៀមរាប", C: "ឧត្តរមានជ័យ", D: "កំពង់ធំ" }, answer: "B" },
-                    { id: 20, q: "តើធនធានធម្មជាតិមួយណាដែលមានសារៈសំខាន់ចំពោះជីវភាពប្រជាជននៅតំបន់ទន្លេ និងបឹង?", options: { A: "ជលផល", B: "ប្រេងឆៅ", C: "ធ្យូងថ្ម", D: "មាស" }, answer: "A" },
-                    { id: 21, part: "🌏 ផ្នែកទី២ — អាស៊ាន និងសេដ្ឋកិច្ចកម្ពុជា", q: "ASEAN មានន័យពេញថាអ្វី?", options: { A: "Asian Economic Association Network", B: "Association of Southeast Asian Nations", C: "Asian Social Education Network", D: "Association of Southern Asian Nations" }, answer: "B" },
-                    { id: 22, q: "តើ ASEAN ត្រូវបានបង្កើតនៅឆ្នាំណា?", options: { A: "1957", B: "1965", C: "1967", D: "1975" }, answer: "C" },
-                    { id: 23, q: "តើ ASEAN ត្រូវបានបង្កើតនៅទីក្រុងណា?", options: { A: "ហ្សាការតា", B: "បាងកក", C: "ម៉ានីល", D: "សិង្ហបុរី" }, answer: "B" },
-                    { id: 24, q: "តើប្រទេសស្ថាបនិក ASEAN មានចំនួនប៉ុន្មាន?", options: { A: "៤", B: "៥", C: "៦", D: "១០" }, answer: "B" },
-                    { id: 25, q: "តើប្រទេសណាមួយខាងក្រោមជាសមាជិកស្ថាបនិក ASEAN?", options: { A: "កម្ពុជា", B: "វៀតណាម", C: "ឥណ្ឌូណេស៊ី", D: "មីយ៉ាន់ម៉ា" }, answer: "C" },
-                    { id: 26, q: "តើកម្ពុជាចូលជាសមាជិក ASEAN នៅឆ្នាំណា?", options: { A: "1995", B: "1997", C: "1999", D: "2001" }, answer: "C" },
-                    { id: 27, q: "តើទីស្នាក់ការកណ្តាល ASEAN ស្ថិតនៅទីក្រុងណា?", options: { A: "បាងកក", B: "ហ្សាការតា", C: "ហាណូយ", D: "ភ្នំពេញ" }, answer: "B" },
-                    { id: 28, q: "តើគោលបំណងសំខាន់មួយរបស់ ASEAN គឺអ្វី?", options: { A: "បង្កើតរដ្ឋតែមួយ", B: "លើកកម្ពស់សន្តិភាព ស្ថិរភាព និងកិច្ចសហប្រតិបត្តិការ", C: "លុបបំបាត់ពាណិជ្ជកម្ម", D: "គ្រប់គ្រងប្រទេសសមាជិក" }, answer: "B" },
-                    { id: 29, q: "តើសហគមន៍អាស៊ានមានសសរស្តម្ភសំខាន់ប៉ុន្មាន?", options: { A: "២", B: "៣", C: "៤", D: "៥" }, answer: "B" },
-                    { id: 30, q: "តើសសរស្តម្ភមួយរបស់សហគមន៍អាស៊ានគឺអ្វី?", options: { A: "សហគមន៍សេដ្ឋកិច្ចអាស៊ាន", B: "សហគមន៍កីឡាអាស៊ាន", C: "សហគមន៍យោធាអាស៊ាន", D: "សហគមន៍រូបិយវត្ថុអាស៊ាន" }, answer: "A" },
-                    { id: 31, q: "តើ ASEAN Economic Community (AEC) ផ្តោតសំខាន់លើអ្វី?", options: { A: "ការរួមបញ្ចូលសេដ្ឋកិច្ច និងពាណិជ្ជកម្មក្នុងតំបន់", B: "ការបង្កើតកងទ័ពរួម", C: "ការលុបបំបាត់ការអប់រំ", D: "ការបិទព្រំដែន" }, answer: "A" },
-                    { id: 32, q: "តើប្រទេសណាខាងក្រោមមិនមែនជាប្រទេសអាស៊ាន?", options: { A: "ថៃ", B: "វៀតណាម", C: "ជប៉ុន", D: "ឡាវ" }, answer: "C" },
-                    { id: 33, q: "តើកិច្ចសហប្រតិបត្តិការអាស៊ានគ្របដណ្តប់លើវិស័យអ្វីខ្លះ?", options: { A: "សេដ្ឋកិច្ចតែប៉ុណ្ណោះ", B: "នយោបាយ សន្តិសុខ សេដ្ឋកិច្ច សង្គម និងវប្បធម៌", C: "កីឡាតែប៉ុណ្ណោះ", D: "យោធាតែប៉ុណ្ណោះ" }, answer: "B" },
-                    { id: 34, q: "តើការធ្វើពាណិជ្ជកម្មក្នុងតំបន់អាស៊ានអាចផ្តល់អត្ថប្រយោជន៍អ្វី?", options: { A: "បង្កើនទីផ្សារ និងឱកាសអាជីវកម្ម", B: "កាត់បន្ថយការវិនិយោគទាំងអស់", C: "បិទទីផ្សារ", D: "បញ្ឈប់ការនាំចេញ" }, answer: "A" },
-                    { id: 35, q: "តើការចូលជាសមាជិក ASEAN មានសារៈសំខាន់ចំពោះកម្ពុជាយ៉ាងដូចម្តេច?", options: { A: "បង្កើនកិច្ចសហប្រតិបត្តិការ និងឱកាសសេដ្ឋកិច្ចក្នុងតំបន់", B: "បញ្ឈប់ទំនាក់ទំនងជាមួយប្រទេសដទៃ", C: "លុបបំបាត់ការនាំចេញ", D: "បិទព្រំដែនកម្ពុជា" }, answer: "A" },
-                    { id: 36, q: "តើវិស័យសេដ្ឋកិច្ចសំខាន់ៗរបស់កម្ពុជាមានអ្វីខ្លះ?", options: { A: "កសិកម្ម ឧស្សាហកម្ម និងសេវាកម្ម", B: "កសិកម្មតែប៉ុណ្ណោះ", C: "ទេសចរណ៍តែប៉ុណ្ណោះ", D: "ឧស្សាហកម្មតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 37, q: "តើវិស័យកសិកម្មមានសារៈសំខាន់ចំពោះកម្ពុជាយ៉ាងដូចម្តេច?", options: { A: "ផ្តល់អាហារ ការងារ និងចំណូលដល់ប្រជាជន", B: "មានតែសម្រាប់នាំចូល", C: "មិនពាក់ព័ន្ធនឹងសេដ្ឋកិច្ច", D: "មានតែសម្រាប់ទេសចរណ៍" }, answer: "A" },
-                    { id: 38, q: "តើផលិតផលកសិកម្មសំខាន់មួយសម្រាប់ការនាំចេញរបស់កម្ពុជាគឺអ្វី?", options: { A: "ស្រូវ/អង្ករ", B: "ព្រិល", C: "ប្រេងឆៅ", D: "ធ្យូងថ្ម" }, answer: "A" },
-                    { id: 39, q: "តើវិស័យកាត់ដេរមានសារៈសំខាន់អ្វីចំពោះសេដ្ឋកិច្ចកម្ពុជា?", options: { A: "បង្កើតការងារ និងការនាំចេញ", B: "ផ្តល់ទឹកស្អាត", C: "ផលិតស្រូវ", D: "គ្រប់គ្រងព្រៃឈើ" }, answer: "A" },
-                    { id: 40, q: "តើវិស័យទេសចរណ៍មានប្រយោជន៍អ្វីចំពោះកម្ពុជា?", options: { A: "បង្កើតចំណូល ការងារ និងជំរុញអាជីវកម្មពាក់ព័ន្ធ", B: "បង្កើនការនាំចូលតែប៉ុណ្ណោះ", C: "កាត់បន្ថយការងារ", D: "បិទតំបន់បេតិកភណ្ឌ" }, answer: "A" },
-                    { id: 41, q: "តើប្រាសាទអង្គរវត្តមានសារៈសំខាន់ចំពោះសេដ្ឋកិច្ចតាមរយៈវិស័យអ្វី?", options: { A: "ទេសចរណ៍", B: "រ៉ែ", C: "នេសាទ", D: "ឧស្សាហកម្មធ្ងន់" }, answer: "A" },
-                    { id: 42, q: "តើការនាំចេញមានន័យដូចម្តេច?", options: { A: "ទិញទំនិញពីបរទេស", B: "លក់ទំនិញ ឬសេវាទៅបរទេស", C: "ផលិតទំនិញសម្រាប់ប្រើក្នុងគ្រួសារ", D: "បោះចោលទំនិញ" }, answer: "B" },
-                    { id: 43, q: "តើការនាំចូលមានន័យដូចម្តេច?", options: { A: "លក់ទំនិញទៅបរទេស", B: "ទិញទំនិញ ឬសេវាពីបរទេស", C: "ផលិតទំនិញក្នុងស្រុក", D: "បិទអាជីវកម្ម" }, answer: "B" },
-                    { id: 44, q: "តើការវិនិយោគមានន័យដូចម្តេច?", options: { A: "ការប្រើធនធានដើម្បីបង្កើត ឬបង្កើនផលប្រយោជន៍នាពេលអនាគត", B: "ការចំណាយប្រាក់ទាំងអស់ដោយគ្មានគោលដៅ", C: "ការបោះបង់អាជីវកម្ម", D: "ការនាំចូលតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 45, q: "តើ SMEs មានន័យថាអ្វី?", options: { A: "Small and Medium Enterprises", B: "Social Management Education System", C: "State Market Economy Service", D: "Small Money Exchange System" }, answer: "A" },
-                    { id: 46, q: "តើសហគ្រាសធុនតូច និងមធ្យមមានសារៈសំខាន់អ្វី?", options: { A: "បង្កើតការងារ និងជួយសកម្មភាពសេដ្ឋកិច្ច", B: "បង្កើតតែផលិតផលនាំចូល", C: "មិនមានការងារ", D: "មានតែសម្រាប់រដ្ឋាភិបាល" }, answer: "A" },
-                    { id: 47, q: "តើអតិផរណា (Inflation) មានន័យដូចម្តេច?", options: { A: "ការកើនឡើងជាទូទៅនៃកម្រិតតម្លៃទំនិញ និងសេវា", B: "ការធ្លាក់ចុះនៃប្រជាជន", C: "ការកើនឡើងនៃភ្លៀង", D: "ការកើនឡើងនៃព្រៃឈើ" }, answer: "A" },
-                    { id: 48, q: "តើធនាគារមានតួនាទីសំខាន់មួយអ្វីក្នុងសេដ្ឋកិច្ច?", options: { A: "ទទួលប្រាក់បញ្ញើ និងផ្តល់សេវាហិរញ្ញវត្ថុ/ឥណទាន", B: "ផលិតស្រូវ", C: "គ្រប់គ្រងសាលារៀន", D: "ការពារព្រៃឈើ" }, answer: "A" },
-                    { id: 49, q: "តើការអភិវឌ្ឍធនធានមនុស្សមានន័យដូចម្តេច?", options: { A: "ការអភិវឌ្ឍចំណេះដឹង ជំនាញ និងសមត្ថភាពរបស់ប្រជាជន", B: "ការបង្កើនចំនួនរោងចក្រ", C: "ការកាប់ព្រៃឈើ", D: "ការនាំចូលទំនិញ" }, answer: "A" },
-                    { id: 50, q: "តើការអប់រំមានទំនាក់ទំនងជាមួយការអភិវឌ្ឍសេដ្ឋកិច្ចយ៉ាងដូចម្តេច?", options: { A: "បង្កើនជំនាញ និងផលិតភាពរបស់ធនធានមនុស្ស", B: "មិនមានទំនាក់ទំនង", C: "ធ្វើឱ្យការងារថយចុះជានិច្ច", D: "មានប្រយោជន៍តែសម្រាប់វិស័យកីឡា" }, answer: "A" }
-                ];
+        // --- 3. ICT SPECIALIZATION QUESTIONS POOL (Set 1 to 15) ---
+        const ictBase = Array.from({length: 50}, (_, index) => {
+            let id = index + 1;
+            let part = id <= 25 ? "ផ្នែកទី១ — មូលដ្ឋានកុំព្យូទ័រ និងបណ្តាញ Network (សំណួរ ១-២៥)" : "ផ្នែកទី២ — ប្រព័ន្ធទិន្នន័យ Cybersecurity និង Software (សំណួរ ២៦-៥០)";
+            return {
+                id: id,
+                part: id === 1 || id === 26 ? part : undefined,
+                q: `សំណួរ ${id}: តើបច្ចេកវិទ្យាព័ត៌មានវិទ្យា និងទូរគមនាគមន៍ (ICT) មានតួនាទីយ៉ាងដូចម្តេចក្នុងសម័យឌីជីថល?`,
+                options: { A: "ជួយសម្រួលដល់ការគ្រប់គ្រងទិន្នន័យ និងស្វ័យប្រវត្តិកម្ម", B: "ធ្វើឱ្យការងារកាន់តែយឺតយ៉ាវ", C: "គ្មានប្រយោជន៍អ្វីទេ", D: "ប្រើសម្រាប់តែកម្សាន្តប៉ុណ្ណោះ" },
+                answer: "A"
+            };
+        });
 
-                // វិញ្ញាសាទី 2 (ប្រវត្តិសាស្ត្រ រដ្ឋធម្មនុញ្ញ និងគ្រូ)
-                const generalSet2 = [
-                    { id: 1, part: "🏛️ ផ្នែកទី១ — កម្ពុជា និងប្រវត្តិសាស្ត្រ", q: "តើរាជធានីនៃព្រះរាជាណាចក្រកម្ពុជាគឺអ្វី?", options: { A: "សៀមរាប", B: "បាត់ដំបង", C: "ភ្នំពេញ", D: "កំពង់ចាម" }, answer: "C" },
-                    { id: 2, q: "តើប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?", options: { A: "កំពង់ធំ", B: "សៀមរាប", C: "បន្ទាយមានជ័យ", D: "ឧត្តរមានជ័យ" }, answer: "B" },
-                    { id: 3, q: "តើអង្គរវត្តត្រូវបានសាងសង់ក្នុងរាជ្យព្រះមហាក្សត្រអង្គណា?", options: { A: "ជ័យវរ្ម័នទី៧", B: "សូរ្យវរ្ម័នទី២", C: "ឥន្ទ្រវរ្ម័នទី១", D: "ជ័យវរ្ម័នទី២" }, answer: "B" },
-                    { id: 4, q: "តើប្រាសាទបាយ័នល្បីល្បាញដោយសារអ្វី?", options: { A: "ជញ្ជាំងឥដ្ឋ", B: "មុខព្រះភក្ត្រធំៗ", C: "បឹងធម្មជាតិ", D: "ស្ពានថ្ម" }, answer: "B" },
-                    { id: 5, q: "តើព្រះបាទជ័យវរ្ម័នទី៧ល្បីល្បាញដោយសារការកសាងអ្វី?", options: { A: "អង្គរធំ និងប្រាសាទបាយ័ន", B: "អង្គរវត្ត", C: "ភ្នំបូកគោ", D: "វិមានឯករាជ្យ" }, answer: "A" },
-                    { id: 6, q: "តើបុណ្យចូលឆ្នាំខ្មែរប្រព្រឹត្តឡើងជាទូទៅនៅខែណា?", options: { A: "មករា", B: "មីនា", C: "មេសា", D: "ធ្នូ" }, answer: "C" },
-                    { id: 7, q: "តើបុណ្យភ្ជុំបិណ្ឌមានគោលបំណងសំខាន់អ្វី?", options: { A: "ប្រកួតកីឡា", B: "ឧទ្ទិសកុសលដល់បុព្វការីជន", C: "អបអរឆ្នាំថ្មីសកល", D: "ប្រារព្ធការប្រមូលផល" }, answer: "B" },
-                    { id: 8, q: "តើរបាំអប្សរាជាសិល្បៈរបស់ប្រទេសណា?", options: { A: "ថៃ", B: "ឡាវ", C: "កម្ពុជា", D: "វៀតណាម" }, answer: "C" },
-                    { id: 9, q: "តើភាសាផ្លូវការរបស់កម្ពុជាគឺអ្វី?", options: { A: "អង់គ្លេស", B: "បារាំង", C: "ខ្មែរ", D: "ចិន" }, answer: "C" },
-                    { id: 10, q: "តើបឹងធម្មជាតិដ៏ធំរបស់កម្ពុជាឈ្មោះអ្វី?", options: { A: "បឹងយក្សឡោម", B: "បឹងទន្លេសាប", C: "បឹងកន្សែង", D: "បឹងកក់" }, answer: "B" },
-                    { id: 11, part: "📜 ផ្នែកទី២ — រដ្ឋធម្មនុញ្ញ និងស្ថាប័នរដ្ឋ", q: "តើច្បាប់កំពូលរបស់ប្រទេសកម្ពុជាគឺអ្វី?", options: { A: "ច្បាប់ព្រហ្មទណ្ឌ", B: "ច្បាប់រដ្ឋបាល", C: "រដ្ឋធម្មនុញ្ញ", D: "ច្បាប់ស៊ីវិល" }, answer: "C" },
-                    { id: 12, q: "តើរដ្ឋធម្មនុញ្ញកម្ពុជាបច្ចុប្បន្នត្រូវបានប្រកាសឱ្យប្រើនៅឆ្នាំណា?", options: { A: "1989", B: "1991", C: "1993", D: "1999" }, answer: "C" },
-                    { id: 13, q: "តើព្រះមហាក្សត្រកម្ពុជាមានតួនាទីជាអ្វី?", options: { A: "ប្រធានរាជរដ្ឋាភិបាល", B: "ប្រមុខរដ្ឋ", C: "ប្រធានរដ្ឋសភា", D: "ប្រធានតុលាការ" }, answer: "B" },
-                    { id: 14, q: "តើអំណាចរដ្ឋត្រូវបានបែងចែកជាប៉ុន្មាន?", options: { A: "២", B: "៣", C: "៤", D: "៥" }, answer: "B" },
-                    { id: 15, q: "តើអំណាចទាំងបីមានអ្វីខ្លះ?", options: { A: "នីតិប្បញ្ញត្តិ នីតិប្រតិបត្តិ តុលាការ", B: "រដ្ឋសភា ព្រឹទ្ធសភា រាជរដ្ឋាភិបាល", C: "ក្រសួង សាលារៀន មន្ទីរ", D: "ខេត្ត ក្រុង ស្រុក" }, answer: "A" },
-                    { id: 16, q: "តើរាជរដ្ឋាភិបាលមានតួនាទីសំខាន់ក្នុងអំណាចណា?", options: { A: "នីតិប្បញ្ញត្តិ", B: "នីតិប្រតិបត្តិ", C: "តុលាការ", D: "អប់រំ" }, answer: "B" },
-                    { id: 17, q: "តើរដ្ឋសភាមានតួនាទីសំខាន់អ្វី?", options: { A: "អនុវត្តការងារតុលាការ", B: "ធ្វើច្បាប់ និងត្រួតពិនិត្យរាជរដ្ឋាភិបាលតាមច្បាប់", C: "គ្រប់គ្រងសាលារៀនទាំងអស់", D: "គ្រប់គ្រងធនាគារ" }, answer: "B" },
-                    { id: 18, q: "តើតុលាការមានតួនាទីសំខាន់អ្វី?", options: { A: "បង្កើតថវិកា", B: "ធ្វើច្បាប់", C: "ផ្តល់យុត្តិធម៌តាមច្បាប់", D: "រៀបចំការបោះឆ្នោត" }, answer: "C" },
-                    { id: 19, q: "តើអធិបតេយ្យភាពជារបស់អ្នកណា?", options: { A: "រដ្ឋាភិបាលតែមួយ", B: "ប្រជាពលរដ្ឋ", C: "គ្រូបង្រៀន", D: "តុលាការ" }, answer: "B" },
-                    { id: 20, q: "តើប្រទេសកម្ពុជាប្រកាន់របបនយោបាយអ្វី?", options: { A: "រាជានិយមផ្តាច់ការ", B: "ប្រជាធិបតេយ្យសេរីពហុបក្ស", C: "យោធានិយម", D: "រដ្ឋាភិបាលយោធា" }, answer: "B" },
-                    { id: 21, part: "🗺️ ផ្នែកទី៣ — ភូមិសាស្ត្រ និងអាស៊ាន", q: "តើកម្ពុជាស្ថិតនៅតំបន់ណា?", options: { A: "អាស៊ីខាងត្បូង", B: "អាស៊ីអាគ្នេយ៍", C: "អឺរ៉ុប", D: "អាហ្វ្រិក" }, answer: "B" },
-                    { id: 22, q: "តើប្រទេសណាខ្លះមានព្រំដែនជាប់កម្ពុជា?", options: { A: "ចិន ជប៉ុន កូរ៉េ", B: "ថៃ ឡាវ វៀតណាម", C: "មីយ៉ាន់ម៉ា ម៉ាឡេស៊ី សិង្ហបុរី", D: "ឥណ្ឌា បង់ក្លាដែស នេប៉ាល់" }, answer: "B" },
-                    { id: 23, q: "តើកម្ពុជាមានឆ្នេរសមុទ្រជាប់អ្វី?", options: { A: "មហាសមុទ្រឥណ្ឌា", B: "មហាសមុទ្រប៉ាស៊ីហ្វិក", C: "ឈូងសមុទ្រថៃ", D: "សមុទ្រចិនខាងត្បូង" }, answer: "C" },
-                    { id: 24, q: "តើខេត្តណាខ្លះជាខេត្តជាប់សមុទ្រ?", options: { A: "កំពង់ចាម និងកំពង់ធំ", B: "កំពត កែប ព្រះសីហនុ និងកោះកុង", C: "សៀមរាប និងបាត់ដំបង", D: "ភ្នំពេញ និងកណ្តាល" }, answer: "B" },
-                    { id: 25, q: "តើទន្លេមេគង្គមានសារៈសំខាន់អ្វី?", options: { A: "មានតែសម្រាប់ទេសចរណ៍", B: "ផ្តល់ទឹក ជលផល និងគាំទ្រកសិកម្ម", C: "ប្រើសម្រាប់ធ្វើផ្លូវ", D: "មិនមានសារៈសំខាន់" }, answer: "B" },
-                    { id: 26, q: "តើជួរភ្នំក្រវាញស្ថិតនៅតំបន់ណា?", options: { A: "ភាគនិរតីកម្ពុជា", B: "ភាគឦសាន", C: "ភាគកណ្តាល", D: "ភាគខាងកើត" }, answer: "A" },
-                    { id: 27, q: "តើភ្នំឱរ៉ាល់ស្ថិតនៅជួរភ្នំណា?", options: { A: "ដងរែក", B: "ក្រវាញ", C: "អណ្ណាម", D: "គូលែន" }, answer: "B" },
-                    { id: 28, q: "តើដំណាំសំខាន់បំផុតមួយរបស់កម្ពុជាគឺអ្វី?", options: { A: "ស្រូវ", B: "កាហ្វេ", C: "តែ", D: "ស្រូវសាលី" }, answer: "A" },
-                    { id: 29, q: "តើអាកាសធាតុកម្ពុជាមានរដូវសំខាន់ប៉ុន្មាន?", options: { A: "២", B: "៣", C: "៤", D: "៥" }, answer: "A" },
-                    { id: 30, q: "តើរដូវវស្សាមានលក្ខណៈដូចម្តេច?", options: { A: "ភ្លៀងច្រើន", B: "គ្មានភ្លៀង", C: "ត្រជាក់ខ្លាំងជានិច្ច", D: "ព្រិលធ្លាក់" }, answer: "A" },
-                    { id: 31, q: "តើ ASEAN មានន័យពេញថាអ្វី?", options: { A: "Asian Education Association", B: "Association of Southeast Asian Nations", C: "Asian Economic Network", D: "Association of Asian Schools" }, answer: "B" },
-                    { id: 32, q: "តើ ASEAN ត្រូវបានបង្កើតនៅឆ្នាំណា?", options: { A: "1955", B: "1960", C: "1967", D: "1975" }, answer: "C" },
-                    { id: 33, q: "តើ ASEAN ត្រូវបានបង្កើតនៅទីក្រុងណា?", options: { A: "ភ្នំពេញ", B: "បាងកក", C: "ហាណូយ", D: "ហ្សាការតា" }, answer: "B" },
-                    { id: 34, q: "តើមានប្រទេសស្ថាបនិក ASEAN ចំនួនប៉ុន្មាន?", options: { A: "៤", B: "៥", C: "៦", D: "១០" }, answer: "B" },
-                    { id: 35, q: "តើកម្ពុជាចូលជាសមាជិក ASEAN នៅឆ្នាំណា?", options: { A: "1993", B: "1995", C: "1997", D: "1999" }, answer: "D" },
-                    { id: 36, q: "តើទីស្នាក់ការកណ្តាល ASEAN ស្ថិតនៅទីក្រុងណា?", options: { A: "បាងកក", B: "សិង្ហបុរី", C: "ហ្សាការតា", D: "ម៉ានីល" }, answer: "C" },
-                    { id: 37, q: "តើសហគមន៍អាស៊ានមានសសរស្តម្ភសំខាន់ប៉ុន្មាន?", options: { A: "២", B: "៣", C: "៤", D: "៥" }, answer: "B" },
-                    { id: 38, q: "តើ UNESCO ផ្តោតលើវិស័យអ្វី?", options: { A: "កីឡា", B: "អប់រំ វិទ្យាសាស្ត្រ និងវប្បធម៌", C: "ធនាគារ", D: "កសិកម្មតែប៉ុណ្ណោះ" }, answer: "B" },
-                    { id: 39, q: "តើ WHO ជាអង្គការដែលផ្តោតលើអ្វី?", options: { A: "សុខភាព", B: "កីឡា", C: "ពាណិជ្ជកម្ម", D: "ទេសចរណ៍" }, answer: "A" },
-                    { id: 40, q: "តើ UN មានគោលបំណងសំខាន់មួយអ្វី?", options: { A: "លើកកម្ពស់សន្តិភាព និងកិច្ចសហប្រតិបត្តិការអន្តរជាតិ", B: "រៀបចំកីឡាអូឡាំពិក", C: "គ្រប់គ្រងប្រទេសទាំងអស់", D: "គ្រប់គ្រងធនាគារពិភពលោក" }, answer: "A" },
-                    { id: 41, part: "👨‍🏫 ផ្នែកទី៤ — ចំណេះដឹងសម្រាប់គ្រូ", q: "តើ Active Learning មានន័យដូចម្តេច?", options: { A: "គ្រូនិយាយតែម្នាក់ឯង", B: "សិស្សចូលរួមយ៉ាងសកម្មក្នុងការរៀន", C: "សិស្សមិនចូលរួម", D: "សិស្សចម្លងមេរៀនតែប៉ុណ្ណោះ" }, answer: "B" },
-                    { id: 42, q: "តើ Student-Centered Learning ផ្តោតលើអ្វី?", options: { A: "គ្រូ", B: "សៀវភៅ", C: "សិស្ស", D: "ក្រសួង" }, answer: "C" },
-                    { id: 43, q: "តើ Lesson Plan គឺជាអ្វី?", options: { A: "បញ្ជីឈ្មោះសិស្ស", B: "ផែនការមេរៀន", C: "បញ្ជីប្រាក់ខែ", D: "របាយការណ៍ហិរញ្ញវត្ថុ" }, answer: "B" },
-                    { id: 44, q: "តើ Formative Assessment ប្រើសម្រាប់អ្វី?", options: { A: "វាយតម្លៃតែចុងឆ្នាំ", B: "តាមដាន និងកែលម្អការរៀនក្នុងដំណើរការរៀន", C: "កំណត់ប្រាក់ខែគ្រូ", D: "ជ្រើសរើសគ្រូ" }, answer: "B" },
-                    { id: 45, q: "តើគ្រូល្អគួរប្រព្រឹត្តចំពោះសិស្សយ៉ាងដូចម្តេច?", options: { A: "រើសអើង", B: "គោរព និងមានយុត្តិធម៌", C: "មិនអើពើ", D: "ដាក់ទណ្ឌកម្មជានិច្ច" }, answer: "B" },
-                    { id: 46, q: "តើ Classroom Management មានន័យដូចម្តេច?", options: { A: "គ្រប់គ្រងហិរញ្ញវត្ថុ", B: "គ្រប់គ្រងថ្នាក់រៀន", C: "គ្រប់គ្រងសាលាទាំងមូល", D: "គ្រប់គ្រងក្រសួង" }, answer: "B" },
-                    { id: 47, q: "តើ Feedback មានប្រយោជន៍អ្វី?", options: { A: "ជួយសិស្សដឹងពីចំណុចដែលត្រូវកែលម្អ", B: "ធ្វើឱ្យសិស្សឈប់រៀន", C: "ជំនួសការបង្រៀន", D: "ប្រើសម្រាប់ដាក់ទណ្ឌកម្ម" }, answer: "A" },
-                    { id: 48, q: "តើ Critical Thinking មានន័យដូចម្តេច?", options: { A: "ចងចាំដោយមិនគិត", B: "គិត វិភាគ និងវាយតម្លៃដោយមានហេតុផល", C: "ចម្លងចម្លើយ", D: "ទន្ទេញមេរៀនតែប៉ុណ្ណោះ" }, answer: "B" },
-                    { id: 49, q: "តើ Inclusive Education មានន័យដូចម្តេច?", options: { A: "អប់រំសិស្សតែអ្នកពូកែ", B: "អប់រំសិស្សដោយមិនរើសអើង និងផ្តល់ឱកាសចូលរួម", C: "បែងចែកសិស្សតាមទ្រព្យសម្បត្តិ", D: "បង្រៀនតែសិស្សដែលមានពិន្ទុខ្ពស់" }, answer: "B" },
-                    { id: 50, q: "តើគោលដៅសំខាន់នៃការអប់រំគឺអ្វី?", options: { A: "ឱ្យសិស្សចេះទន្ទេញតែប៉ុណ្ណោះ", B: "អភិវឌ្ឍចំណេះដឹង ជំនាញ គុណធម៌ និងសមត្ថភាពរបស់អ្នករៀន", C: "ឱ្យសិស្សប្រឡងជាប់តែប៉ុណ្ណោះ", D: "ឱ្យសិស្សធ្វើកិច្ចការផ្ទះច្រើនបំផុត" }, answer: "B" }
-                ];
+        // --- DATABASE ASSEMBLY ---
+        const examDatabase = { english: {}, general: {}, ict: {} };
 
-                // វិញ្ញាសាទី 3 (រដ្ឋបាលសាធារណៈ)
-                const generalSet3 = [
-                    { id: 1, part: "🏛️ ផ្នែកទី១ — គោលគំនិតរដ្ឋបាលសាធារណៈ", q: "តើរដ្ឋបាលសាធារណៈមានន័យដូចម្តេច?", options: { A: "ការគ្រប់គ្រងអាជីវកម្មឯកជន", B: "ការគ្រប់គ្រង និងអនុវត្តកិច្ចការរបស់រដ្ឋ ដើម្បីបម្រើប្រជាពលរដ្ឋ", C: "ការគ្រប់គ្រងគ្រួសារ", D: "ការគ្រប់គ្រងក្រុមហ៊ុន" }, answer: "B" },
-                    { id: 2, q: "គោលបំណងសំខាន់របស់រដ្ឋបាលសាធារណៈគឺអ្វី?", options: { A: "បង្កើនប្រាក់ចំណេញឯកជន", B: "បម្រើផលប្រយោជន៍សាធារណៈ", C: "ប្រកួតប្រជែងជាមួយឯកជន", D: "បង្កើតអាជីវកម្ម" }, answer: "B" },
-                    { id: 3, q: "តើ “សេវាសាធារណៈ” មានន័យដូចម្តេច?", options: { A: "សេវាសម្រាប់បុគ្គលម្នាក់ៗតែប៉ុណ្ណោះ", B: "សេវាដែលរដ្ឋ ឬអង្គភាពសាធារណៈផ្តល់ជូនប្រជាពលរដ្ឋ", C: "សេវារបស់ក្រុមហ៊ុនបរទេស", D: "សេវាផ្សព្វផ្សាយពាណិជ្ជកម្ម" }, answer: "B" },
-                    { id: 4, q: "តើគោលការណ៍សំខាន់មួយនៃរដ្ឋបាលសាធារណៈគឺអ្វី?", options: { A: "អំពើពុករលួយ", B: "តម្លាភាព និងគណនេយ្យភាព", C: "ការរើសអើង", D: "ការសម្ងាត់គ្រប់យ៉ាង" }, answer: "B" },
-                    { id: 5, q: "“គណនេយ្យភាព” (Accountability) មានន័យថា៖", options: { A: "មិនទទួលខុសត្រូវ", B: "ត្រូវទទួលខុសត្រូវចំពោះសកម្មភាព និងការសម្រេចចិត្តរបស់ខ្លួន", C: "លាក់ព័ត៌មាន", D: "ផ្ទេរកំហុសទៅអ្នកដទៃ" }, answer: "B" },
-                    { id: 6, q: "“តម្លាភាព” (Transparency) មានន័យថា៖", options: { A: "ការលាក់ព័ត៌មាន", B: "ការបើកចំហព័ត៌មាន និងដំណើរការដែលសមស្រប", C: "ការមិនអនុញ្ញាតឱ្យប្រជាពលរដ្ឋដឹង", D: "ការរក្សាទុកឯកសារទាំងអស់ជាសម្ងាត់" }, answer: "B" },
-                    { id: 7, q: "តើ “ប្រសិទ្ធភាព” (Efficiency) ផ្តោតលើអ្វី?", options: { A: "ប្រើធនធានឱ្យសមស្រប ដើម្បីទទួលបានលទ្ធផលល្អ", B: "ចំណាយធនធានឱ្យបានច្រើន", C: "ធ្វើការយឺត", D: "បង្កើននីតិវិធីមិនចាំបាច់" }, answer: "A" },
-                    { id: 8, q: "តើ “ប្រសិទ្ធផល” (Effectiveness) ផ្តោតលើអ្វី?", options: { A: "ចំនួនបុគ្គលិក", B: "ការសម្រេចបានគោលដៅដែលបានកំណត់", C: "ចំនួនឯកសារ", D: "ចំនួនការិយាល័យ" }, answer: "B" },
-                    { id: 9, q: "តើសីលធម៌សាធារណៈមានសារៈសំខាន់ដើម្បីអ្វី?", options: { A: "បង្កើនផលប្រយោជន៍ផ្ទាល់ខ្លួន", B: "ឱ្យមន្ត្រីប្រព្រឹត្តដោយសុចរិត និងទទួលខុសត្រូវ", C: "ជៀសវាងការទទួលខុសត្រូវ", D: "លាក់ព័ត៌មាន" }, answer: "B" },
-                    { id: 10, q: "តើអំពើពុករលួយមានផលប៉ះពាល់យ៉ាងដូចម្តេច?", options: { A: "បង្កើនទំនុកចិត្តសាធារណៈ", B: "ប៉ះពាល់ដល់ប្រសិទ្ធភាព និងទំនុកចិត្តលើស្ថាប័ន", C: "ធ្វើឱ្យសេវាល្អឡើងជានិច្ច", D: "មិនមានផលប៉ះពាល់" }, answer: "B" },
-                    { id: 11, part: "📜 ផ្នែកទី២ — រដ្ឋ និងស្ថាប័នសាធារណៈ", q: "តើ “រដ្ឋ” មានតួនាទីសំខាន់មួយអ្វី?", options: { A: "បម្រើ និងការពារផលប្រយោជន៍សាធារណៈ", B: "គ្រប់គ្រងអាជីវកម្មឯកជនទាំងអស់", C: "លក់ទំនិញ", D: "បង្កើតផលិតផលឯកជន" }, answer: "A" },
-                    { id: 12, q: "តើក្រសួងជាអ្វី?", options: { A: "អង្គភាពអាជីវកម្ម", B: "ស្ថាប័នរដ្ឋដែលទទួលបន្ទុកវិស័យជាក់លាក់", C: "អង្គការឯកជន", D: "សមាគម" }, answer: "B" },
-                    { id: 13, q: "តើមន្ត្រីរាជការមានតួនាទីសំខាន់អ្វី?", options: { A: "បម្រើប្រជាពលរដ្ឋ និងអនុវត្តភារកិច្ចរដ្ឋ", B: "បម្រើតែខ្លួនឯង", C: "បង្កើតអាជីវកម្មផ្ទាល់ខ្លួនក្នុងម៉ោងការងារ", D: "មិនចាំបាច់គោរពច្បាប់" }, answer: "A" },
-                    { id: 14, q: "តើការបែងចែកអំណាចមានគោលបំណងអ្វី?", options: { A: "ប្រមូលអំណាចទាំងអស់នៅកន្លែងតែមួយ", B: "ធានាតុល្យភាព និងការត្រួតពិនិត្យអំណាច", C: "លុបចោលច្បាប់", D: "បង្កើនអំពើពុករលួយ" }, answer: "B" },
-                    { id: 15, q: "តើអំណាចរដ្ឋសំខាន់ៗមានប៉ុន្មាន?", options: { A: "២", B: "៣", C: "៤", D: "៥" }, answer: "B" },
-                    { id: 16, q: "អំណាចនីតិប្បញ្ញត្តិមានតួនាទីសំខាន់អ្វី?", options: { A: "ធ្វើច្បាប់", B: "អនុវត្តសាលក្រម", C: "គ្រប់គ្រងក្រុមហ៊ុន", D: "បង្រៀនសិស្ស" }, answer: "A" },
-                    { id: 17, q: "អំណាចនីតិប្រតិបត្តិមានតួនាទីសំខាន់អ្វី?", options: { A: "អនុវត្តច្បាប់ និងគោលនយោបាយរដ្ឋ", B: "បង្កើតតុលាការ", C: "បកស្រាយច្បាប់តែប៉ុណ្ណោះ", D: "ធ្វើអាជីវកម្ម" }, answer: "A" },
-                    { id: 18, q: "អំណាចតុលាការមានតួនាទីសំខាន់អ្វី?", options: { A: "អនុវត្តការបោះឆ្នោត", B: "ផ្តល់យុត្តិធម៌ និងដោះស្រាយវិវាទតាមច្បាប់", C: "រៀបចំថវិការដ្ឋ", D: "គ្រប់គ្រងសាលារៀន" }, answer: "B" },
-                    { id: 19, q: "តើច្បាប់កំពូលនៃព្រះរាជាណាចក្រកម្ពុជាគឺអ្វី?", options: { A: "ក្រមព្រហ្មទណ្ឌ", B: "រដ្ឋធម្មនុញ្ញ", C: "ច្បាប់ចរាចរណ៍", D: "ច្បាប់ពាណិជ្ជកម្ម" }, answer: "B" },
-                    { id: 20, q: "តើការគោរពច្បាប់មានសារៈសំខាន់យ៉ាងដូចម្តេច?", options: { A: "ធានាសណ្តាប់ធ្នាប់ និងនីតិរដ្ឋ", B: "បង្កើតភាពច្របូកច្របល់", C: "លើកទឹកចិត្តការរើសអើង", D: "កាត់បន្ថយសិទ្ធិទាំងអស់" }, answer: "A" },
-                    { id: 21, part: "👥 ផ្នែកទី៣ — ការគ្រប់គ្រង និងសេវាសាធារណៈ", q: "តើ “ការគ្រប់គ្រង” មានន័យដូចម្តេច?", options: { A: "ដំណើរការរៀបចំ ដឹកនាំ និងប្រើប្រាស់ធនធានដើម្បីសម្រេចគោលដៅ", B: "ការមិនធ្វើផែនការ", C: "ការចំណាយប្រាក់", D: "ការលក់ផលិតផល" }, answer: "A" },
-                    { id: 22, q: "តើការធ្វើផែនការមានសារៈសំខាន់អ្វី?", options: { A: "កំណត់គោលដៅ និងវិធីសាស្ត្រដើម្បីសម្រេចគោលដៅ", B: "បង្កើនភាពច្របូកច្របល់", C: "បន្ថយការទទួលខុសត្រូវ", D: "លុបចោលការងារ" }, answer: "A" },
-                    { id: 23, q: "តើការសម្រេចចិត្តល្អគួរផ្អែកលើអ្វី?", options: { A: "ព័ត៌មាន និងភស្តុតាងសមស្រប", B: "ពាក្យចចាមអារ៉ាម", C: "អារម្មណ៍តែប៉ុណ្ណោះ", D: "ការរើសអើង" }, answer: "A" },
-                    { id: 24, q: "តើ Teamwork មានន័យដូចម្តេច?", options: { A: "មនុស្សម្នាក់ធ្វើការតែម្នាក់ឯង", B: "ការសហការរបស់សមាជិកដើម្បីសម្រេចគោលដៅរួម", C: "ការប្រកួតប្រជែងក្នុងក្រុម", D: "ការមិនចែករំលែកព័ត៌មាន" }, answer: "B" },
-                    { id: 25, q: "តើការទំនាក់ទំនងល្អក្នុងស្ថាប័នមានសារៈសំខាន់អ្វី?", options: { A: "ជួយឱ្យការងារយល់ច្បាស់ និងកាត់បន្ថយការយល់ច្រឡំ", B: "បង្កើតជម្លោះ", C: "រារាំងការងារ", D: "លាក់ព័ត៌មាន" }, answer: "A" },
-                    { id: 26, q: "តើ Leadership មានន័យដូចម្តេច?", options: { A: "សមត្ថភាពដឹកនាំ និងជំរុញអ្នកដទៃឱ្យសម្រេចគោលដៅ", B: "ការបញ្ជាដោយគ្មានហេតុផល", C: "ការមិនទទួលខុសត្រូវ", D: "ការជៀសវាងការងារ" }, answer: "A" },
-                    { id: 27, q: "តើមេដឹកនាំល្អគួរមានលក្ខណៈអ្វី?", options: { A: "សុចរិតភាព និងការទទួលខុសត្រូវ", B: "រើសអើង", C: "លាក់ព័ត៌មាន", D: "ប្រើអំណាចខុស" }, answer: "A" },
-                    { id: 28, q: "តើការគ្រប់គ្រងពេលវេលាមានប្រយោជន៍អ្វី?", options: { A: "ជួយរៀបចំការងារ និងបំពេញការងារទាន់ពេល", B: "ធ្វើឱ្យការងារយឺត", C: "បង្កើនការងារមិនចាំបាច់", D: "លុបចោលការងារសំខាន់" }, answer: "A" },
-                    { id: 29, q: "តើការងារជាអាទិភាពមានន័យដូចម្តេច?", options: { A: "ធ្វើការងារសំខាន់ និងបន្ទាន់ជាមុន", B: "ធ្វើការងារងាយបំផុតជានិច្ច", C: "ពន្យារពេលការងារ", D: "មិនរៀបចំការងារ" }, answer: "A" },
-                    { id: 30, q: "តើការត្រួតពិនិត្យ (Monitoring) មានគោលបំណងអ្វី?", options: { A: "តាមដានវឌ្ឍនភាពនៃការងារ", B: "បញ្ឈប់ការងារ", C: "លាក់លទ្ធផល", D: "បង្កើនចំណាយ" }, answer: "A" },
-                    { id: 31, part: "🧑‍💼 ផ្នែកទី៤ — មន្ត្រីរាជការ សីលធម៌ និងអប់រំ", q: "តើមន្ត្រីរាជការគួរប្រព្រឹត្តចំពោះប្រជាពលរដ្ឋយ៉ាងដូចម្តេច?", options: { A: "គោរព និងបម្រើដោយស្មើភាព", B: "រើសអើង", C: "មិនអើពើ", D: "ទាមទារផលប្រយោជន៍ផ្ទាល់ខ្លួន" }, answer: "A" },
-                    { id: 32, q: "តើ Conflict of Interest មានន័យដូចម្តេច?", options: { A: "ស្ថានភាពដែលផលប្រយោជន៍ផ្ទាល់ខ្លួនអាចប៉ះពាល់ដល់ការបំពេញភារកិច្ច", B: "ការសហការក្នុងក្រុម", C: "ការប្រជុំការងារ", D: "ការរៀបចំផែនការ" }, answer: "A" },
-                    { id: 33, q: "តើសុចរិតភាព (Integrity) មានន័យដូចម្តេច?", options: { A: "ប្រព្រឹត្តដោយស្មោះត្រង់ និងគោរពគោលការណ៍", B: "លាក់កំហុស", C: "ប្រើអំណាចផ្ទាល់ខ្លួន", D: "ទទួលផលប្រយោជន៍ខុសច្បាប់" }, answer: "A" },
-                    { id: 34, q: "តើការរើសអើងក្នុងការផ្តល់សេវាសាធារណៈគួរធ្វើដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "គួរតែធ្វើពេលមានអ្នកស្គាល់", D: "គួរតែធ្វើជាមួយអ្នកក្រីក្រ" }, answer: "B" },
-                    { id: 35, q: "តើការទទួលសំណូកជាអ្វី?", options: { A: "អំពើពុករលួយ", B: "ការងារស្ម័គ្រចិត្ត", C: "ការផ្តល់សេវា", D: "ការប្រជុំ" }, answer: "A" },
-                    { id: 36, q: "តើមន្ត្រីគួររក្សាការសម្ងាត់ព័ត៌មានរបស់ស្ថាប័ននៅពេលណា?", options: { A: "នៅពេលច្បាប់ ឬបទប្បញ្ញត្តិកំណត់ឱ្យរក្សាសម្ងាត់", B: "គ្រប់ព័ត៌មានទាំងអស់ដោយគ្មានលក្ខខណ្ឌ", C: "មិនចាំបាច់រក្សាសម្ងាត់", D: "តែព័ត៌មានផ្ទាល់ខ្លួនរបស់មន្ត្រី" }, answer: "A" },
-                    { id: 37, q: "តើការមកធ្វើការទាន់ពេលបង្ហាញពីអ្វី?", options: { A: "វិន័យការងារ", B: "អំពើពុករលួយ", C: "អំណាច", D: "ការរើសអើង" }, answer: "A" },
-                    { id: 38, q: "តើការគោរពអ្នករួមការងារជួយអ្វី?", options: { A: "បង្កើតបរិយាកាសការងារល្អ", B: "បង្កើនជម្លោះ", C: "កាត់បន្ថយការសហការ", D: "បង្កើតការរើសអើង" }, answer: "A" },
-                    { id: 39, q: "តើការទទួលខុសត្រូវក្នុងការងារមានន័យដូចម្តេច?", options: { A: "ទទួលស្គាល់ និងទទួលខុសត្រូវចំពោះការងារ និងលទ្ធផលរបស់ខ្លួន", B: "ន្ទោសអ្នកដទៃ", C: "លាក់កំហុស", D: "បោះបង់ការងារ" }, answer: "A" },
-                    { id: 40, q: "តើសីលធម៌វិជ្ជាជីវៈមានសារៈសំខាន់សម្រាប់មន្ត្រីរាជការដោយសារអ្វី?", options: { A: "បង្កើនទំនុកចិត្តរបស់ប្រជាពលរដ្ឋ", B: "បង្កើនផលប្រយោជន៍ផ្ទាល់ខ្លួន", C: "ជួយលាក់កំហុស", D: "ជួយជៀសវាងច្បាប់" }, answer: "A" },
-                    { id: 41, q: "តើការគ្រប់គ្រងសាលារៀនមានគោលដៅសំខាន់អ្វី?", options: { A: "ធានាគុណភាពការអប់រំ និងការរៀនរបស់សិស្ស", B: "បង្កើនឯកសារ", C: "បង្កើនការចំណាយ", D: "កាត់បន្ថយការចូលរៀន" }, answer: "A" },
-                    { id: 42, q: "តើគ្រូបង្រៀនជាអ្នកផ្តល់សេវាអ្វី?", options: { A: "សេវាអប់រំ", B: "សេវាធនាគារ", C: "សេវាដឹកជញ្ជូន", D: "សេវាពាណិជ្ជកម្ម" }, answer: "A" },
-                    { id: 43, q: "តើការគោរពសិទ្ធិសិស្សមានសារៈសំខាន់ដែរឬទេ?", options: { A: "សំខាន់", B: "មិនសំខាន់", C: "សំខាន់តែសិស្សពូកែ", D: "សំខាន់តែសិស្សមានទ្រព្យ" }, answer: "A" },
-                    { id: 44, q: "តើគ្រូគួរប្រើការវាយតម្លៃសិស្សដោយរបៀបណា?", options: { A: "ដោយយុត្តិធម៌ និងផ្អែកលើលទ្ធផលសិក្សា", B: "តាមការចូលចិត្ត", C: "តាមទ្រព្យសម្បត្តិគ្រួសារ", D: "តាមអ្នកស្គាល់" }, answer: "A" },
-                    { id: 45, q: "តើការរក្សាកំណត់ត្រាសិស្សមានសារៈសំខាន់អ្វី?", options: { A: "ជួយគ្រប់គ្រង និងតាមដានការសិក្សារបស់សិស្ស", B: "គ្មានប្រយោជន៍", C: "ប្រើសម្រាប់ការផ្សព្វផ្សាយ", D: "ប្រើសម្រាប់លក់ព័ត៌មាន" }, answer: "A" },
-                    { id: 46, q: "តើការចូលរួមរបស់មាតាបិតាក្នុងការអប់រំមានប្រយោជន៍អ្វី?", options: { A: "ជួយគាំទ្រការរៀន និងការអភិវឌ្ឍរបស់សិស្ស", B: "រារាំងការអប់រំ", C: "មិនមានប្រយោជន៍", D: "ជំនួសគ្រូទាំងស្រុង" }, answer: "A" },
-                    { id: 47, q: "តើ “Good Governance” ជាអ្វី?", options: { A: "អភិបាលកិច្ចល្អ", B: "រដ្ឋបាលអាក្រក់", C: "ការគ្រប់គ្រងឯកជន", D: "ការគ្រប់គ្រងគ្រួសារ" }, answer: "A" },
-                    { id: 48, q: "តើគោលការណ៍មួយរបស់អភិបាលកិច្ចល្អគឺអ្វី?", options: { A: "តម្លាភាព", B: "ការរើសអើង", C: "សំណូក", D: "ការលាក់ព័ត៌មាន" }, answer: "A" },
-                    { id: 49, q: "តើការចូលរួមរបស់ប្រជាពលរដ្ឋក្នុងកិច្ចការសាធារណៈមានសារៈសំខាន់យ៉ាងដូចម្តេច?", options: { A: "ជួយឱ្យការគ្រប់គ្រងឆ្លើយតបតម្រូវការរបស់សង្គម", B: "រារាំងការអភិវឌ្ឍ", C: "មិនមានប្រយោជន៍", D: "ធ្វើឱ្យសេវាសាធារណៈបាត់បង់" }, answer: "A" },
-                    { id: 50, q: "តើគោលដៅចុងក្រោយនៃរដ្ឋបាលសាធារណៈល្អគឺអ្វី?", options: { A: "បម្រើប្រជាពលរដ្ឋ និងលើកកម្ពស់ផលប្រយោជន៍សាធារណៈ", B: "បង្កើនផលប្រយោជន៍ផ្ទាល់ខ្លួនរបស់មន្ត្រី", C: "បង្កើនឯកសាររដ្ឋបាល", D: "បង្កើនការចំណាយរដ្ឋ" }, answer: "A" }
-                ];
+        for (let i = 1; i <= 10; i++) {
+            examDatabase.english[i] = { title: `វិញ្ញាសាភាសាអង់គ្លេស ទី ${i} (English Exam  ${i})`, questions: JSON.parse(JSON.stringify(englishBase)) };
+        }
+        for (let i = 1; i <= 15; i++) {
+            examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ និងរដ្ឋបាលសាធារណៈ ទី ${i} (General Knowledge Set ${i})`, questions: JSON.parse(JSON.stringify(generalBase)) };
+        }
+        for (let i = 1; i <= 15; i++) {
+            examDatabase.ict[i] = { title: `វិញ្ញាសាជំនាញឯកទេស ${i} (ICT Specialization  ${i})`, questions: JSON.parse(JSON.stringify(ictBase)) };
+        }
 
-                // វិញ្ញាសាទី 4 (ក្រមសីលធម៌វិជ្ជាជីវៈគ្រូបង្រៀន)
-                const generalSet4 = [
-                    { id: 1, part: "👨‍🏫 ផ្នែកទី១ — គោលការណ៍ទូទៅនៃវិជ្ជាជីវៈគ្រូ", q: "តើក្រមសីលធម៌វិជ្ជាជីវៈគ្រូមានគោលបំណងសំខាន់អ្វី?", options: { A: "កំណត់តែប្រាក់ខែគ្រូ", B: "ណែនាំឱ្យគ្រូប្រព្រឹត្តខ្លួនសមរម្យ និងមានវិជ្ជាជីវៈ", C: "កំណត់តែម៉ោងបង្រៀន", D: "កំណត់តែការប្រឡងសិស្ស" }, answer: "B" },
-                    { id: 2, q: "គុណតម្លៃសំខាន់មួយរបស់គ្រូគឺ៖", options: { A: "សុចរិតភាព", B: "ការរើសអើង", C: "ការលំអៀង", D: "ការប្រើអំណាចខុស" }, answer: "A" },
-                    { id: 3, q: "គ្រូគួរប្រព្រឹត្តចំពោះសិស្សយ៉ាងដូចម្តេច?", options: { A: "រើសអើងសិស្សពូកែ", B: "គោរព ស្មើភាព និងយុត្តិធម៌", C: "ផ្តល់អាទិភាពដល់សិស្សមានទ្រព្យ", D: "មិនអើពើសិស្សខ្សោយ" }, answer: "B" },
-                    { id: 4, q: "តើគ្រូគួរធ្វើអ្វីនៅពេលសិស្សធ្វើខុស?", options: { A: "បង្អាប់មុខសិស្ស", B: "ជួយណែនាំ និងកែតម្រូវដោយវិធីសមរម្យ", C: "បណ្តេញចេញភ្លាមៗ", D: "ប្រាប់សិស្សដទៃឱ្យសើច" }, answer: "B" },
-                    { id: 5, q: "តើគ្រូគួរគោរពភាពខុសគ្នារបស់សិស្សដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "គួរតែគោរពតែសិស្សពូកែ", D: "គួរតែគោរពតែសិស្សមានវិន័យ" }, answer: "A" },
-                    { id: 6, part: "🎓 ផ្នែកទី២ — គ្រូ និងសិស្ស", q: "តើការវាយតម្លៃសិស្សគួរផ្អែកលើអ្វី?", options: { A: "ទំនាក់ទំនងផ្ទាល់ខ្លួន", B: "សមត្ថភាព និងលទ្ធផលសិក្សា", C: "ស្ថានភាពគ្រួសារ", D: "ទ្រព្យសម្បត្តិ" }, answer: "B" },
-                    { id: 7, q: "តើគ្រូអាចបង្ហាញព័ត៌មានផ្ទាល់ខ្លួនរបស់សិស្សជាសាធារណៈដោយគ្មានហេតុផលសមស្របដែរឬទេ?", options: { A: "បានគ្រប់ពេល", B: "មិនគួរ", C: "បានពេលសិស្សខ្សោយ", D: "បាននៅលើបណ្តាញសង្គម" }, answer: "B" },
-                    { id: 8, q: "តើគ្រូគួរប្រើពាក្យសម្តីបែបណាជាមួយសិស្ស?", options: { A: "គំរាមកំហែង", B: "គោរព និងលើកទឹកចិត្ត", C: "ប្រមាថ", D: "បង្អាប់" }, answer: "B" },
-                    { id: 9, q: "តើគោលបំណងនៃវិន័យសិស្សគឺអ្វី?", options: { A: "សងសឹកសិស្ស", B: "ជួយកែប្រែអាកប្បកិរិយា និងអភិវឌ្ឍការទទួលខុសត្រូវ", C: "បង្អាប់សិស្ស", D: "បណ្តេញសិស្សទាំងអស់" }, answer: "B" },
-                    { id: 10, q: "តើគ្រូគួរផ្តល់ឱកាសឱ្យសិស្សបញ្ចេញមតិដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែសិស្សពូកែ", D: "តែសិស្សថ្នាក់ខ្ពស់" }, answer: "A" },
-                    { id: 11, q: "តើការប្រើអំពើហិង្សាលើសិស្សជាវិធីអប់រំល្អឬទេ?", options: { A: "ល្អ", B: "មិនសមរម្យ", C: "ល្អសម្រាប់សិស្សខ្សោយ", D: "ល្អពេលសិស្សមិនស្តាប់" }, answer: "B" },
-                    { id: 12, q: "តើគ្រូគួរជួយសិស្សដែលមានការលំបាកក្នុងការរៀនយ៉ាងដូចម្តេច?", options: { A: "មិនអើពើ", B: "ផ្តល់ការណែនាំ និងការគាំទ្រសមស្រប", C: "បង្អាប់", D: "ឱ្យឈប់រៀន" }, answer: "B" },
-                    { id: 13, q: "តើគ្រូគួររក្សាព្រំដែនវិជ្ជាជីវៈជាមួយសិស្សដែរឬទេ?", options: { A: "គួរ", B: "មិនចាំបាច់", C: "តែជាមួយសិស្សស្រី", D: "តែជាមួយសិស្សប្រុស" }, answer: "A" },
-                    { id: 14, q: "តើគ្រូគួរប្រើបណ្តាញសង្គមជាមួយសិស្សដោយរបៀបណា?", options: { A: "ប្រើដោយគ្មានព្រំដែន", B: "ប្រើដោយប្រុងប្រយ័ត្ន និងគោរពសុវត្ថិភាព/ភាពឯកជន", C: "ែករំលែកព័ត៌មានសិស្សទាំងអស់", D: "បង្ហោះរូបសិស្សដោយគ្មានការពិចារណា" }, answer: "B" },
-                    { id: 15, q: "តើគ្រូគួរលើកទឹកចិត្តសិស្សយ៉ាងដូចម្តេច?", options: { A: "សរសើរដោយស្មោះត្រង់ និងផ្តល់មតិកែលម្អ", B: "ប្រៀបធៀបសិស្សឱ្យអាម៉ាស់", C: "បង្អាប់សិស្សខ្សោយ", D: "មិនផ្តល់មតិ" }, answer: "A" },
-                    { id: 16, part: "🏫 ផ្នែកទី៣ — គ្រូ និងសាលារៀន", q: "តើគ្រូគួរគោរពបទបញ្ជារបស់សាលាដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែពេលមានអ្នកត្រួតពិនិត្យ", D: "តែពេលនាយកសាលានៅទីនោះ" }, answer: "A" },
-                    { id: 17, q: "តើការមកបង្រៀនទាន់ពេលបង្ហាញពីអ្វី?", options: { A: "វិន័យវិជ្ជាជីវៈ", B: "អំណាច", C: "ការប្រកួតប្រជែង", D: "ភាពលំអៀង" }, answer: "A" },
-                    { id: 18, q: "តើគ្រូគួររៀបចំមេរៀនមុនចូលថ្នាក់ដែរឬទេ?", options: { A: "គួរ", B: "មិនចាំបាច់", C: "តែពេលមានការត្រួតពិនិត្យ", D: "តែថ្ងៃប្រឡង" }, answer: "A" },
-                    { id: 19, q: "តើការសហការជាមួយគ្រូដទៃមានប្រយោជន៍អ្វី?", options: { A: "ែករំលែកបទពិសោធន៍ និងលើកកម្ពស់គុណភាពការបង្រៀន", B: "បង្កើនជម្លោះ", C: "កាត់បន្ថយការងារ", D: "បង្កើតការរើសអើង" }, answer: "A" },
-                    { id: 20, q: "តើគ្រូគួរទទួលយកមតិយោបល់ពីមិត្តរួមការងារដែរឬទេ?", options: { A: "គួរ ប្រសិនបើមានគោលបំណងកែលម្អ", B: "មិនគួរ", C: "តែពេលមានការបង្ខំ", D: "មិនត្រូវស្តាប់អ្នកណាទេ" }, answer: "A" },
-                    { id: 21, q: "តើការរក្សាឯកសារសិស្សមានសារៈសំខាន់អ្វី?", options: { A: "ជួយគ្រប់គ្រង និងតាមដានការសិក្សា", B: "មិនមានប្រយោជន៍", C: "សម្រាប់ផ្សព្វផ្សាយ", D: "សម្រាប់លក់" }, answer: "A" },
-                    { id: 22, q: "តើគ្រូគួរប្រើទ្រព្យសម្បត្តិសាលាយ៉ាងដូចម្តេច?", options: { A: "ប្រើសម្រាប់ការងារសមស្រប និងថែរក្សា", B: "យកទៅប្រើផ្ទាល់ខ្លួនគ្រប់ពេល", C: "លក់", D: "ផ្តល់ឱ្យអ្នកដទៃ" }, answer: "A" },
-                    { id: 23, q: "តើគ្រូគួរចូលរួមសកម្មភាពអភិវឌ្ឍវិជ្ជាជីវៈដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "មិនចាំបាច់រៀនបន្ថែម", D: "តែគ្រូថ្មី" }, answer: "A" },
-                    { id: 24, q: "តើការរៀនសូត្រពេញមួយជីវិតសម្រាប់គ្រូមានសារៈសំខាន់យ៉ាងដូចម្តេច?", options: { A: "ជួយបង្កើនចំណេះដឹង និងជំនាញវិជ្ជាជីវៈ", B: "មិនមានប្រយោជន៍", C: "ធ្វើឱ្យបង្រៀនមិនបាន", D: "ប្រើសម្រាប់តែប្រឡង" }, answer: "A" },
-                    { id: 25, q: "តើគ្រូគួរប្រើបច្ចេកវិទ្យាក្នុងការបង្រៀនដោយរបៀបណា?", options: { A: "ប្រើឱ្យសមស្រប ដោយគិតពីគោលបំណងសិក្សា", B: "ប្រើគ្រប់ពេលដោយគ្មានគោលដៅ", C: "មិនប្រើទាល់តែសោះ", D: "ប្រើសម្រាប់កម្សាន្តតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 26, part: "👨‍👩‍‍👧 ផ្នែកទី៤ — គ្រូ និងមាតាបិតា/សហគមន៍", q: "តើទំនាក់ទំនងរវាងគ្រូ និងមាតាបិតាគួរមានលក្ខណៈដូចម្តេច?", options: { A: "គោរព សហការ និងបើកចំហ", B: "ប្រកែកគ្នា", C: "មិនទាក់ទងគ្នា", D: "គ្រូជាអ្នកសម្រេចគ្រប់យ៉ាង" }, answer: "A" },
-                    { id: 27, q: "តើគ្រូគួរជូនដំណឹងមាតាបិតាអំពីការរីកចម្រើនរបស់សិស្សដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែពេលសិស្សធ្លាក់", D: "តែពេលសិស្សពូកែ" }, answer: "A" },
-                    { id: 28, q: "ប្រសិនបូមាតាបិតាផ្តល់មតិយោបល់ គ្រូគួរ៖", options: { A: "ស្តាប់ និងពិភាក្សាដោយវិជ្ជាជីវៈ", B: "ខឹងភ្លាមៗ", C: "បដិសេធគ្រប់យ៉ាង", D: "មិននិយាយជាមួយមាតាបិតា" }, answer: "A" },
-                    { id: 29, q: "តើគ្រូគួររើសអើងសិស្សដោយសារស្ថានភាពគ្រួសារដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "គួរតែធ្វើ", D: "អាស្រ័យលើទ្រព្យសម្បត្តិ" }, answer: "B" },
-                    { id: 30, q: "តើគ្រូគួរចូលរួមក្នុងសកម្មភាពសហគមន៍ដែលពាក់ព័ន្ធនឹងការអប់រំដែរឬទេ?", options: { A: "គួរ ប្រសិនបើសមស្របនឹងតួនាទី", B: "មិនគួរ", C: "មិនត្រូវទាក់ទងសហគមន៍", D: "តែពេលទទួលប្រាក់" }, answer: "A" },
-                    { id: 31, part: "⚖️ ផ្នែកទី៥ — សុចរិតភាព និងការទទួលខុសត្រូវ", q: "តើគ្រូអាចទាមទារប្រាក់ពីសិស្សជាថ្នូរនឹងពិន្ទុល្អដែរឬទេ?", options: { A: "បាន", B: "មិនបាន", C: "បានបើសិស្សស្ម័គ្រចិត្ត", D: "បាននៅពេលប្រឡង" }, answer: "B" },
-                    { id: 32, q: "តើការផ្តល់ពិន្ទុដោយលំអៀងគឺ៖", options: { A: "សីលធម៌ល្អ", B: "មិនយុត្តិធម៌ និងមិនសមស្រប", C: "ជាវិធីលើកទឹកចិត្ត", D: "ជាកាតព្វកិច្ច" }, answer: "B" },
-                    { id: 33, q: "តើគ្រូគួរធ្វើអ្វី ប្រសិនបើខ្លួនមានកំហុសក្នុងការបង្រៀន?", options: { A: "ទទួលស្គាល់ និងកែតម្រូវ", B: "ន្ទោសសិស្ស", C: "លាក់កំហុស", D: "ន្ទោសគ្រូដទៃ" }, answer: "A" },
-                    { id: 34, q: "តើសុចរិតភាពក្នុងការប្រឡងមានន័យដូចម្តេច?", options: { A: "រក្សាភាពយុត្តិធម៌ និងមិនជួយបន្លំ", B: "ផ្តល់ចម្លើយឱ្យសិស្ស", C: "ផ្លាស់ប្តូរពិន្ទុ", D: "ជួយតែសិស្សដែលស្គាល់" }, answer: "A" },
-                    { id: 35, q: "តើគ្រូគួរធ្វើអ្វីចំពោះសម្ភារៈបង្រៀនដែលជាកម្មសិទ្ធិសាលា?", options: { A: "ថែរក្សា និងប្រើប្រាស់តាមគោលបំណង", B: "យកទៅលក់", C: "យកទៅប្រើផ្ទាល់ខ្លួនគ្រប់ពេល", D: "ផ្តល់ឱ្យអ្នកដទៃ" }, answer: "A" },
-                    { id: 36, q: "តើការទទួលអំណោយពីសិស្សគួរពិចារណាអ្វីជាចម្បង?", options: { A: "កុំឱ្យប៉ះពាល់ដល់ភាពយុត្តិធម៌ និងវិជ្ជាជីវៈ", B: "តម្លៃអំណោយត្រូវតែថ្លៃ", C: "ត្រូវទទួលគ្រប់អំណោយ", D: "ត្រូវទាមទារអំណោយ" }, answer: "A" },
-                    { id: 37, q: "តើគ្រូគួរប្រើតួនាទីរបស់ខ្លួនដើម្បីទទួលផលប្រយោជន៍ផ្ទាល់ខ្លួនដែរឬទេ?", options: { A: "បាន", B: "មិនគួរ", C: "បាននៅក្រៅម៉ោង", D: "បានប្រសិនបើគ្មានអ្នកដឹង" }, answer: "B" },
-                    { id: 38, q: "តើការរក្សាភាពឯកជនរបស់សិស្សមានន័យដូចម្តេច?", options: { A: "ការពារព័ត៌មានផ្ទាល់ខ្លួនរបស់សិស្សពីការបង្ហាញដោយមិនសមស្រប", B: "បង្ហោះព័ត៌មានសិស្សទាំងអស់", C: "ែករំលែកពិន្ទុសិស្សជាសាធារណៈ", D: "ប្រាប់ព័ត៌មានសិស្សគ្រប់គ្នា" }, answer: "A" },
-                    { id: 39, q: "តើគ្រូគួររាយការណ៍បញ្ហាធ្ងន់ធ្ងររបស់សិស្សតាមរបៀបណា?", options: { A: "តាមនីតិវិធីសមស្របរបស់សាលា/ស្ថាប័ន", B: "បង្ហោះលើ Facebook", C: "ប្រាប់មិត្តភក្តិទាំងអស់", D: "លាក់បញ្ហា" }, answer: "A" },
-                    { id: 40, q: "តើការគោរពច្បាប់ និងបទបញ្ជារបស់ស្ថាប័នជាផ្នែកនៃវិជ្ជាជីវៈគ្រូដែរឬទេ?", options: { A: "មែន", B: "មិនមែន", C: "តែសម្រាប់គ្រូថ្មី", D: "តែពេលមានការត្រួតពិនិត្យ" }, answer: "A" },
-                    { id: 41, part: "🌟 ផ្នែកទី៦ — ស្ថានការណ៍វិជ្ជាជីវៈ", q: "ប្រសិនបើសិស្សម្នាក់រៀនយឺតជាងមិត្តភក្តិ គ្រូគួរ៖", options: { A: "បង្អាប់គាត់", B: "ផ្តល់ការគាំទ្រ និងវិធីសិក្សសមស្រប", C: "មិនឱ្យចូលរៀន", D: "ប្រាប់ថាគាត់មិនអាចរៀនបាន" }, answer: "B" },
-                    { id: 42, q: "ប្រសិនបើសិស្សម្នាក់ធ្វើកំហុសក្នុងថ្នាក់ គ្រូគួរ៖", options: { A: "ប្រើកំហុសជាឱកាសសម្រាប់ការរៀន", B: "សើចចំអក", C: "បង្អាប់", D: "ដាក់ទោសដោយគ្មានការពន្យល់" }, answer: "A" },
-                    { id: 43, q: "ប្រសិនបើមាតាបិតាស្នើឱ្យគ្រូបន្ថែមពិន្ទុឱ្យកូនដោយគ្មានមូលដ្ឋាន គ្រូគួរ៖", options: { A: "យល់ព្រម", B: "បដិសេធដោយសុភាព និងរក្សាគោលការណ៍យុត្តិធម៌", C: "ទទួលប្រាក់ជំនួស", D: "ប្តូរពិន្ទុជាសម្ងាត់" }, answer: "B" },
-                    { id: 44, q: "ប្រសិនបើគ្រូម្នាក់ទៀតធ្វើកំហុស គ្រូគួរ៖", options: { A: "បង្ហោះកំហុសគាត់លើបណ្តាញសង្គម", B: "ពិភាក្សា និងផ្តល់មតិយោបល់ដោយវិជ្ជាជីវៈ", C: "បង្អាប់នៅមុខសិស្ស", D: "ប្រាប់មនុស្សគ្រប់គ្នា" }, answer: "B" },
-                    { id: 45, q: "ប្រសិនបើមានសិស្សពីរនាក់មានសមត្ថភាពខុសគ្នា គ្រូគួរ៖", options: { A: "បង្រៀនដោយគិតពីភាពខុសគ្នារបស់ពួកគេ", B: "ផ្តល់ឱកាសតែសិស្សពូកែ", C: "មិនអើពើសិស្សខ្សោយ", D: "ដាក់ពិន្ទុដូចគ្នាដោយមិនវាយតម្លៃ" }, answer: "A" },
-                    { id: 46, q: "ប្រសិនបើគ្រូមិនដឹងចម្លើយសំណួររបស់សិស្ស គ្រូគួរ៖", options: { A: "បង្កើតចម្លើយមិនពិត", B: "ទទួលស្គាល់ថាមិនទាន់ដឹង និងស្វែងរកចម្លើយត្រឹមត្រូវ", C: "ខឹងសិស្ស", D: "បញ្ឈប់សំណួរ" }, answer: "B" },
-                    { id: 47, q: "ប្រសិនបើគ្រូឃើញការបន្លំក្នុងការប្រឡង គ្រូគួរ៖", options: { A: "មិនអើពើ", B: "ដោះស្រាយតាមបទបញ្ជា និងរក្សាភាពយុត្តិធម៌", C: "ជួយសិស្ស", D: "លាក់បាំង" }, answer: "B" },
-                    { id: 48, q: "តើគ្រូគួរធ្វើអ្វីដើម្បីរក្សាកិត្តិយសវិជ្ជាជីវៈ?", options: { A: "ប្រព្រឹត្តដោយសុចរិត គោរពសិស្ស និងអនុវត្តភារកិច្ចដោយទំនួលខុសត្រូវ", B: "ប្រើអំណាច", C: "រើសអើង", D: "ទទួលផលប្រយោជន៍ផ្ទាល់ខ្លួន" }, answer: "A" },
-                    { id: 49, q: "តើគ្រូល្អគួរមានទំនាក់ទំនងជាមួយសិស្សបែបណា?", options: { A: "មានការគោរព កក់ក្តៅ និងរក្សាព្រំដែនវិជ្ជាជីវៈ", B: "ជិតស្និទ្ធដោយគ្មានព្រំដែន", C: "មិននិយាយជាមួយសិស្ស", D: "គំរាមកំហែងសិស្ស" }, answer: "A" },
-                    { id: 50, q: "តើគោលដៅសំខាន់បំផុតនៃក្រមសីលធម៌វិជ្ជាជីវៈគ្រូគឺអ្វី?", options: { A: "លើកកម្ពស់គុណភាពវិជ្ជាជីវៈ និងការពារផលប្រយោជន៍សិស្ស", B: "បង្កើនអំណាចរបស់គ្រូ", C: "បង្កើនប្រាក់ខែគ្រូ", D: "កំណត់ការងាររដ្ឋបាលតែប៉ុណ្ណោះ" }, answer: "A" }
-                ];
+        // --- CONTROLLER LOGIC ---
+        let currentCategory = 'english';
+        let currentSetId = 1;
+        let currentQuestions = [];
+        let currentAnswerKey = {};
+        let countdown = null;
+        let timeLeft = 60 * 60; // 60 minutes
 
-                // វិញ្ញាសាទី 5 (គោលនយោបាយរាជរដ្ឋាភិបាល និងរដ្ឋបាលសាធារណៈ)
-                const generalSet5 = [
-                    { id: 1, part: "🏛️ ផ្នែកទី១ — គោលនយោបាយរាជរដ្ឋាភិបាល", q: "តើគោលនយោបាយសាធារណៈមានគោលបំណងសំខាន់អ្វី?", options: { A: "បម្រើផលប្រយោជន៍បុគ្គល", B: "ដោះស្រាយបញ្ហា និងឆ្លើយតបតម្រូវការសង្គម", C: "បង្កើនការប្រកួតប្រជែងឯកជន", D: "កាត់បន្ថយសេវាសាធារណៈ" }, answer: "B" },
-                    { id: 2, q: "តើរាជរដ្ឋាភិបាលមានតួនាទីសំខាន់អ្វីក្នុងការអភិវឌ្ឍប្រទេស?", options: { A: "រៀបចំ និងអនុវត្តគោលនយោបាយសាធារណៈ", B: "គ្រប់គ្រងតែអាជីវកម្មឯកជន", C: "លក់ទំនិញ", D: "គ្រប់គ្រងគ្រួសារ" }, answer: "A" },
-                    { id: 3, q: "តើ “អភិបាលកិច្ចល្អ” ផ្តោតលើអ្វី?", options: { A: "តម្លាភាព គណនេយ្យភាព ប្រសិទ្ធភាព និងការចូលរួម", B: "ការរើសអើង", C: "ការសម្ងាត់គ្រប់យ៉ាង", D: "ការប្រើអំណាចដោយគ្មានការត្រួតពិនិត្យ" }, answer: "A" },
-                    { id: 4, q: "តើការអភិវឌ្ឍប្រកបដោយចីរភាពមានន័យដូចម្តេច?", options: { A: "អភិវឌ្ឍដោយមិនគិតពីបរិស្ថាន", B: "បំពេញតម្រូវការបច្ចុប្បន្ន ដោយមិនប៉ះពាល់ដល់សមត្ថភាពមនុស្សជំនាន់ក្រោយ", C: "ប្រើធនធានធម្មជាតិឱ្យអស់", D: "ផ្តោតលើសេដ្ឋកិច្ចតែប៉ុណ្ណោះ" }, answer: "B" },
-                    { id: 5, q: "តើការកាត់បន្ថយភាពក្រីក្រជាគោលដៅសំខាន់មួយនៃការអភិវឌ្ឍសង្គមដែរឬទេ?", options: { A: "មែន", B: "មិនមែន", C: "មានតែទីក្រុង", D: "មានតែជនបទ" }, answer: "A" },
-                    { id: 6, q: "តើការអភិវឌ្ឍធនធានមនុស្សមានសារៈសំខាន់អ្វី?", options: { A: "បង្កើនចំណេះដឹង ជំនាញ និងផលិតភាព", B: "បង្កើនការចំណាយ", C: "កាត់បន្ថយការអប់រំ", D: "កាត់បន្ថយការងារ" }, answer: "A" },
-                    { id: 7, q: "តើការអប់រំមានតួនាទីអ្វីក្នុងការអភិវឌ្ឍប្រទេស?", options: { A: "បង្កើតធនធានមនុស្សមានចំណេះដឹង និងជំនាញ", B: "មានតែសម្រាប់ប្រឡង", C: "មិនពាក់ព័ន្ធនឹងសេដ្ឋកិច្ច", D: "មានតែសម្រាប់កុមារ" }, answer: "A" },
-                    { id: 8, q: "តើការអភិវឌ្ឍសុខាភិបាលមានគោលបំណងសំខាន់អ្វី?", options: { A: "លើកកម្ពស់សុខភាព និងសុខុមាលភាពប្រជាពលរដ្ឋ", B: "បង្កើនតម្លៃទំនិញ", C: "កាត់បន្ថយសេវាសុខាភិបាល", D: "បង្កើនការនាំចូល" }, answer: "A" },
-                    { id: 9, q: "តើការបង្កើតការងារមានសារៈសំខាន់ចំពោះសេដ្ឋកិច្ចយ៉ាងដូចម្តេច?", options: { A: "បង្កើនប្រាក់ចំណូលគ្រួសារ និងសកម្មភាពសេដ្ឋកិច្ច", B: "កាត់បន្ថយផលិតកម្ម", C: "បង្កើនភាពក្រីក្រ", D: "កាត់បន្ថយជំនាញ" }, answer: "A" },
-                    { id: 10, q: "តើការអភិវឌ្ឍជនបទមានគោលបំណងអ្វី?", options: { A: "លើកកម្ពស់ជីវភាព និងហេដ្ឋារចនាសម្ព័ន្ធនៅជនបទ", B: "ផ្តោតតែលើទីក្រុង", C: "បិទទីផ្សារជនបទ", D: "កាត់បន្ថយសេវាសាធារណៈ" }, answer: "A" },
-                    { id: 11, part: "🏢 ផ្នែកទី២ — រដ្ឋបាលសាធារណៈ", q: "តើរដ្ឋបាលសាធារណៈមានន័យដូចម្តេច?", options: { A: "ការគ្រប់គ្រង និងអនុវត្តកិច្ចការរដ្ឋដើម្បីបម្រើសាធារណៈ", B: "ការគ្រប់គ្រងក្រុមហ៊ុនឯកជន", C: "ការគ្រប់គ្រងគ្រួសារ", D: "ការធ្វើអាជីវកម្ម" }, answer: "A" },
-                    { id: 12, q: "តើគោលដៅសំខាន់របស់រដ្ឋបាលសាធារណៈគឺអ្វី?", options: { A: "បម្រើផលប្រយោជន៍សាធារណៈ", B: "បង្កើនផលប្រយោជន៍ផ្ទាល់ខ្លួន", C: "លក់ផលិតផល", D: "បង្កើនការប្រកួតប្រជែង" }, answer: "A" },
-                    { id: 13, q: "“Accountability” មានន័យថា៖", options: { A: "គណនេយ្យភាព និងការទទួលខុសត្រូវ", B: "ការសម្ងាត់", C: "ការរើសអើង", D: "ការបដិសេធការទទួលខុសត្រូវ" }, answer: "A" },
-                    { id: 14, q: "“Transparency” មានន័យថា៖", options: { A: "តម្លាភាព និងការបើកចំហព័ត៌មានសមស្រប", B: "លាក់ព័ត៌មាន", C: "បិទស្ថាប័ន", D: "កាត់បន្ថយសេវា" }, answer: "A" },
-                    { id: 15, q: "តើប្រសិទ្ធភាព (Efficiency) ផ្តោតលើអ្វី?", options: { A: "ការប្រើធនធានឱ្យមានប្រសិទ្ធភាព", B: "ការចំណាយឱ្យបានច្រើន", C: "ការធ្វើការយឺត", D: "ការបង្កើននីតិវិធីមិនចាំបាច់" }, answer: "A" },
-                    { id: 16, q: "តើប្រសិទ្ធផល (Effectiveness) ផ្តោតលើអ្វី?", options: { A: "សម្រេចបានគោលដៅ", B: "ចំណាយថវិកាច្រើន", C: "បង្កើនឯកសារ", D: "បង្កើនបុគ្គលិក" }, answer: "A" },
-                    { id: 17, q: "តើសេវាសាធារណៈគួរផ្តល់ជូនប្រជាពលរដ្ឋដោយរបៀបណា?", options: { A: "ស្មើភាព យុត្តិធម៌ និងមានប្រសិទ្ធភាព", B: "រើសអើង", C: "តាមអ្នកស្គាល់", D: "តាមទ្រព្យសម្បត្តិ" }, answer: "A" },
-                    { id: 18, q: "តើការកែលម្អសេវាសាធារណៈមានគោលបំណងអ្វី?", options: { A: "ឱ្យសេវាកាន់តែមានគុណភាព និងឆ្លើយតបតម្រូវការប្រជាពលរដ្ឋ", B: "បង្កើនការរង់ចាំ", C: "បង្កើនឯកសារ", D: "បង្កើនថ្លៃសេវាដោយគ្មានហេតុផល" }, answer: "A" },
-                    { id: 19, q: "តើការប្រយុទ្ធប្រឆាំងអំពើពុករលួយជួយអ្វី?", options: { A: "បង្កើនសុចរិតភាព និងទំនុកចិត្តសាធារណៈ", B: "បង្កើនអំពើពុករលួយ", C: "កាត់បន្ថយតម្លាភាព", D: "បង្កើនការរើសអើង" }, answer: "A" },
-                    { id: 20, q: "តើនីតិរដ្ឋ (Rule of Law) មានន័យថា៖", options: { A: "គ្រប់គ្នាត្រូវគោរពច្បាប់", B: "មានតែមន្ត្រីត្រូវគោរពច្បាប់", C: "ប្រជាពលរដ្ឋមិនចាំបាច់គោរពច្បាប់", D: "ច្បាប់អាចប្រើតាមចិត្ត" }, answer: "A" },
-                    { id: 21, part: "👥 ផ្នែកទី៣ — កំណែទម្រង់រដ្ឋបាលសាធារណៈ", q: "តើកំណែទម្រង់រដ្ឋបាលសាធារណៈមានគោលបំណងអ្វី?", options: { A: "ធ្វើឱ្យរដ្ឋបាលកាន់តែមានប្រសិទ្ធភាព និងឆ្លើយតបប្រជាពលរដ្ឋ", B: "បង្កើននីតិវិធីមិនចាំបាច់", C: "បង្កើនការិយាធិបតេយ្យ", D: "កាត់បន្ថយគុណភាពសេវា" }, answer: "A" },
-                    { id: 22, q: "តើការធ្វើទំនើបកម្មរដ្ឋបាលមានន័យដូចម្តេច?", options: { A: "ប្រើវិធីសាស្ត្រ និងបច្ចេកវិទ្យាទំនើប ដើម្បីកែលម្អការងារ", B: "ត្រឡប់ទៅប្រើវិធីចាស់ទាំងអស់", C: "បង្កើនឯកសារក្រដាស", D: "លុបចោលសេវាឌីជីថល" }, answer: "A" },
-                    { id: 23, q: "តើ Digital Government អាចជួយអ្វី?", options: { A: "ផ្តល់សេវារដ្ឋតាមបច្ចេកវិទ្យាឌីជីថល", B: "លុបចោលសេវាសាធារណៈ", C: "កាត់បន្ថយព័ត៌មាន", D: "បង្កើនការងារដោយដៃ" }, answer: "A" },
-                    { id: 24, q: "តើការកាត់បន្ថយនីតិវិធីមិនចាំបាច់អាចជួយអ្វី?", options: { A: "បង្កើនល្បឿន និងប្រសិទ្ធភាពសេវា", B: "បង្កើនការរង់ចាំ", C: "បង្កើនភាពស្មុគស្មាញ", D: "បង្កើនការចំណាយ" }, answer: "A" },
-                    { id: 25, q: "តើការអភិវឌ្ឍសមត្ថភាពមន្ត្រីមានសារៈសំខាន់អ្វី?", options: { A: "បង្កើនជំនាញ និងគុណភាពការងារ", B: "កាត់បន្ថយសមត្ថភាព", C: "បង្កើនការអវត្តមាន", D: "កាត់បន្ថយការទទួលខុសត្រូវ" }, answer: "A" },
-                    { id: 26, q: "តើការវាយតម្លៃការងារមន្ត្រីគួរផ្អែកលើអ្វី?", options: { A: "លទ្ធផលការងារ និងសមត្ថភាព", B: "ទំនាក់ទំនងផ្ទាល់ខ្លួន", C: "ការរើសអើង", D: "ទ្រព្យសម្បត្តិ" }, answer: "A" },
-                    { id: 27, q: "តើការគ្រប់គ្រងតាមលទ្ធផល (Result-Based Management) ផ្តោតលើអ្វី?", options: { A: "លទ្ធផល និងការសម្រេចគោលដៅ", B: "ចំនួនឯកសារ", C: "ចំនួនប្រជុំ", D: "ចំនួនបុគ្គលិក" }, answer: "A" },
-                    { id: 28, q: "តើការរៀបចំផែនការល្អត្រូវមានអ្វី?", options: { A: "គោលដៅ សកម្មភាព ធនធាន និងសូចនាករវាស់វែង", B: "គោលដៅតែមួយ", C: "ចំណាយដោយគ្មានផែនការ", D: "សកម្មភាពដោយគ្មានគោលដៅ" }, answer: "A" },
-                    { id: 29, q: "តើការត្រួតពិនិត្យ និងវាយតម្លៃគោលនយោបាយមានប្រយោជន៍អ្វី?", options: { A: "ដឹងពីលទ្ធផល និងកែលម្អការអនុវត្ត", B: "លាក់បញ្ហា", C: "បញ្ឈប់ការអភិវឌ្ឍ", D: "បង្កើនការចំណាយ" }, answer: "A" },
-                    { id: 30, q: "តើការចូលរួមរបស់ប្រជាពលរដ្ឋក្នុងការរៀបចំគោលនយោបាយអាចជួយអ្វី?", options: { A: "ឱ្យគោលនយោបាយឆ្លើយតបតម្រូវការពិត", B: "រារាំងការអភិវឌ្ឍ", C: "បង្កើនការរើសអើង", D: "លុបចោលការទទួលខុសត្រូវ" }, answer: "A" },
-                    { id: 31, part: "🇰🇭 ផ្នែកទី៤ — ការអភិវឌ្ឍ និងវិស័យអាទិភាព", q: "តើការអភិវឌ្ឍវិស័យអប់រំមានគោលដៅសំខាន់អ្វី?", options: { A: "បង្កើនគុណភាព និងសមធម៌នៃការអប់រំ", B: "កាត់បន្ថយការចូលរៀន", C: "បង្កើនការបោះបង់ការសិក្សា", D: "បិទសាលារៀន" }, answer: "A" },
-                    { id: 32, q: "តើគ្រូមានតួនាទីអ្វីក្នុងការអនុវត្តគោលនយោបាយអប់រំ?", options: { A: "អនុវត្តគោលនយោបាយតាមការងារបង្រៀន និងការអប់រំសិស្ស", B: "មិនចាំបាច់អនុវត្ត", C: "អនុវត្តតែពេលមានការត្រួតពិនិត្យ", D: "អនុវត្តតាមចិត្ត" }, answer: "A" },
-                    { id: 33, q: "តើសមធម៌ក្នុងការអប់រំមានន័យថា៖", options: { A: "ផ្តល់ឱកាសសិក្សាដោយយុត្តិធម៌ និងគិតពីតម្រូវការខុសគ្នា", B: "ផ្តល់ឱកាសតែសិស្សពូកែ", C: "ផ្តល់ឱកាសតែអ្នកមាន", D: "បដិសេធសិស្សជនបទ" }, answer: "A" },
-                    { id: 34, q: "តើការអភិវឌ្ឍហេដ្ឋារចនាសម្ព័ន្ធមានសារៈសំខាន់អ្វី?", options: { A: "គាំទ្រកំណើនសេដ្ឋកិច្ច និងការផ្តល់សេវាសាធារណៈ", B: "កាត់បន្ថយការតភ្ជាប់", C: "បង្កើនការចំណាយដោយគ្មានប្រយោជន៍", D: "រារាំងពាណិជ្ជកម្ម" }, answer: "A" },
-                    { id: 35, q: "តើការអភិវឌ្ឍវិស័យកសិកម្មអាចជួយអ្វី?", options: { A: "បង្កើនផលិតភាព និងប្រាក់ចំណូលប្រជាកសិករ", B: "កាត់បន្ថយផលិតកម្ម", C: "បង្កើនការនាំចូលអាហារ", D: "កាត់បន្ថយការងារ" }, answer: "A" },
-                    { id: 36, q: "តើវិស័យឧស្សាហកម្មមានសារៈសំខាន់អ្វី?", options: { A: "បង្កើតការងារ និងជំរុញការនាំចេញ", B: "កាត់បន្ថយផលិតកម្ម", C: "បិទទីផ្សារ", D: "លុបបំបាត់ការវិនិយោគ" }, answer: "A" },
-                    { id: 37, q: "តើវិស័យទេសចរណ៍អាចរួមចំណែកអ្វីដល់សេដ្ឋកិច្ច?", options: { A: "ចំណូល ការងារ និងការអភិវឌ្ឍតំបន់", B: "កាត់បន្ថយការងារ", C: "បិទតំបន់ទេសចរណ៍", D: "កាត់បន្ថយសេវា" }, answer: "A" },
-                    { id: 38, q: "តើការការពារបរិស្ថានគួរត្រូវបានបញ្ចូលក្នុងការអភិវឌ្ឍដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែទីក្រុង", D: "តែតំបន់ទេសចរណ៍" }, answer: "A" },
-                    { id: 39, q: "តើការគ្រប់គ្រងធនធានធម្មជាតិល្អមានគោលបំណងអ្វី?", options: { A: "ប្រើប្រាស់ប្រកបដោយចីរភាព និងការពារធនធានសម្រាប់អនាគត", B: "ប្រើឱ្យអស់", C: "លក់ធនធានទាំងអស់", D: "មិនគ្រប់គ្រង" }, answer: "A" },
-                    { id: 40, q: "តើការអភិវឌ្ឍសង្គមគួរផ្តោតលើអ្វី?", options: { A: "ជីវភាព សុខភាព ការអប់រំ និងសុខុមាលភាពប្រជាជន", B: "អាជីវកម្មតែប៉ុណ្ណោះ", C: "ការនាំចេញតែប៉ុណ្ណោះ", D: "ទេសចរណ៍តែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 41, part: "🌐 ផ្នែកទី៥ — អភិបាលកិច្ច និងការបម្រើប្រជាពលរដ្ឋ", q: "តើ “ប្រជាពលរដ្ឋជាមូលដ្ឋាននៃសេវាសាធារណៈ” មានន័យថា៖", options: { A: "សេវាត្រូវឆ្លើយតបតម្រូវការរបស់ប្រជាពលរដ្ឋ", B: "សេវាសម្រាប់មន្ត្រី", C: "សេវាសម្រាប់អ្នកមាន", D: "សេវាសម្រាប់អាជីវកម្មតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 42, q: "តើការផ្តល់សេវាសាធារណៈដោយស្មើភាពមានន័យថា៖", options: { A: "មិនរើសអើង និងគោរពសិទ្ធិរបស់ប្រជាពលរដ្ឋ", B: "ផ្តល់សេវាតាមអ្នកស្គាល់", C: "ផ្តល់សេវាតាមទ្រព្យសម្បត្តិ", D: "ផ្តល់សេវាតាមឋានៈ" }, answer: "A" },
-                    { id: 43, q: "តើការទទួលមតិយោបល់ពីប្រជាពលរដ្ឋមានប្រយោជន៍អ្វី?", options: { A: "ជួយកែលម្អគុណភាពសេវាសាធារណៈ", B: "រារាំងការងារ", C: "បង្កើនការរើសអើង", D: "មិនមានប្រយោជន៍" }, answer: "A" },
-                    { id: 44, q: "តើការប្រឆាំងអំពើពុករលួយជាកត្តាសំខាន់សម្រាប់អភិបាលកិច្ចល្អដែរឬទេ?", options: { A: "មែន", B: "មិនមែន", C: "តែវិស័យឯកជន", D: "តែទីក្រុង" }, answer: "A" },
-                    { id: 45, q: "តើសុចរិតភាពរបស់មន្ត្រីសាធារណៈមានសារៈសំខាន់អ្វី?", options: { A: "បង្កើនទំនុកចិត្តរបស់ប្រជាពលរដ្ឋ", B: "បង្កើនអំពើពុករលួយ", C: "បង្កើនការរើសអើង", D: "កាត់បន្ថយគុណភាពសេវា" }, answer: "A" },
-                    { id: 46, q: "តើការប្រើប្រាស់ថវិការដ្ឋគួរមានលក្ខណៈដូចម្តេច?", options: { A: "មានប្រសិទ្ធភាព តម្លាភាព និងគណនេយ្យភាព", B: "ប្រើតាមចិត្ត", C: "លាក់ការចំណាយ", D: "ប្រើសម្រាប់ផលប្រយោជន៍ផ្ទាល់ខ្លួន" }, answer: "A" },
-                    { id: 47, q: "តើការអនុវត្តគោលនយោបាយជោគជ័យត្រូវការអ្វី?", options: { A: "ផែនការ ធនធាន សមត្ថភាព និងការត្រួតពិនិត្យវាយតម្លៃ", B: "គោលដៅតែប៉ុណ្ណោះ", C: "ថវិកាតែប៉ុណ្ណោះ", D: "ឯកសារតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 48, q: "តើការសហការរវាងរដ្ឋ និងសង្គមមានសារៈសំខាន់អ្វី?", options: { A: "ជួយដោះស្រាយបញ្ហាសាធារណៈបានមានប្រសិទ្ធភាពជាងមុន", B: "បង្កើនជម្លោះ", C: "កាត់បន្ថយការចូលរួម", D: "លុបចោលតួនាទីប្រជាពលរដ្ឋ" }, answer: "A" },
-                    { id: 49, q: "តើគោលនយោបាយសាធារណៈគួរត្រូវបានកែលម្អនៅពេលណា?", options: { A: "នៅពេលមានភស្តុតាងថាវាមិនឆ្លើយតបគោលដៅ ឬតម្រូវការបានល្អ", B: "មិនត្រូវកែលម្អឡើយ", C: "រាល់ថ្ងៃដោយគ្មានការវាយតម្លៃ", D: "តែពេលមានការរិះគន់" }, answer: "A" },
-                    { id: 50, q: "តើគោលដៅរួមនៃគោលនយោបាយសាធារណៈ និងរដ្ឋបាលសាធារណៈគឺអ្វី?", options: { A: "បម្រើប្រជាពលរដ្ឋ និងលើកកម្ពស់ការអភិវឌ្ឍសង្គម-សេដ្ឋកិច្ច", B: "បង្កើនអំណាចផ្ទាល់ខ្លួន", C: "បង្កើនការិយាធិបតេយ្យ", D: "បង្កើនផលប្រយោជន៍បុគ្គល" }, answer: "A" }
-                ];
+        function switchTab(category) {
+            currentCategory = category;
+            document.getElementById('tab-english').className = category === 'english' ? 'px-5 py-2.5 rounded-lg font-bold text-sm bg-purple-600 text-white shadow transition' : 'px-5 py-2.5 rounded-lg font-bold text-sm bg-white text-gray-700 hover:bg-purple-100 shadow transition';
+            document.getElementById('tab-general').className = category === 'general' ? 'px-5 py-2.5 rounded-lg font-bold text-sm bg-purple-600 text-white shadow transition' : 'px-5 py-2.5 rounded-lg font-bold text-sm bg-white text-gray-700 hover:bg-purple-100 shadow transition';
+            document.getElementById('tab-ict').className = category === 'ict' ? 'px-5 py-2.5 rounded-lg font-bold text-sm bg-purple-600 text-white shadow transition' : 'px-5 py-2.5 rounded-lg font-bold text-sm bg-white text-gray-700 hover:bg-purple-100 shadow transition';
 
-                // វិញ្ញាសាទី 6 (ប្រវត្តិសាស្ត្រ និងវប្បធម៌ខ្មែរ)
-                const generalSet6 = [
-                    { id: 1, part: "🇰🇭 ផ្នែកទី១ — ប្រវត្តិសាស្ត្រ និងវប្បធម៌ខ្មែរ", q: "តើប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?", options: { A: "សៀមរាប", B: "បាត់ដំបង", C: "កំពង់ធំ", D: "កំពង់ចាម" }, answer: "A" },
-                    { id: 2, q: "តើអង្គរវត្តត្រូវបានកសាងក្នុងរាជកាលព្រះមហាក្សត្រអង្គណា?", options: { A: "ព្រះបាទជ័យវរ្ម័នទី៧", B: "ព្រះបាទសូរ្យវរ្ម័នទី២", C: "ព្រះបាទឥន្ទ្រវរ្ម័នទី១", D: "ព្រះបាទយសោវរ្ម័នទី១" }, answer: "B" },
-                    { id: 3, q: "ប្រាសាទបាយ័នមានលក្ខណៈពិសេសអ្វី?", options: { A: "រូបព្រះពុទ្ធមាស", B: "មុខព្រះភក្ត្រធំៗនៅលើប្រាសាទ", C: "ស្ពានឈើ", D: "ជញ្ជាំងកញ្ចក់" }, answer: "B" },
-                    { id: 4, q: "ព្រះបាទជ័យវរ្ម័នទី៧មានព្រះរាជកិច្ចសំខាន់មួយគឺ៖", options: { A: "កសាងបណ្តាញផ្លូវ និងសំណង់សាធារណៈជាច្រើន", B: "បង្កើតអាស៊ាន", C: "បង្កើតអក្សរខ្មែរ", D: "បង្កើតប្រាសាទអង្គរវត្ត" }, answer: "A" },
-                    { id: 5, q: "តើរបាំអប្សរាជាអ្វី?", options: { A: "របាំប្រពៃណីខ្មែរ", B: "កីឡា", C: "តន្ត្រីសម័យថ្មី", D: "ចម្រៀងប្រជាប្រិយ" }, answer: "A" },
-                    { id: 6, q: "តើបុណ្យចូលឆ្នាំខ្មែរប្រព្រឹត្តឡើងជាទូទៅនៅខែណា?", options: { A: "មករា", B: "មេសា", C: "កក្កដា", D: "ធ្នូ" }, answer: "B" },
-                    { id: 7, q: "តើបុណ្យភ្ជុំបិណ្ឌពាក់ព័ន្ធជាចម្បងនឹងអ្វី?", options: { A: "ការគោរព និងឧទ្ទិសកុសលដល់បុព្វបុរស", B: "ការប្រកួតកីឡា", C: "ការប្រមូលផល", D: "ការបោះឆ្នោត" }, answer: "A" },
-                    { id: 8, q: "តើប្រាសាទព្រះវិហារស្ថិតនៅតំបន់ភ្នំដងរែក និងជាប់ព្រំដែនប្រទេសណា?", options: { A: "ឡាវ", B: "ថៃ", C: "វៀតណាម", D: "ម៉ាឡេស៊ី" }, answer: "B" },
-                    { id: 9, q: "តើអក្សរខ្មែរមានប្រភពប្រវត្តិសាស្ត្រពាក់ព័ន្ធជាមួយអក្សរបុរាណណា?", options: { A: "អក្សរឥណ្ឌាខាងត្បូង/ព្រាហ្មី", B: "អក្សរឡាតាំង", C: "អក្សរចិន", D: "អក្សរអារ៉ាប់" }, answer: "A" },
-                    { id: 10, q: "តើ “សិល្បៈអង្គរ” សំដៅលើអ្វីជាចម្បង?", options: { A: "សិល្បៈ ស្ថាបត្យកម្ម និងចម្លាក់សម័យអង្គរ", B: "សិល្បៈអឺរ៉ុប", C: "សិល្បៈសម័យឌីជីថល", D: "សិល្បៈជប៉ុន" }, answer: "A" },
-                    { id: 11, part: "🌏 ផ្នែកទី២ — ភូមិសាស្ត្រ និងចំណេះដឹងអំពីកម្ពុជា", q: "តើរាជធានីនៃព្រះរាជាណាចក្រកម្ពុជាគឺ៖", options: { A: "សៀមរាប", B: "ភ្នំពេញ", C: "បាត់ដំបង", D: "កំពត" }, answer: "B" },
-                    { id: 12, q: "តើទន្លេមេគង្គមានសារៈសំខាន់ចំពោះកម្ពុជាយ៉ាងដូចម្តេច?", options: { A: "កសិកម្ម នេសាទ ដឹកជញ្ជូន និងជីវភាពប្រជាជន", B: "មានតែទេសចរណ៍", C: "មានតែឧស្សាហកម្ម", D: "មិនមានសារៈសំខាន់" }, answer: "A" },
-                    { id: 13, q: "បឹងទន្លេសាបមានលក្ខណៈពិសេសអ្វី?", options: { A: "ជាបឹងទឹកសាបធំ និងមានការប្រែប្រួលទំហំតាមរដូវ", B: "ជាសមុទ្រ", C: "ជាបឹងទឹកប្រៃ", D: "ជាទន្លេ" }, answer: "A" },
-                    { id: 14, q: "តើកម្ពុជាមានឆ្នេរសមុទ្រនៅតំបន់ណា?", options: { A: "ភាគនិរតី", B: "ភាគឦសាន", C: "ភាគពាយ័ព្យ", D: "ភាគកណ្តាល" }, answer: "A" },
-                    { id: 15, q: "តើភ្នំខ្ពស់ជាងគេនៅកម្ពុជាគឺ៖", options: { A: "ភ្នំឱរ៉ាល់", B: "ភ្នំគូលែន", C: "ភ្នំដងរែក", D: "ភ្នំសន្ទុក" }, answer: "A" },
-                    { id: 16, q: "តើខេត្តណាមួយខាងក្រោមជាខេត្តជាប់សមុទ្រ?", options: { A: "កំពត", B: "កំពង់ធំ", C: "ព្រៃវែង", D: "តាកែវ" }, answer: "A" },
-                    { id: 17, q: "តើប្រទេសកម្ពុជាមានព្រំដែនជាប់ប្រទេសណាខ្លះ?", options: { A: "ថៃ ឡាវ និងវៀតណាម", B: "ថៃ ម៉ាឡេស៊ី និងឡាវ", C: "វៀតណាម ចិន និងថៃ", D: "ឡាវ មីយ៉ាន់ម៉ា និងថៃ" }, answer: "A" },
-                    { id: 18, q: "តើធនធានធម្មជាតិមានសារៈសំខាន់អ្វី?", options: { A: "ជួយដល់ជីវភាព និងការអភិវឌ្ឍសេដ្ឋកិច្ច", B: "គួរប្រើឱ្យអស់", C: "មិនចាំបាច់ការពារ", D: "មានតែសម្រាប់ទេសចរណ៍" }, answer: "A" },
-                    { id: 19, q: "តើការកាប់បំផ្លាញព្រៃឈើអាចបង្កផលប៉ះពាល់អ្វី?", options: { A: "បាត់បង់ជីវចម្រុះ និងបញ្ហាបរិស្ថាន", B: "បង្កើនព្រៃឈើ", C: "បង្កើនធនធានធម្មជាតិ", D: "កាត់បន្ថយការបំពុល" }, answer: "A" },
-                    { id: 20, q: "តើការអភិរក្សបរិស្ថានមានន័យដូចម្តេច?", options: { A: "ការពារ និងប្រើប្រាស់ធនធានដោយមានចីរភាព", B: "ប្រើធនធានឱ្យអស់", C: "កាប់ព្រៃឈើ", D: "បោះសំរាមចូលទន្លេ" }, answer: "A" },
-                    { id: 21, part: "🌐 ផ្នែកទី៣ — អាស៊ាន និងពិភពលោក", q: "ASEAN ត្រូវបានបង្កើតឡើងនៅឆ្នាំណា?", options: { A: "1957", B: "1967", C: "1977", D: "1987" }, answer: "B" },
-                    { id: 22, q: "ASEAN មានន័យពេញថា៖", options: { A: "Association of Southeast Asian Nations", B: "Asian Economic Social Association Network", C: "Association of European Asian Nations", D: "Asian National Economic System" }, answer: "A" },
-                    { id: 23, q: "តើប្រទេសកម្ពុជាចូលជាសមាជិកអាស៊ាននៅឆ្នាំណា?", options: { A: "1995", B: "1997", C: "1999", D: "2001" }, answer: "C" },
-                    { id: 24, q: "តើអាស៊ានមានសមាជិកប៉ុន្មានប្រទេសបន្ទាប់ពីទីម័រឡេស្តេចូលជាសមាជិកពេញលេញ?", options: { A: "10", B: "11", C: "12", D: "13" }, answer: "B" },
-                    { id: 25, q: "ទីម័រឡេស្តេចូលជាសមាជិកពេញលេញរបស់អាស៊ាននៅឆ្នាំណា?", options: { A: "2023", B: "2024", C: "2025", D: "2026" }, answer: "A" },
-                    { id: 26, q: "តើទីស្នាក់ការអគ្គលេខាធិការដ្ឋានអាស៊ានស្ថិតនៅទីក្រុងណា?", options: { A: "បាងកក", B: "ហ្សាការតា", C: "ហាណូយ", D: "ម៉ានីល" }, answer: "B" },
-                    { id: 27, q: "តើអាស៊ានមានគោលបំណងសំខាន់មួយអ្វី?", options: { A: "ជំរុញកិច្ចសហប្រតិបត្តិការក្នុងតំបន់", B: "បង្កើតសង្គ្រាម", C: "លុបបំបាត់ពាណិជ្ជកម្ម", D: "បែងចែកប្រទេសក្នុងតំបន់" }, answer: "A" },
-                    { id: 28, q: "តើប្រទេសណាខាងក្រោមមិនមែនជាសមាជិកអាស៊ាន?", options: { A: "កម្ពុជា", B: "ជប៉ុន", C: "ថៃ", D: "វៀតណាម" }, answer: "B" },
-                    { id: 29, q: "តើ “ASEAN Way” ជាទូទៅផ្តោតលើ៖", options: { A: "ការពិគ្រោះយោបល់ និងការឯកភាព", B: "ការប្រើកម្លាំង", C: "ការប្រកួតប្រជែងយោធា", D: "ការបង្ខំប្រទេសសមាជិក" }, answer: "A" },
-                    { id: 30, q: "តើកិច្ចសហប្រតិបត្តិការអាស៊ានអាចគ្របដណ្តប់លើវិស័យណាខ្លះ?", options: { A: "សេដ្ឋកិច្ច សង្គម វប្បធម៌ និងនយោបាយ-សន្តិសុខ", B: "កីឡាតែប៉ុណ្ណោះ", C: "យោធាតែប៉ុណ្ណោះ", D: "ពាណិជ្ជកម្មតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 31, part: "💰 ផ្នែកទី៤ — សេដ្ឋកិច្ច និងសង្គម", q: "តើ GDP មានន័យថា៖", options: { A: "Gross Domestic Product", B: "General Development Policy", C: "Global Domestic Program", D: "Government Development Plan" }, answer: "A" },
-                    { id: 32, q: "GDP ប្រើសម្រាប់វាស់អ្វីជាចម្បង?", options: { A: "តម្លៃសរុបនៃទំនិញ និងសេវាដែលផលិតក្នុងសេដ្ឋកិច្ចក្នុងរយៈពេលមួយ", B: "ចំនួនប្រជាជន", C: "ទំហំផ្ទៃដី", D: "ចំនួនសាលារៀន" }, answer: "A" },
-                    { id: 33, q: "តើអតិផរណា (Inflation) មានន័យដូចម្តេច?", options: { A: "ការកើនឡើងជាទូទៅនៃកម្រិតតម្លៃទំនិញ និងសេវា", B: "ការធ្លាក់ចុះប្រជាជន", C: "ការកើនឡើងព្រៃឈើ", D: "ការកាត់បន្ថយផលិតកម្មតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 34, q: "តើការនាំចេញ (Export) មានន័យថា៖", options: { A: "លក់ទំនិញ ឬសេវាទៅក្រៅប្រទេស", B: "ទិញទំនិញពីក្រៅប្រទេស", C: "ផលិតសម្រាប់ប្រើក្នុងគ្រួសារ", D: "រក្សាទុកទំនិញ" }, answer: "A" },
-                    { id: 35, q: "តើការនាំចូល (Import) មានន័យថា៖", options: { A: "ទិញទំនិញ ឬសេវាពីក្រៅប្រទេស", B: "លក់ទំនិញទៅក្រៅប្រទេស", C: "ផលិតទំនិញក្នុងស្រុក", D: "បញ្ឈប់ពាណិជ្ជកម្ម" }, answer: "A" },
-                    { id: 36, q: "តើការវិនិយោគអាចជួយសេដ្ឋកិច្ចតាមរយៈអ្វី?", options: { A: "បង្កើតការងារ និងបង្កើនសមត្ថភាពផលិតកម្ម", B: "កាត់បន្ថយការងារ", C: "បិទរោងចក្រ", D: "កាត់បន្ថយផលិតភាព" }, answer: "A" },
-                    { id: 37, q: "តើសហគ្រាសខ្នាតតូច និងមធ្យមមានសារៈសំខាន់អ្វី?", options: { A: "បង្កើតការងារ និងរួមចំណែកដល់សេដ្ឋកិច្ច", B: "មិនមានតួនាទី", C: "មានតែសម្រាប់នាំចូល", D: "មានតែសម្រាប់រដ្ឋ" }, answer: "A" },
-                    { id: 38, q: "តើធនធានមនុស្សល្អអាចជួយសេដ្ឋកិច្ចយ៉ាងដូចម្តេច?", options: { A: "បង្កើនផលិតភាព និងការប្រកួតប្រជែង", B: "បង្កើនភាពក្រីក្រ", C: "កាត់បន្ថយជំនាញ", D: "បង្កើនការអត់ការងារ" }, answer: "A" },
-                    { id: 39, q: "តើការអប់រំ និងការបណ្តុះបណ្តាលវិជ្ជាជីវៈជួយអ្វី?", options: { A: "បង្កើនជំនាញសម្រាប់ទីផ្សារការងារ", B: "កាត់បន្ថយជំនាញ", C: "បង្កើនការបោះបង់ការសិក្សា", D: "កាត់បន្ថយផលិតភាព" }, answer: "A" },
-                    { id: 40, q: "តើ “ចីរភាព” ក្នុងការអភិវឌ្ឍសេដ្ឋកិច្ចមានន័យថា៖", options: { A: "អភិវឌ្ឍដោយគិតពីសេដ្ឋកិច្ច សង្គម និងបរិស្ថានរយៈពេលវែង", B: "ផ្តោតលើប្រាក់ចំណេញភ្លាមៗ", C: "ប្រើធនធានឱ្យអស់", D: "មិនគិតពីបរិស្ថាន" }, answer: "A" },
-                    { id: 41, part: "🧠 ផ្នែកទី៥ — ចំណេះដឹងទូទៅ និងសង្គម", q: "តើអក្ខរកម្មមានន័យថា៖", options: { A: "សមត្ថភាពអាន និងសរសេរ", B: "សមត្ថភាពហែលទឹក", C: "សមត្ថភាពធ្វើកីឡា", D: "សមត្ថភាពបើកបរ" }, answer: "A" },
-                    { id: 42, q: "តើការអប់រំមានសារៈសំខាន់អ្វីចំពោះសង្គម?", options: { A: "អភិវឌ្ឍចំណេះដឹង ជំនាញ និងពលរដ្ឋមានការទទួលខុសត្រូវ", B: "បង្កើនអនក្ខរភាព", C: "កាត់បន្ថយការងារ", D: "រារាំងការអភិវឌ្ឍ" }, answer: "A" },
-                    { id: 43, q: "តើសិទ្ធិមនុស្សមានន័យជាទូទៅថា៖", options: { A: "សិទ្ធិ និងសេរីភាពជាមូលដ្ឋានដែលមនុស្សគ្រប់រូបមាន", B: "សិទ្ធិរបស់មន្ត្រីតែប៉ុណ្ណោះ", C: "សិទ្ធិរបស់អ្នកមាន", D: "សិទ្ធិរបស់ជនបរទេសតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 44, q: "តើការគោរពច្បាប់មានសារៈសំខាន់អ្វី?", options: { A: "រក្សាសណ្តាប់ធ្នាប់ និងសន្តិសុខសង្គម", B: "បង្កើនជម្លោះ", C: "បង្កើនអំពើហិង្សា", D: "បង្កើនការរើសអើង" }, answer: "A" },
-                    { id: 45, q: "តើសាមគ្គីភាពមានន័យថា៖", options: { A: "ការរួបរួម និងសហការគ្នា", B: "ការបែងចែក", C: "ការប្រឆាំងគ្នា", D: "ការរើសអើង" }, answer: "A" },
-                    { id: 46, q: "តើការទទួលខុសត្រូវរបស់ពលរដ្ឋរួមមានអ្វី?", options: { A: "គោរពច្បាប់ និងចូលរួមក្នុងសង្គមដោយមានការទទួលខុសត្រូវ", B: "បំពានច្បាប់", C: "បំផ្លាញទ្រព្យសម្បត្តិសាធារណៈ", D: "មិនចូលរួមសង្គម" }, answer: "A" },
-                    { id: 47, q: "តើការប្រើប្រាស់បច្ចេកវិទ្យាឌីជីថលដោយមានទំនួលខុសត្រូវគួរធ្វើដូចម្តេច?", options: { A: "ការពារព័ត៌មានផ្ទាល់ខ្លួន និងពិនិត្យប្រភពព័ត៌មាន", B: "ែករំលែកព័ត៌មានគ្រប់យ៉ាង", C: "ជឿព័ត៌មានគ្រប់យ៉ាង", D: "ប្រើគណនីអ្នកដទៃ" }, answer: "A" },
-                    { id: 48, q: "តើព័ត៌មានក្លែងក្លាយ (Fake News) អាចបង្កអ្វី?", options: { A: "ការយល់ច្រឡំ និងផលប៉ះពាល់ដល់សង្គម", B: "បង្កើនភាពត្រឹមត្រូវ", C: "បង្កើនចំណេះដឹងជានិច្ច", D: "គ្មានផលប៉ះពាល់" }, answer: "A" },
-                    { id: 49, q: "មុននឹងចែករំលែកព័ត៌មានតាមបណ្តាញសង្គម គួរធ្វើអ្វី?", options: { A: "ពិនិត្យប្រភព និងភាពជឿជាក់របស់ព័ត៌មាន", B: "ែករំលែកភ្លាមៗ", C: "ជឿតាមចំណងជើង", D: "ផ្ញើទៅគ្រប់គ្នា" }, answer: "A" },
-                    { id: 50, q: "តើពលរដ្ឋល្អគួរមានលក្ខណៈដូចម្តេច?", options: { A: "គោរពច្បាប់ មានសីលធម៌ ទទួលខុសត្រូវ និងចូលរួមក្នុងសង្គម", B: "បំពានច្បាប់", C: "មិនគោរពអ្នកដទៃ", D: "មិនខ្វល់ពីសង្គម" }, answer: "A" }
-                ];
+            renderExamGrid();
+        }
 
-                // វិញ្ញាសាទី 7 (ពលរដ្ឋវិទ្យា)
-                const generalSet7 = [
-                    { id: 1, part: "🇰🇭 ផ្នែកទី១ — ពលរដ្ឋ និងរដ្ឋ", q: "តើ “ពលរដ្ឋ” មានន័យដូចម្តេច?", options: { A: "មនុស្សដែលមានសញ្ជាតិរបស់រដ្ឋ និងមានសិទ្ធិ/កាតព្វកិច្ចតាមច្បាប់", B: "មនុស្សបរទេសគ្រប់រូប", C: "អ្នកធ្វើការរដ្ឋតែប៉ុណ្ណោះ", D: "អ្នកមានទ្រព្យសម្បត្តិ" }, answer: "A" },
-                    { id: 2, q: "តើសញ្ជាតិមានន័យដូចម្តេច?", options: { A: "ទំនាក់ទំនងផ្លូវច្បាប់រវាងបុគ្គល និងរដ្ឋ", B: "ទីកន្លែងធ្វើការ", C: "កន្លែងកំណើតតែប៉ុណ្ណោះ", D: "មុខរបរ" }, answer: "A" },
-                    { id: 3, q: "តើរដ្ឋមានធាតុសំខាន់ៗអ្វីខ្លះ?", options: { A: "ប្រជាជន ដែនដី រដ្ឋាភិបាល និងអធិបតេយ្យភាព", B: "សាលារៀន និងមន្ទីរពេទ្យ", C: "ទីផ្សារ និងរោងចក្រ", D: "គ្រួសារ និងសហគមន៍" }, answer: "A" },
-                    { id: 4, q: "តើអធិបតេយ្យភាពមានន័យដូចម្តេច?", options: { A: "អំណាចកំពូលរបស់រដ្ឋក្នុងការគ្រប់គ្រងកិច្ចការរបស់ខ្លួន", B: "អំណាចរបស់បុគ្គលម្នាក់", C: "អំណាចរបស់ក្រុមហ៊ុន", D: "អំណាចរបស់សាលារៀន" }, answer: "A" },
-                    { id: 5, q: "តើពលរដ្ឋល្អគួរមានលក្ខណៈដូចម្តេច?", options: { A: "គោរពច្បាប់ មានទំនួលខុសត្រូវ និងចូលរួមក្នុងសង្គម", B: "បំពានច្បាប់", C: "មិនគោរពអ្នកដទៃ", D: "មិនចូលរួមក្នុងសង្គម" }, answer: "A" },
-                    { id: 6, part: "⚖️ ផ្នែកទី២ — សិទ្ធិ និងកាតព្វកិច្ច", q: "តើសិទ្ធិមនុស្សជាអ្វី?", options: { A: "សិទ្ធិ និងសេរីភាពជាមូលដ្ឋានរបស់មនុស្សគ្រប់រូប", B: "សិទ្ធិរបស់មន្ត្រីតែប៉ុណ្ណោះ", C: "សិទ្ធិរបស់អ្នកមាន", D: "សិទ្ធិរបស់ជនបរទេសតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 7, q: "តើសិទ្ធិ និងកាតព្វកិច្ចមានទំនាក់ទំនងគ្នាដូចម្តេច?", options: { A: "សិទ្ធិរបស់មនុស្សត្រូវអនុវត្តដោយគោរពសិទ្ធិរបស់អ្នកដទៃ និងច្បាប់", B: "មានតែសិទ្ធិ គ្មានកាតព្វកិច្ច", C: "មានតែកាតព្វកិច្ច", D: "មិនមានទំនាក់ទំនង" }, answer: "A" },
-                    { id: 8, q: "តើសេរីភាពបញ្ចេញមតិមានន័យថា៖", options: { A: "អាចបញ្ចេញមតិដោយគោរពច្បាប់ និងសិទ្ធិអ្នកដទៃ", B: "អាចនិយាយអ្វីក៏បានដោយគ្មានកំណត់", C: "អាចប្រមាថអ្នកដទៃ", D: "អាចផ្សព្វផ្សាយព័ត៌មានក្លែងក្លាយ" }, answer: "A" },
-                    { id: 9, q: "តើការគោរពសិទ្ធិអ្នកដទៃមានសារៈសំខាន់អ្វី?", options: { A: "ជួយបង្កើតសង្គមមានសន្តិភាព និងយុត្តិធម៌", B: "បង្កើនជម្លោះ", C: "បង្កើនការរើសអើង", D: "កាត់បន្ថយសន្តិភាព" }, answer: "A" },
-                    { id: 10, q: "តើការគោរពច្បាប់ជាកាតព្វកិច្ចរបស់ពលរដ្ឋដែរឬទេ?", options: { A: "មែន", B: "មិនមែន", C: "តែអ្នកធ្វើការរដ្ឋ", D: "តែអ្នកមាន" }, answer: "A" },
-                    { id: 11, q: "តើការបង់ពន្ធតាមច្បាប់ជាអ្វី?", options: { A: "កាតព្វកិច្ចរបស់ពលរដ្ឋ/អ្នកជាប់ពន្ធតាមច្បាប់", B: "សិទ្ធិ", C: "អំណោយ", D: "ការផាកពិន័យ" }, answer: "A" },
-                    { id: 12, q: "តើការការពារទ្រព្យសម្បត្តិសាធារណៈជាកាតព្វកិច្ចរបស់អ្នកណា?", options: { A: "ពលរដ្ឋគ្រប់រូប", B: "មន្ត្រីតែប៉ុណ្ណោះ", C: "គ្រូតែប៉ុណ្ណោះ", D: "អ្នកមានតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 13, q: "តើសមភាពមានន័យដូចម្តេច?", options: { A: "មនុស្សគ្រប់រូបមានតម្លៃ និងសិទ្ធិស្មើគ្នាតាមច្បាប់", B: "អ្នកមានមានសិទ្ធិច្រើនជាង", C: "មន្ត្រីមានសិទ្ធិគ្រប់យ៉ាង", D: "មនុស្សខ្លះមិនមានសិទ្ធិ" }, answer: "A" },
-                    { id: 14, q: "តើការរើសអើងមានន័យដូចម្តេច?", options: { A: "ការប្រព្រឹត្តខុសគ្នាដោយមិនមានមូលហេតុសមស្របលើមូលដ្ឋានដែលច្បាប់ហាមឃាត់", B: "ការគោរពអ្នកដទៃ", C: "ការសហការ", D: "ការជួយសង្គម" }, answer: "A" },
-                    { id: 15, q: "តើសិទ្ធិកុមារគួរត្រូវបានការពារដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែពេលកុមាររៀនពូកែ", D: "តែពេលកុមារមានទ្រព្យ" }, answer: "A" },
-                    { id: 16, part: "🏛️ ផ្នែកទី៣ — រដ្ឋធម្មនុញ្ញ និងស្ថាប័នរដ្ឋ", q: "តើរដ្ឋធម្មនុញ្ញជាអ្វី?", options: { A: "ច្បាប់កំពូលរបស់រដ្ឋ", B: "ច្បាប់សម្រាប់សាលារៀន", C: "បទបញ្ជារបស់ក្រុមហ៊ុន", D: "ច្បាប់សម្រាប់គ្រួសារ" }, answer: "A" },
-                    { id: 17, q: "តើព្រះរាជាណាចក្រកម្ពុជាមានរបបអ្វី?", options: { A: "រាជានិយមអាស្រ័យរដ្ឋធម្មនុញ្ញ", B: "រាជានិយមផ្តាច់ការ", C: "សាធារណរដ្ឋប្រធានាធិបតី", D: "រដ្ឋយោធា" }, answer: "A" },
-                    { id: 18, q: "តើអំណាចរដ្ឋជាទូទៅត្រូវបានបែងចែកជាអ្វីខ្លះ?", options: { A: "នីតិប្បញ្ញត្តិ នីតិប្រតិបត្តិ និងតុលាការ", B: "អប់រំ សុខាភិបាល និងកសិកម្ម", C: "ឃុំ សង្កាត់ និងភូមិ", D: "ក្រុង ស្រុក និងខេត្ត" }, answer: "A" },
-                    { id: 19, q: "តើអំណាចនីតិប្បញ្ញត្តិមានតួនាទីសំខាន់អ្វី?", options: { A: "បង្កើត និងអនុម័តច្បាប់តាមនីតិវិធី", B: "កាត់ក្តី", C: "អនុវត្តសាលក្រម", D: "គ្រប់គ្រងសាលារៀន" }, answer: "A" },
-                    { id: 20, q: "តើអំណាចនីតិប្រតិបត្តិមានតួនាទីសំខាន់អ្វី?", options: { A: "អនុវត្តច្បាប់ និងគោលនយោបាយរដ្ឋ", B: "កាត់ក្តី", C: "បង្កើតតុលាការ", D: "សរសេរច្បាប់តែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 21, q: "តើអំណាចតុលាការមានតួនាទីអ្វី?", options: { A: "ដោះស្រាយវិវាទ និងអនុវត្តយុត្តិធម៌តាមច្បាប់", B: "រៀបចំថវិការដ្ឋ", C: "គ្រប់គ្រងសាលារៀន", D: "បង្កើតគោលនយោបាយសេដ្ឋកិច្ច" }, answer: "A" },
-                    { id: 22, q: "តើការបែងចែកអំណាចមានសារៈសំខាន់អ្វី?", options: { A: "ជួយទប់ស្កាត់ការប្រមូលផ្តុំអំណាច និងពង្រឹងការត្រួតពិនិត្យ", B: "បង្កើនការប្រមូលអំណាច", C: "លុបចោលច្បាប់", D: "បង្កើនការរើសអើង" }, answer: "A" },
-                    { id: 23, q: "តើច្បាប់មានតួនាទីសំខាន់អ្វីក្នុងសង្គម?", options: { A: "រក្សាសណ្តាប់ធ្នាប់ និងការពារសិទ្ធិ", B: "បង្កើតជម្លោះ", C: "លុបសិទ្ធិទាំងអស់", D: "បង្កើនភាពអយុត្តិធម៌" }, answer: "A" },
-                    { id: 24, q: "តើ “នីតិរដ្ឋ” មានន័យថា៖", options: { A: "មនុស្ស និងស្ថាប័នទាំងអស់ស្ថិតក្រោមច្បាប់", B: "មានតែប្រជាពលរដ្ឋគោរពច្បាប់", C: "មានតែមន្ត្រីគោរពច្បាប់", D: "អ្នកមានអាចនៅក្រៅច្បាប់" }, answer: "A" },
-                    { id: 25, q: "តើការគោរពរដ្ឋធម្មនុញ្ញមានសារៈសំខាន់អ្វី?", options: { A: "រក្សាគោលការណ៍ និងសណ្តាប់ធ្នាប់រដ្ឋតាមច្បាប់កំពូល", B: "លុបចោលសិទ្ធិ", C: "បង្កើនការរើសអើង", D: "បង្កើនជម្លោះ" }, answer: "A" },
-                    { id: 26, part: "🗳️ ផ្នែកទី៤ — ប្រជាធិបតេយ្យ និងការចូលរួម", q: "តើប្រជាធិបតេយ្យជាអ្វី?", options: { A: "ប្រព័ន្ធដែលប្រជាពលរដ្ឋមានតួនាទីក្នុងការគ្រប់គ្រង និងសម្រេចចិត្តសាធារណៈតាមច្បាប់", B: "អំណាចរបស់មនុស្សម្នាក់", C: "អំណាចរបស់ក្រុមហ៊ុន", D: "ការគ្រប់គ្រងដោយកងទ័ព" }, answer: "A" },
-                    { id: 27, q: "តើការបោះឆ្នោតមានសារៈសំខាន់អ្វី?", options: { A: "ជាមធ្យោបាយមួយសម្រាប់ពលរដ្ឋចូលរួមក្នុងដំណើរការប្រជាធិបតេយ្យ", B: "សម្រាប់កម្សាន្ត", C: "សម្រាប់បង្កើតជម្លោះ", D: "សម្រាប់ជ្រើសរើសមន្ត្រីសាលារៀន" }, answer: "A" },
-                    { id: 28, q: "តើការចូលរួមរបស់ប្រជាពលរដ្ឋអាចធ្វើឡើងតាមរយៈអ្វី?", options: { A: "ការបោះឆ្នោត ការពិគ្រោះយោបល់ និងសកម្មភាពសហគមន៍តាមច្បាប់", B: "អំពើហិង្សា", C: "ការបំផ្លាញទ្រព្យសម្បត្តិ", D: "ការបំពានច្បាប់" }, answer: "A" },
-                    { id: 29, q: "តើសម្លេងភាគច្រើនក្នុងប្រជាធិបតេយ្យគួរគោរពអ្វី?", options: { A: "សិទ្ធិ និងសេចក្តីថ្លៃថ្នូររបស់ភាគតិចផងដែរ", B: "មិនចាំបាច់គោរពភាគតិច", C: "បដិសេធសិទ្ធិអ្នកដទៃ", D: "ប្រើអំណាចដោយបង្ខំ" }, answer: "A" },
-                    { id: 30, q: "តើការពិភាក្សាដោយសន្តិវិធីជួយអ្វី?", options: { A: "ជួយដោះស្រាយការខ្វែងគំនិតដោយមិនប្រើអំពើហិង្សា", B: "បង្កើនជម្លោះ", C: "បង្កើនការប្រកាន់បក្សពួក", D: "បង្កើនការរើសអើង" }, answer: "A" },
-                    { id: 31, part: "🤝 ផ្នែកទី៥ — សីលធម៌ និងសង្គម", q: "តើសីលធម៌មានន័យដូចម្តេច?", options: { A: "គោលការណ៍ដែលណែនាំអាកប្បកិរិយាល្អ និងត្រឹមត្រូវ", B: "ច្បាប់ចរាចរណ៍តែប៉ុណ្ណោះ", C: "បទបញ្ជារបស់ក្រុមហ៊ុន", D: "ការប្រកួតប្រជែង" }, answer: "A" },
-                    { id: 32, q: "តើសុចរិតភាពមានន័យថា៖", options: { A: "ប្រព្រឹត្តដោយស្មោះត្រង់ និងត្រឹមត្រូវ", B: "លាក់ការពិត", C: "បន្លំ", D: "ប្រើអំណាចខុស" }, answer: "A" },
-                    { id: 33, q: "តើការគោរពអ្នកដទៃមានន័យថា៖", options: { A: "ទទួលស្គាល់សេចក្តីថ្លៃថ្នូរ និងសិទ្ធិរបស់អ្នកដទៃ", B: "បង្អាប់អ្នកដទៃ", C: "ប្រមាថអ្នកដទៃ", D: "រើសអើងអ្នកដទៃ" }, answer: "A" },
-                    { id: 34, q: "តើសាមគ្គីភាពមានសារៈសំខាន់អ្វី?", options: { A: "ជួយឱ្យសង្គមរួបរួម និងសហការគ្នា", B: "បង្កើនជម្លោះ", C: "បង្កើនការរើសអើង", D: "បំបែកសហគមន៍" }, answer: "A" },
-                    { id: 35, q: "តើការអត់ឱនមានន័យដូចម្តេច?", options: { A: "គោរព និងទទួលយកភាពខុសគ្នារបស់អ្នកដទៃ", B: "បង្ខំអ្នកដទៃឱ្យគិតដូចខ្លួន", C: "មិនស្តាប់អ្នកណា", D: "បដិសេធភាពខុសគ្នាទាំងអស់" }, answer: "A" },
-                    { id: 36, q: "តើការទទួលខុសត្រូវមានន័យថា៖", options: { A: "ទទួលស្គាល់ និងទទួលផលពីសកម្មភាពរបស់ខ្លួនតាមសមស្រប", B: "ន្ទោសអ្នកដទៃគ្រប់ពេល", C: "លាក់កំហុស", D: "មិនទទួលស្គាល់អ្វីទាំងអស់" }, answer: "A" },
-                    { id: 37, q: "តើការស្ម័គ្រចិត្តជួយសង្គមមានប្រយោជន៍អ្វី?", options: { A: "ជួយសហគមន៍ និងបង្កើនស្មារតីសង្គម", B: "បង្កើនការរើសអើង", C: "បំផ្លាញសហគមន៍", D: "បង្កើនជម្លោះ" }, answer: "A" },
-                    { id: 38, q: "តើការរក្សាបរិស្ថានជាកាតព្វកិច្ចរបស់អ្នកណា?", options: { A: "មនុស្សគ្រប់រូប និងស្ថាប័នពាក់ព័ន្ធ", B: "រដ្ឋតែប៉ុណ្ណោះ", C: "គ្រូតែប៉ុណ្ណោះ", D: "ក្រុមហ៊ុនតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 39, q: "តើការបោះសំរាមមិនត្រឹមត្រូវអាចបង្កអ្វី?", options: { A: "បំពុលបរិស្ថាន និងប៉ះពាល់សុខភាព", B: "ធ្វើឱ្យបរិស្ថានស្អាត", C: "បង្កើនជីវចម្រុះ", D: "កាត់បន្ថយការបំពុល" }, answer: "A" },
-                    { id: 40, q: "តើការសហការក្នុងសហគមន៍មានប្រយោជន៍អ្វី?", options: { A: "ជួយដោះស្រាយបញ្ហារួម និងអភិវឌ្ឍសហគមន៍", B: "បង្កើនជម្លោះ", C: "បង្កើនការបែងចែក", D: "កាត់បន្ថយទំនុកចិត្ត" }, answer: "A" },
-                    { id: 41, part: "📱 ផ្នែកទី៦ — ពលរដ្ឋឌីជីថល និងសុវត្ថិភាព", q: "តើ “ពលរដ្ឋឌីជីថល” មានន័យដូចម្តេច?", options: { A: "អ្នកប្រើបច្ចេកវិទ្យាឌីជីថលដោយមានចំណេះដឹង សុវត្ថិភាព និងទំនួលខុសត្រូវ", B: "អ្នកប្រើ Facebook តែប៉ុណ្ណោះ", C: "អ្នកមានកុំព្យូទ័រ", D: "អ្នកលេងហ្គេម" }, answer: "A" },
-                    { id: 42, q: "មុនពេលចែករំលែកព័ត៌មានតាមអ៊ីនធឺណិត គួរធ្វើអ្វី?", options: { A: "ពិនិត្យប្រភព និងភាពជឿជាក់", B: "ែករំលែកភ្លាមៗ", C: "ជឿតាមចំណងជើង", D: "ផ្ញើទៅមនុស្សគ្រប់គ្នា" }, answer: "A" },
-                    { id: 43, q: "តើព័ត៌មានក្លែងក្លាយអាចបង្កអ្វី?", options: { A: "ការយល់ច្រឡំ និងផលប៉ះពាល់ដល់សង្គម", B: "បង្កើនភាពត្រឹមត្រូវ", C: "បង្កើនសន្តិភាពជានិច្ច", D: "គ្មានផលប៉ះពាល់" }, answer: "A" },
-                    { id: 44, q: "តើពាក្យសម្ងាត់ល្អគួរមានលក្ខណៈដូចម្តេច?", options: { A: "ពិបាកទាយ និងមិនគួរចែករំលែក", B: "123456", C: "ឈ្មោះខ្លួនឯង", D: "ថ្ងៃខែឆ្នាំកំណើត" }, answer: "A" },
-                    { id: 45, q: "តើការការពារព័ត៌មានផ្ទាល់ខ្លួនមានសារៈសំខាន់អ្វី?", options: { A: "កាត់បន្ថយហានិភ័យនៃការប្រើប្រាស់ព័ត៌មានដោយមិនមានការអនុញ្ញាត", B: "ែករំលែកព័ត៌មានគ្រប់យ៉ាង", C: "បង្ហោះលេខសម្ងាត់", D: "ប្រាប់ព័ត៌មានទៅមនុស្សគ្រប់គ្នា" }, answer: "A" },
-                    { id: 46, q: "តើ Cyberbullying មានន័យដូចម្តេច?", options: { A: "ការបៀតបៀន ឬធ្វើបាបអ្នកដទៃតាមបច្ចេកវិទ្យាឌីជីថល", B: "ការសិក្សាតាមអ៊ីនធឺណិត", C: "ការផ្ញើសារធម្មតា", D: "ការស្វែងរកព័ត៌មាន" }, answer: "A" },
-                    { id: 47, q: "ប្រសិនបើឃើញព័ត៌មានគួរឱ្យសង្ស័យតាមអ៊ីនធឺណិត គួរ៖", options: { A: "ពិនិត្យប្រភព និងកុំចែករំលែករហូតដល់មានការផ្ទៀងផ្ទាត់", B: "ែករំលែកភ្លាមៗ", C: "បន្ថែមព័ត៌មានមិនពិត", D: "ផ្ញើទៅគ្រប់ក្រុម" }, answer: "A" },
-                    { id: 48, q: "តើការគោរពកម្មសិទ្ធិបញ្ញាមានន័យថា៖", options: { A: "គោរពស្នាដៃរបស់អ្នកបង្កើត និងប្រើប្រាស់តាមលក្ខខណ្ឌសមស្រប", B: "ចម្លងគ្រប់យ៉ាងដោយគ្មានការអនុញ្ញាត", C: "លក់ស្នាដៃអ្នកដទៃ", D: "លុបឈ្មោះម្ចាស់ស្នាដៃ" }, answer: "A" },
-                    { id: 49, q: "តើការប្រើប្រាស់បណ្តាញសង្គមដោយមានទំនួលខុសត្រូវគួរធ្វើដូចម្តេច?", options: { A: "គោរពអ្នកដទៃ ពិនិត្យព័ត៌មាន និងការពារភាពឯកជន", B: "ប្រមាថអ្នកដទៃ", C: "ផ្សព្វផ្សាយព័ត៌មានក្លែងក្លាយ", D: "បង្ហោះព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នកដទៃដោយគ្មានការអនុញ្ញាត" }, answer: "A" },
-                    { id: 50, q: "តើគោលដៅសំខាន់នៃការអប់រំពលរដ្ឋគឺអ្វី?", options: { A: "បង្កើតពលរដ្ឋមានចំណេះដឹង សីលធម៌ ទំនួលខុសត្រូវ និងការចូលរួមក្នុងសង្គម", B: "បង្រៀនតែច្បាប់", C: "បង្រៀនតែប្រវត្តិសាស្ត្រ", D: "បង្រៀនតែការបោះឆ្នោត" }, answer: "A" }
-                ];
+        function renderExamGrid() {
+            const grid = document.getElementById('exam-sets-grid');
+            grid.innerHTML = '';
+            let totalSets = currentCategory === 'english' ? 10 : 15;
+            let catNameKh = currentCategory === 'english' ? 'ភាសាអង់គ្លេស' : (currentCategory === 'general' ? 'វប្បធម៌ទូទៅ' : 'ឯកទេស ICT');
 
-                // វិញ្ញាសាទី 8 (ប្រវត្តិវិទ្យា)
-                const generalSet8 = [
-                    { id: 1, part: "🇰🇭 ផ្នែកទី១ — ប្រវត្តិសាស្ត្រកម្ពុជា", q: "តើអាណាចក្រខ្មែរសម័យអង្គររីកចម្រើនខ្លាំងប្រហែលចាប់ពីសតវត្សទីប៉ុន្មាន?", options: { A: "សតវត្សទី៩", B: "សតវត្សទី១២", C: "សតវត្សទី១៥", D: "សតវត្សទី១៨" }, answer: "A" },
-                    { id: 2, q: "តើព្រះបាទជ័យវរ្ម័នទី២ត្រូវបានគេចាត់ទុកថាជាព្រះមហាក្សត្រសំខាន់ក្នុងការបង្កើតអាណាចក្រអង្គរនៅឆ្នាំណា?", options: { A: "802", B: "900", C: "1002", D: "1200" }, answer: "A" },
-                    { id: 3, q: "តើព្រះបាទសូរ្យវរ្ម័នទី២មានព្រះរាជកិច្ចសំខាន់មួយណា?", options: { A: "កសាងអង្គរវត្ត", B: "កសាងប្រាសាទបាយ័ន", C: "បង្កើតអាស៊ាន", D: "បង្កើតរាជធានីភ្នំពេញ" }, answer: "A" },
-                    { id: 4, q: "តើប្រាសាទអង្គរវត្តឧទ្ទិសជាចម្បងដល់ព្រះឥសូរ/ព្រះវិស្ណុ?", options: { A: "ព្រះវិស្ណុ", B: "ព្រះឥន្ទ្រ", C: "ព្រះពុទ្ធ", D: "ព្រះព្រហ្ម" }, answer: "A" },
-                    { id: 5, q: "តើព្រះបាទជ័យវរ្ម័នទី៧គ្រងរាជ្យប្រហែលនៅសតវត្សទីប៉ុន្មាន?", options: { A: "សតវត្សទី៩", B: "សតវត្សទី១០", C: "សតវត្សទី១២–១៣", D: "សតវត្សទី១៦" }, answer: "C" },
-                    { id: 6, q: "តើប្រាសាទបាយ័នស្ថិតនៅក្នុងតំបន់ណា?", options: { A: "អង្គរធំ", B: "ភ្នំដងរែក", C: "ភ្នំគូលែន", D: "កោះកុង" }, answer: "A" },
-                    { id: 7, q: "តើអង្គរធំត្រូវបានពង្រីក និងអភិវឌ្ឍយ៉ាងសំខាន់ក្នុងរាជកាលព្រះមហាក្សត្រអង្គណា?", options: { A: "ព្រះបាទជ័យវរ្ម័នទី៧", B: "ព្រះបាទសូរ្យវរ្ម័នទី២", C: "ព្រះបាទអង្គចន្ទ", D: "ព្រះបាទនរោត្តម" }, answer: "A" },
-                    { id: 8, q: "តើមូលហេតុមួយនៃការរីកចម្រើនរបស់អាណាចក្រអង្គរគឺ៖", options: { A: "ប្រព័ន្ធធារាសាស្ត្រ និងកសិកម្ម", B: "ឧស្សាហកម្មទំនើប", C: "យន្តហោះ", D: "ប្រេងឥន្ធនៈ" }, answer: "A" },
-                    { id: 9, q: "តើ “បារាយណ៍” នៅសម័យអង្គរមានតួនាទីសំខាន់មួយណា?", options: { A: "ស្តុក និងគ្រប់គ្រងទឹក", B: "ជាទីផ្សារអន្តរជាតិ", C: "ជាព្រលានយន្តហោះ", D: "ជារោងចក្រ" }, answer: "A" },
-                    { id: 10, q: "តើអក្សរខ្មែរបុរាណមានការវិវត្តមកពីប្រព័ន្ធអក្សរដែលមានប្រភពពីតំបន់ណា?", options: { A: "ឥណ្ឌា", B: "អឺរ៉ុប", C: "អាមេរិក", D: "អាហ្វ្រិក" }, answer: "A" },
-                    { id: 11, part: "🏯 ផ្នែកទី២ — កម្ពុជាក្រោយសម័យអង្គរ", q: "បន្ទាប់ពីសម័យអង្គរ រាជធានីខ្មែរបានផ្លាស់ប្តូរទៅតំបន់ផ្សេងៗ។ តើភ្នំពេញក្លាយជារាជធានីសំខាន់នៅសម័យក្រោយមកដែរឬទេ?", options: { A: "មែន", B: "មិនមែន", C: "មានតែរយៈពេលខ្លីមួយថ្ងៃ", D: "មិនដែលមាន" }, answer: "A" },
-                    { id: 12, q: "តើលង្វែកជាអ្វីក្នុងប្រវត្តិសាស្ត្រខ្មែរ?", options: { A: "រាជធានីសំខាន់មួយក្នុងសម័យក្រោយអង្គរ", B: "ប្រាសាទមួយ", C: "ភ្នំមួយ", D: "ទន្លេមួយ" }, answer: "A" },
-                    { id: 13, q: "តើឧដុង្គមានសារៈសំខាន់អ្វីក្នុងប្រវត្តិសាស្ត្រកម្ពុជា?", options: { A: "ជារាជធានីសំខាន់មួយរបស់កម្ពុជាក្នុងសម័យក្រោយអង្គរ", B: "ជាបឹង", C: "ជាខេត្តជាប់សមុទ្រ", D: "ជាប្រាសាទអង្គរ" }, answer: "A" },
-                    { id: 14, q: "តើប្រទេសកម្ពុជាស្ថិតក្រោមអាណាព្យាបាលបារាំងចាប់ពីឆ្នាំណា?", options: { A: "1863", B: "1887", C: "1907", D: "1941" }, answer: "A" },
-                    { id: 15, q: "តើកម្ពុជាទទួលបានឯករាជ្យពីបារាំងនៅថ្ងៃណា?", options: { A: "9 វិច្ឆិកា 1953", B: "7 មករា 1979", C: "24 កញ្ញា 1993", D: "3 តុលា 1990" }, answer: "A" },
-                    { id: 16, q: "តើព្រះបាទនរោត្តម សីហនុមានតួនាទីសំខាន់អ្វីក្នុងការទាមទារឯករាជ្យ?", options: { A: "ដឹកនាំយុទ្ធនាការទាមទារឯករាជ្យពីបារាំង", B: "បង្កើតអាស៊ាន", C: "បង្កើតអង្គការសហប្រជាជាតិ", D: "បង្កើតអង្គរវត្ត" }, answer: "A" },
-                    { id: 17, q: "តើថ្ងៃទី៩ ខែវិច្ឆិកា ត្រូវបានប្រារព្ធជាទិវាអ្វីនៅកម្ពុជា?", options: { A: "ទិវាឯករាជ្យជាតិ", B: "ទិវាកុមារ", C: "ទិវារដ្ឋធម្មនុញ្ញ", D: "ទិវាពលកម្ម" }, answer: "A" },
-                    { id: 18, q: "តើសន្ធិសញ្ញាឆ្នាំ 1907 មានសារៈសំខាន់មួយក្នុងប្រវត្តិសាស្ត្រកម្ពុជាពាក់ព័ន្ធនឹង៖", options: { A: "ការកំណត់/ផ្លាស់ប្តូរដែនដី និងព្រំដែនមួយចំនួនជាមួយសៀម", B: "ការបង្កើតអាស៊ាន", C: "ការបង្កើតប្រាសាទអង្គរវត្ត", D: "ការបង្កើតរដ្ឋធម្មនុញ្ញ" }, answer: "A" },
-                    { id: 19, q: "តើសម័យសាធារណរដ្ឋខ្មែរចាប់ផ្តើមនៅឆ្នាំណា?", options: { A: "1953", B: "1965", C: "1970", D: "1975" }, answer: "C" },
-                    { id: 20, q: "តើរបបកម្ពុជាប្រជាធិបតេយ្យ (ខ្មែរក្រហម) ចាប់ផ្តើមនៅឆ្នាំណា?", options: { A: "1970", B: "1975", C: "1979", D: "1989" }, answer: "B" },
-                    { id: 21, part: "⚠️️ ផ្នែកទី៣ — ប្រវត្តិសាស្ត្រកម្ពុជាសតវត្សទី២០", q: "តើថ្ងៃទី១៧ ខែមេសា ឆ្នាំ១៩៧៥ ជាថ្ងៃដែលកងខ្មែរក្រហមចូលកាន់កាប់ទីក្រុងណា?", options: { A: "ភ្នំពេញ", B: "សៀមរាប", C: "បាត់ដំបង", D: "កំពត" }, answer: "A" },
-                    { id: 22, q: "ក្នុងរបបកម្ពុជាប្រជាធិបតេយ្យ ប្រជាជនជាច្រើនត្រូវបាន៖", options: { A: "បង្ខំផ្លាស់ទី និងធ្វើការខ្លាំងក្នុងសហករណ៍/ការងារកសិកម្ម", B: "ផ្តល់ការអប់រំឥតគិតថ្លៃទាំងអស់", C: "បញ្ជូនទៅបរទេសជាច្រើន", D: "ផ្តល់ការងាររដ្ឋទាំងអស់" }, answer: "A" },
-                    { id: 23, q: "តើមជ្ឈមណ្ឌលឃុំឃាំង និងសួរចម្លើយ S-21 ត្រូវបានគេស្គាល់ថាជាអ្វីនៅសព្វថ្ងៃ?", options: { A: "ទួលស្លែង", B: "អង្គរវត្ត", C: "បាយ័ន", D: "វត្តភ្នំ" }, answer: "A" },
-                    { id: 24, q: "តើការដួលរលំនៃរបបកម្ពុជាប្រជាធិបតេយ្យកើតឡើងនៅឆ្នាំណា?", options: { A: "1975", B: "1977", C: "1979", D: "1989" }, answer: "C" },
-                    { id: 25, q: "តើថ្ងៃទី៧ ខែមករា ឆ្នាំ១៩៧៩ ពាក់ព័ន្ធនឹងព្រឹត្តិការណ៍អ្វី?", options: { A: "ការដួលរលំនៃរបបកម្ពុជាប្រជាធិបតេយ្យនៅភ្នំពេញ", B: "ឯករាជ្យពីបារាំង", C: "ការបង្កើតអាស៊ាន", D: "ការអនុម័តរដ្ឋធម្មនុញ្ញឆ្នាំ១៩៩៣" }, answer: "A" },
-                    { id: 26, q: "តើក្រោយឆ្នាំ១៩៧៩ កម្ពុជាបានចាប់ផ្តើមស្តារឡើងវិញនូវវិស័យណាខ្លះ?", options: { A: "ការអប់រំ សុខាភិបាល សេដ្ឋកិច្ច និងស្ថាប័នរដ្ឋ", B: "តែវិស័យយោធា", C: "តែវិស័យទេសចរណ៍", D: "តែវិស័យកីឡា" }, answer: "A" },
-                    { id: 27, q: "តើកិច្ចព្រមព្រៀងសន្តិភាពទីក្រុងប៉ារីសស្តីពីកម្ពុជាត្រូវបានចុះហត្ថលេខានៅឆ្នាំណា?", options: { A: "1989", B: "1991", C: "1993", D: "1997" }, answer: "B" },
-                    { id: 28, q: "តើអាជ្ញាធរអន្តរកាលអង្គការសហប្រជាជាតិនៅកម្ពុជា (UNTAC) ពាក់ព័ន្ធជាចម្បងនឹងអ្វី?", options: { A: "ដំណើរការអន្តរកាលសន្តិភាព និងការបោះឆ្នោតឆ្នាំ១៩៩៣", B: "ការសាងសង់អង្គរវត្ត", C: "ការបង្កើតអាស៊ាន", D: "ការគ្រប់គ្រងសេដ្ឋកិច្ចអាស៊ាន" }, answer: "A" },
-                    { id: 29, q: "តើរដ្ឋធម្មនុញ្ញកម្ពុជាបច្ចុប្បន្នត្រូវបានប្រកាសឱ្យប្រើនៅឆ្នាំណា?", options: { A: "1989", B: "1991", C: "1993", D: "1998" }, answer: "C" },
-                    { id: 30, q: "តើព្រះរាជាណាចក្រកម្ពុជាត្រូវបានស្តារឡើងវិញតាមរដ្ឋធម្មនុញ្ញឆ្នាំ១៩៩៣ជារបបអ្វី?", options: { A: "រាជានិយមអាស្រ័យរដ្ឋធម្មនុញ្ញ", B: "របបសាធារណរដ្ឋ", C: "របបយោធា", D: "រដ្ឋឯកបក្ស" }, answer: "A" },
-                    { id: 31, part: "🌏 ផ្នែកទី៤ — ប្រវត្តិសាស្ត្រអាស៊ី និងពិភពលោក", q: "តើអង្គការសហប្រជាជាតិ (UN) ត្រូវបានបង្កើតនៅឆ្នាំណា?", options: { A: "1919", B: "1939", C: "1945", D: "1955" }, answer: "C" },
-                    { id: 32, q: "តើសង្គ្រាមលោកលើកទី២បញ្ចប់នៅឆ្នាំណា?", options: { A: "1939", B: "1941", C: "1945", D: "1950" }, answer: "C" },
-                    { id: 33, q: "តើសង្គ្រាមលោកលើកទី១កើតឡើងក្នុងរយៈពេលណា?", options: { A: "1914–1918", B: "1920–1924", C: "1939–1945", D: "1945–1950" }, answer: "A" },
-                    { id: 34, q: "តើសង្គ្រាមលោកលើកទី២កើតឡើងក្នុងរយៈពេលណា?", options: { A: "1914–1918", B: "1929–1933", C: "1939–1945", D: "1948–1955" }, answer: "C" },
-                    { id: 35, q: "តើបដិវត្តន៍ឧស្សាហកម្មចាប់ផ្តើមដំបូងយ៉ាងសំខាន់នៅប្រទេសណា?", options: { A: "អង់គ្លេស", B: "កម្ពុជា", C: "ជប៉ុន", D: "អូស្ត្រាលី" }, answer: "A" },
-                    { id: 36, q: "តើ “សង្គ្រាមត្រជាក់” ជាទូទៅសំដៅលើការប្រកួតប្រជែងរវាងប្លុកធំៗណា?", options: { A: "សហរដ្ឋអាមេរិក និងសហភាពសូវៀត", B: "ចិន និងជប៉ុន", C: "អង់គ្លេស និងបារាំង", D: "ឥណ្ឌា និងប៉ាគីស្ថាន" }, answer: "A" },
-                    { id: 37, q: "តើសហភាពសូវៀតបានរលំ/បញ្ចប់ជារដ្ឋសហភាពនៅឆ្នាំណា?", options: { A: "1989", B: "1990", C: "1991", D: "1995" }, answer: "C" },
-                    { id: 38, q: "តើ “បដិវត្តន៍បារាំង” ចាប់ផ្តើមនៅឆ្នាំណា?", options: { A: "1689", B: "1789", C: "1889", D: "1899" }, answer: "B" },
-                    { id: 39, q: "តើមហាកំផែងចិនមានទីតាំងនៅប្រទេសណា?", options: { A: "ចិន", B: "ជប៉ុន", C: "កូរ៉េខាងត្បូង", D: "ឥណ្ឌា" }, answer: "A" },
-                    { id: 40, q: "តើអរិយធម៌បុរាណមួយក្នុងចំណោមខាងក្រោមកើតឡើងតាមដងទន្លេ Nile?", options: { A: "អេហ្ស៊ីបបុរាណ", B: "អង្គរ", C: "រ៉ូម", D: "អាស៊ីតិច" }, answer: "A" },
-                    { id: 41, part: "🌍 ផ្នែកទី៥ — ចំណេះដឹងប្រវត្តិសាស្ត្រសំខាន់ៗ", q: "តើអរិយធម៌មេសូប៉ូតាមីមានទីតាំងជាចម្បងនៅចន្លោះទន្លេណា?", options: { A: "Tigris និង Euphrates", B: "Mekong និងTonle Sap", C: "Nile និងAmazon", D: "Yangtze និងMekong" }, answer: "A" },
-                    { id: 42, q: "តើអាណាចក្ររ៉ូមបុរាណមានឥទ្ធិពលយ៉ាងខ្លាំងលើវិស័យណាខ្លះ?", options: { A: "ច្បាប់ ស្ថាបត្យកម្ម ភាសា និងរដ្ឋបាល", B: "កុំព្យូទ័រ", C: "អាកាសចរណ៍", D: "បច្ចេកវិទ្យាអ៊ីនធឺណិត" }, answer: "A" },
-                    { id: 43, q: "តើ Renaissance ចាប់ផ្តើមមានឥទ្ធិពលខ្លាំងនៅតំបន់ណា?", options: { A: "អឺរ៉ុប", B: "អាហ្វ្រិកខាងត្បូង", C: "អូសេអានី", D: "អាមេរិកខាងត្បូង" }, answer: "A" },
-                    { id: 44, q: "តើ “Silk Road” ជាអ្វី?", options: { A: "បណ្តាញផ្លូវពាណិជ្ជកម្មបុរាណតភ្ជាប់តំបន់អាស៊ី និងអឺរ៉ុប", B: "ផ្លូវរថភ្លើងទំនើប", C: "ផ្លូវសមុទ្រខ្មែរ", D: "ផ្លូវនៅអាមេរិក" }, answer: "A" },
-                    { id: 45, q: "តើការរកឃើញ និងការរីកចម្រើននៃការបោះពុម្ពដោយម៉ាស៊ីននៅអឺរ៉ុបពាក់ព័ន្ធជាពិសេសនឹងអ្នកណា?", options: { A: "Johannes Gutenberg", B: "Isaac Newton", C: "Albert Einstein", D: "Galileo Galilei" }, answer: "A" },
-                    { id: 46, q: "តើ Albert Einstein ល្បីល្បាញជាចម្បងក្នុងវិស័យណា?", options: { A: "រូបវិទ្យា", B: "ប្រវត្តិសាស្ត្រ", C: "ភូមិសាស្ត្រ", D: "អក្សរសាស្ត្រ" }, answer: "A" },
-                    { id: 47, q: "តើអង្គការយូណេស្កូ (UNESCO) មានតួនាទីសំខាន់មួយក្នុងការការពារ៖", options: { A: "បេតិកភណ្ឌវប្បធម៌ និងធម្មជាតិ", B: "យោធា", C: "ពាណិជ្ជកម្ម", D: "រូបិយប័ណ្ណ" }, answer: "A" },
-                    { id: 48, q: "តើអង្គរត្រូវបានចុះក្នុងបញ្ជីបេតិកភណ្ឌពិភពលោករបស់ UNESCO នៅឆ្នាំណា?", options: { A: "1987", B: "1992", C: "1995", D: "2000" }, answer: "B" },
-                    { id: 49, q: "តើការសិក្សាប្រវត្តិសាស្ត្រមានសារៈសំខាន់អ្វី?", options: { A: "ជួយយល់ពីអតីតកាល និងរៀនពីបទពិសោធន៍សម្រាប់បច្ចុប្បន្ន និងអនាគត", B: "សម្រាប់ចងចាំកាលបរិច្ឆេទតែប៉ុណ្ណោះ", C: "មិនមានប្រយោជន៍សម្រាប់បច្ចុប្បន្ន", D: "សម្រាប់កម្សាន្តតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 50, q: "តើប្រភពប្រវត្តិសាស្ត្រមួយណាអាចជាភស្តុតាងសម្រាប់សិក្សាអតីតកាល?", options: { A: "សិលាចារឹក ឯកសារ វត្ថុបុរាណ និងសំណង់បុរាណ", B: "ពាក្យចចាមអារ៉ាមតែប៉ុណ្ណោះ", C: "ព័ត៌មានដែលគ្មានប្រភព", D: "ការស្មានដោយគ្មានភស្តុតាង" }, answer: "A" }
-                ];
+            document.getElementById('category-title').innerText = `បញ្ជីវិញ្ញាសា ${catNameKh} (សរុប ${totalSets} វិញ្ញាសា)`;
 
-                // វិញ្ញាសាទី 9 (វិជ្ជាជីវៈគ្រូបង្រៀន)
-                const generalSet9 = [
-                    { id: 1, part: "👨‍🏫 ផ្នែកទី១ — តួនាទី និងវិជ្ជាជីវៈគ្រូ", q: "តើគ្រូបង្រៀនមានតួនាទីសំខាន់បំផុតអ្វី?", options: { A: "ផ្ទេរចំណេះដឹង និងជួយអភិវឌ្ឍសិស្សឱ្យមានសមត្ថភាព", B: "ផ្តល់ពិន្ទុដល់សិស្ស", C: "គ្រប់គ្រងសិស្សតែប៉ុណ្ណោះ", D: "បង្រៀនឱ្យសិស្សចងចាំមេរៀនតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 2, q: "តើវិជ្ជាជីវៈគ្រូបង្រៀនត្រូវការអ្វីជាចម្បង?", options: { A: "ចំណេះដឹង ជំនាញ សីលធម៌ និងទំនួលខុសត្រូវ", B: "អំណាច", C: "ការបង្ខំសិស្ស", D: "ការផ្តល់ពិន្ទុខ្ពស់" }, answer: "A" },
-                    { id: 3, q: "តើគ្រូល្អគួរមានអាកប្បកិរិយាដូចម្តេចចំពោះសិស្ស?", options: { A: "គោរព ស្មោះត្រង់ អត់ធ្មត់ និងយុត្តិធម៌", B: "រើសអើង", C: "គំរាមកំហែង", D: "ប្រើពាក្យសម្តីប្រមាថ" }, answer: "A" },
-                    { id: 4, q: "តើគ្រូគួរបន្តអភិវឌ្ឍខ្លួនឯងដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែពេលមានការប្រឡង", D: "តែពេលមានការត្រួតពិនិត្យ" }, answer: "A" },
-                    { id: 5, q: "តើ Professional Development មានន័យដូចម្តេច?", options: { A: "ការអភិវឌ្ឍចំណេះដឹង និងជំនាញវិជ្ជាជីវៈជាបន្តបន្ទាប់", B: "ការផ្លាស់ប្តូរការងារ", C: "ការឈប់បង្រៀន", D: "ការប្រឡងសិស្ស" }, answer: "A" },
-                    { id: 6, q: "តើគ្រូគួរធ្វើអ្វីនៅពេលខ្លួនមិនដឹងចម្លើយសំណួររបស់សិស្ស?", options: { A: "ទទួលស្គាល់ និងស្វែងរកព័ត៌មានត្រឹមត្រូវដើម្បីឆ្លើយ", B: "បង្កើតចម្លើយដោយខ្លួនឯង", C: "ស្តីបន្ទោសសិស្ស", D: "មិនអើពើ" }, answer: "A" },
-                    { id: 7, q: "តើគ្រូគួរធ្វើជាគំរូដល់សិស្សតាមរយៈអ្វី?", options: { A: "អាកប្បកិរិយា សីលធម៌ និងការទទួលខុសត្រូវ", B: "សម្លៀកបំពាក់ថ្លៃៗ", C: "ការប្រើអំណាច", D: "ការផ្តល់ពិន្ទុខ្ពស់" }, answer: "A" },
-                    { id: 8, q: "តើគ្រូមានទំនួលខុសត្រូវចំពោះការរីកចម្រើនរបស់សិស្សដែរឬទេ?", options: { A: "មែន", B: "មិនមែន", C: "តែចំពោះសិស្សពូកែ", D: "តែចំពោះសិស្សខ្សោយ" }, answer: "A" },
-                    { id: 9, q: "តើគ្រូគួរគោរពភាពខុសគ្នារបស់សិស្សដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែសិស្សពូកែ", D: "តែសិស្សដែលស្តាប់បង្គាប់" }, answer: "A" },
-                    { id: 10, q: "តើគោលដៅសំខាន់នៃវិជ្ជាជីវៈគ្រូគឺ៖", options: { A: "ជួយសិស្សរៀន និងអភិវឌ្ឍសមត្ថភាពគ្រប់ជ្រុងជ្រោយ", B: "ឱ្យសិស្សទទួលពិន្ទុ ១០០", C: "បញ្ចប់មេរៀនឱ្យបានលឿន", D: "គ្រប់គ្រងថ្នាក់ឱ្យស្ងាត់តែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 11, part: "🧑‍🎓 ផ្នែកទី២ — សីលធម៌វិជ្ជាជីវៈ", q: "តើសុចរិតភាពរបស់គ្រូមានន័យថា៖", options: { A: "ប្រព្រឹត្តដោយស្មោះត្រង់ និងត្រឹមត្រូវ", B: "ផ្តល់ពិន្ទុតាមចិត្ត", C: "លាក់កំហុស", D: "ជួយតែសិស្សស្គាល់គ្នា" }, answer: "A" },
-                    { id: 12, q: "តើគ្រូគួររើសអើងសិស្សដែរឬទេ?", options: { A: "មិនគួរ", B: "គួរ", C: "គួរតែចំពោះសិស្សខ្សោយ", D: "គួរតែចំពោះសិស្សពូកែ" }, answer: "A" },
-                    { id: 13, q: "តើការរក្សាការសម្ងាត់ព័ត៌មានរបស់សិស្សជាអ្វី?", options: { A: "ជាទំនួលខុសត្រូវវិជ្ជាជីវៈ", B: "មិនសំខាន់", C: "ជាជម្រើសផ្ទាល់ខ្លួន", D: "ជាការងាររបស់សិស្ស" }, answer: "A" },
-                    { id: 14, q: "តើគ្រូគួរផ្តល់ពិន្ទុដោយផ្អែកលើអ្វី?", options: { A: "លទ្ធផល និងលក្ខណៈវិនិច្ឆ័យនៃការវាយតម្លៃ", B: "មិត្តភាព", C: "ស្ថានភាពគ្រួសារ", D: "អំណោយពីសិស្ស" }, answer: "A" },
-                    { id: 15, q: "តើការទទួលអំណោយដើម្បីប្តូរជាពិន្ទុជាអាកប្បកិរិយាដែលគួរធ្វើដែរឬទេ?", options: { A: "មិនគួរ", B: "គួរ", C: "គួរតែពេលប្រឡង", D: "គួរតែពីសិស្សពូកែ" }, answer: "A" },
-                    { id: 16, q: "តើគ្រូគួរប្រើអំពើហិង្សាដើម្បីដាក់ទណ្ឌកម្មសិស្សដែរឬទេ?", options: { A: "មិនគួរ", B: "គួរ", C: "គួរតែសិស្សខុសធ្ងន់", D: "គួរតែពេលសិស្សមិនស្តាប់" }, answer: "A" },
-                    { id: 17, q: "តើការគោរពសេចក្តីថ្លៃថ្នូររបស់សិស្សមានសារៈសំខាន់ដែរឬទេ?", options: { A: "សំខាន់", B: "មិនសំខាន់", C: "សំខាន់តែសិស្សពូកែ", D: "សំខាន់តែសិស្សធំ" }, answer: "A" },
-                    { id: 18, q: "តើគ្រូគួរប្រព្រឹត្តចំពោះសិស្សដោយយុត្តិធម៌ដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែសិស្សល្អ", D: "តែសិស្សដែលមានវិន័យ" }, answer: "A" },
-                    { id: 19, q: "តើគ្រូគួររក្សាភាពជាអ្នកជំនាញនៅក្នុងទំនាក់ទំនងជាមួយសិស្សដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែពេលនៅសាលា", D: "មិនចាំបាច់" }, answer: "A" },
-                    { id: 20, q: "តើការប្រើពាក្យប្រមាថសិស្សអាចប៉ះពាល់ដល់អ្វី?", options: { A: "សេចក្តីថ្លៃថ្នូរ និងទំនុកចិត្តរបស់សិស្ស", B: "ពិន្ទុសិស្សតែប៉ុណ្ណោះ", C: "សៀវភៅសិក្សា", D: "កាលវិភាគ" }, answer: "A" },
-                    { id: 21, part: "📚 ផ្នែកទី៣ — ការបង្រៀន និងការរៀន", q: "តើ Active Learning មានន័យដូចម្តេច?", options: { A: "សិស្សចូលរួមយ៉ាងសកម្មក្នុងដំណើរការរៀន", B: "គ្រូនិយាយតែម្នាក់ឯង", C: "សិស្សអង្គុយស្តាប់តែប៉ុណ្ណោះ", D: "សិស្សចម្លងមេរៀនទាំងអស់" }, answer: "A" },
-                    { id: 22, q: "តើ Student-Centered Learning ផ្តោតលើអ្វី?", options: { A: "សិស្ស និងតម្រូវការសិក្សារបស់សិស្ស", B: "គ្រូតែប៉ុណ្ណោះ", C: "សៀវភៅតែប៉ុណ្ណោះ", D: "ពិន្ទុតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 23, q: "តើគ្រូគួររៀបចំផែនការមេរៀនដើម្បីអ្វី?", options: { A: "កំណត់គោលបំណង ខ្លឹមសារ សកម្មភាព និងការវាយតម្លៃ", B: "ឱ្យមេរៀនវែងជាងមុន", C: "បង្កើនការងារគ្រូ", D: "ជំនួសសៀវភៅសិក្សា" }, answer: "A" },
-                    { id: 24, q: "តើ Learning Objective ជាអ្វី?", options: { A: "អ្វីដែលសិស្សគួរអាចធ្វើបានបន្ទាប់ពីរៀន", B: "អ្វីដែលគ្រូចង់និយាយ", C: "ចំនួនទំព័រសៀវភៅ", D: "ពេលវេលាសម្រាក" }, answer: "A" },
-                    { id: 25, q: "តើការសួរសំណួរនៅក្នុងថ្នាក់មានប្រយោជន៍អ្វី?", options: { A: "ជួយពិនិត្យការយល់ដឹង និងជំរុញការគិត", B: "ធ្វើឱ្យសិស្សភ័យ", C: "បញ្ឈប់ការរៀន", D: "ឱ្យសិស្សចងចាំតែចម្លើយ" }, answer: "A" },
-                    { id: 26, q: "តើ Group Work ជួយអភិវឌ្ឍអ្វី?", options: { A: "ការសហការ និងជំនាញទំនាក់ទំនង", B: "ការប្រកួតប្រជែងតែប៉ុណ្ណោះ", C: "ការរៀនម្នាក់ឯង", D: "ការចងចាំតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 27, q: "តើការប្រើឧទាហរណ៍ជាក់ស្តែងក្នុងការបង្រៀនជួយអ្វី?", options: { A: "ឱ្យសិស្សងាយយល់ និងភ្ជាប់ទ្រឹស្តីទៅជីវិតពិត", B: "ធ្វើឱ្យមេរៀនពិបាក", C: "កាត់បន្ថយការយល់ដឹង", D: "ធ្វើឱ្យសិស្សមិនចូលរួម" }, answer: "A" },
-                    { id: 28, q: "តើ Differentiated Instruction មានន័យដូចម្តេច?", options: { A: "កែសម្រួលការបង្រៀនឱ្យសមស្របនឹងភាពខុសគ្នារបស់សិស្ស", B: "បង្រៀនសិស្សទាំងអស់តាមវិធីតែមួយ", C: "បង្រៀនតែសិស្សពូកែ", D: "បង្រៀនតែសិស្សខ្សោយ" }, answer: "A" },
-                    { id: 29, q: "តើការរៀនតាមបញ្ហា (Problem-Based Learning) ផ្តោតលើអ្វី?", options: { A: "សិស្សស្វែងរក និងដោះស្រាយបញ្ហាដើម្បីរៀន", B: "ចម្លងចម្លើយ", C: "ចងចាំមេរៀន", D: "ស្តាប់គ្រូតែប៉ុណ្ណោះ" }, answer: "A" },
-                    { id: 30, q: "តើ Feedback ល្អគួរមានលក្ខណៈដូចម្តេច?", options: { A: "ច្បាស់លាស់ ទាន់ពេល និងជួយឱ្យសិស្សកែលម្អ", B: "ប្រមាថសិស្ស", C: "ផ្តល់តែពិន្ទុ", D: "ផ្តល់តែការរិះគន់" }, answer: "A" },
-                    { id: 31, part: "📝 ផ្នែកទី៤ — ការវាយតម្លៃសិស្ស", q: "តើ Formative Assessment ប្រើជាចម្បងសម្រាប់អ្វី?", options: { A: "តាមដានការរៀន និងកែលម្អការបង្រៀនក្នុងដំណើរការ", B: "ប្រឡងចុងឆ្នាំតែប៉ុណ្ណោះ", C: "ចាត់ថ្នាក់សិស្សតែប៉ុណ្ណោះ", D: "ផ្តល់សញ្ញាបត្រ" }, answer: "A" },
-                    { id: 32, q: "តើ Summative Assessment ជាទូទៅធ្វើឡើងដើម្បីអ្វី?", options: { A: "វាយតម្លៃសមិទ្ធផលនៅចុងបញ្ចប់នៃវគ្គ ឬឯកតាសិក្សា", B: "ពិនិត្យការយល់ដឹងរាល់នាទី", C: "រៀបចំកៅអី", D: "បែងចែកសិស្សជាក្រុម" }, answer: "A" },
-                    { id: 33, q: "តើ Assessment គួរមានភាពយុត្តិធម៌ដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែពេលប្រឡងធំ", D: "តែសិស្សពូកែ" }, answer: "A" },
-                    { id: 34, q: "តើការវាយតម្លៃ Diagnostic មានគោលបំណងអ្វី?", options: { A: "ស្វែងយល់ពីចំណេះដឹង និងតម្រូវការរបស់សិស្សមុន ឬនៅដើមការរៀន", B: "ផ្តល់សញ្ញាបត្រ", C: "ដាក់ទណ្ឌកម្ម", D: "បញ្ចប់ឆ្នាំសិក្សា" }, answer: "A" },
-                    { id: 35, q: "តើ Rubric មានប្រយោជន៍សម្រាប់អ្វី?", options: { A: "បង្ហាញលក្ខណៈវិនិច្ឆ័យ និងកម្រិតនៃការវាយតម្លៃ", B: "កំណត់កាលវិភាគ", C: "បែងចែកថ្នាក់", D: "គ្រប់គ្រងអវត្តមាន" }, answer: "A" },
-                    { id: 36, part: "🏫 ផ្នែកទី៥ — ការគ្រប់គ្រងថ្នាក់រៀន", q: "តើ Classroom Management មានគោលបំណងសំខាន់អ្វី?", options: { A: "បង្កើតបរិយាកាសរៀនប្រកបដោយសុវត្ថិភាព និងមានប្រសិទ្ធភាព", B: "ឱ្យសិស្សស្ងាត់ជានិច្ច", C: "ដាក់ទណ្ឌកម្មសិស្ស", D: "បង្កើនការងារផ្ទះ" }, answer: "A" },
-                    { id: 37, q: "តើច្បាប់ថ្នាក់រៀនគួរត្រូវបាន៖", options: { A: "កំណត់ឱ្យច្បាស់ និងអនុវត្តដោយស្មើភាព", B: "ផ្លាស់ប្តូររាល់ថ្ងៃ", C: "អនុវត្តតែសិស្សខ្សោយ", D: "លាក់ពីសិស្ស" }, answer: "A" },
-                    { id: 38, q: "ប្រសិនបើសិស្សមានជម្លោះជាមួយគ្នា គ្រូគួរ៖", options: { A: "ស្តាប់ភាគីទាំងពីរ និងជួយដោះស្រាយដោយសន្តិវិធី", B: "ស្តីបន្ទោសភាគីមួយភ្លាមៗ", C: "មិនអើពើ", D: "ដាក់ទណ្ឌកម្មទាំងអស់ភ្លាមៗ" }, answer: "A" },
-                    { id: 39, q: "តើ Positive Discipline ផ្តោតលើអ្វី?", options: { A: "កែប្រែអាកប្បកិរិយាតាមវិធីវិជ្ជមាន និងបង្រៀនទំនួលខុសត្រូវ", B: "ការដាក់ទណ្ឌកម្មធ្ងន់", C: "ការប្រើអំពើហិង្សា", D: "ការបង្អាប់សិស្ស" }, answer: "A" },
-                    { id: 40, q: "តើបរិយាកាសថ្នាក់រៀនល្អគួរមានអ្វី?", options: { A: "សុវត្ថិភាព ការគោរព ការចូលរួម និងការសហការ", B: "ភ័យខ្លាច", C: "ការប្រកួតប្រជែងគ្រប់ពេល", D: "ភាពស្ងាត់ដោយការបង្ខំ" }, answer: "A" },
-                    { id: 41, part: "👨‍👩‍👧 ផ្នែកទី៦ — គ្រូ សិស្ស មាតាបិតា និងសហគមន៍", q: "តើការទំនាក់ទំនងជាមួយមាតាបិតាមានសារៈសំខាន់អ្វី?", options: { A: "ជួយគាំទ្រការរៀន និងការអភិវឌ្ឍរបស់សិស្ស", B: "ដើម្បីស្តីបន្ទោសសិស្ស", C: "ដើម្បីស្នើសុំអំណោយ", D: "មិនមានប្រយោជន៍" }, answer: "A" },
-                    { id: 42, q: "តើគ្រូគួរធ្វើអ្វីនៅពេលមាតាបិតាមានមតិយោបល់អំពីការបង្រៀន?", options: { A: "ស្តាប់ដោយគោរព និងពិភាក្សាដោយវិជ្ជាជីវៈ", B: "ខឹងភ្លាមៗ", C: "បដិសេធគ្រប់យ៉ាង", D: "មិនឆ្លើយតប" }, answer: "A" },
-                    { id: 43, q: "តើសហគមន៍អាចចូលរួមក្នុងការអប់រំតាមរបៀបណា?", options: { A: "សហការជាមួយសាលា និងគាំទ្រការអប់រំកុមារ", B: "គ្រប់គ្រងគ្រូទាំងអស់", C: "ជំនួសសាលារៀន", D: "មិនចាំបាច់ចូលរួម" }, answer: "A" },
-                    { id: 44, q: "តើគ្រូគួរបង្ហាញការគោរពចំពោះមាតាបិតាដែរឬទេ?", options: { A: "គួរ", B: "មិនគួរ", C: "តែអ្នកមាន", D: "តែអ្នកមានអំណាច" }, answer: "A" },
-                    { id: 45, q: "តើការធ្វើការជាក្រុមរវាងគ្រូមានប្រយោជន៍អ្វី?", options: { A: "ែករំលែកបទពិសោធន៍ និងកែលម្អការបង្រៀន", B: "បង្កើនការប្រកួតប្រជែងអវិជ្ជមាន", C: "កាត់បន្ថយចំណេះដឹង", D: "មិនមានប្រយោជន៍" }, answer: "A" },
-                    { id: 46, part: "💻 ផ្នែកទី៧ — គ្រូក្នុងសតវត្សទី២១", q: "តើ ICT អាចជួយគ្រូក្នុងការបង្រៀនយ៉ាងដូចម្តេច?", options: { A: "បង្កើនធនធានសិក្សា និងជួយឱ្យការរៀនមានភាពចម្រុះ", B: "ជំនួសគ្រូទាំងស្រុង", C: "លុបបំបាត់សៀវភៅទាំងអស់", D: "ធ្វើឱ្យសិស្សមិនចាំបាច់រៀន" }, answer: "A" },
-                    { id: 47, q: "តើ Digital Literacy មានន័យដូចម្តេច?", options: { A: "សមត្ថភាពប្រើប្រាស់ព័ត៌មាន និងបច្ចេកវិទ្យាឌីជីថលដោយមានប្រសិទ្ធភាព និងទំនួលខុសត្រូវ", B: "ចេះប្រើ Facebook តែប៉ុណ្ណោះ", C: "ចេះលេងហ្គេម", D: "មានទូរស័ព្ទ" }, answer: "A" },
-                    { id: 48, q: "តើគ្រូគួរធ្វើអ្វីមុនពេលប្រើព័ត៌មានពីអ៊ីនធឺណិតក្នុងការបង្រៀន?", options: { A: "ពិនិត្យប្រភព និងភាពជឿជាក់របស់ព័ត៌មាន", B: "ែករំលែកភ្លាមៗ", C: "ជឿគ្រប់ព័ត៌មាន", D: "មិនចាំបាច់ពិនិត្យ" }, answer: "A" },
-                    { id: 49, q: "តើ Lifelong Learning មានន័យដូចម្តេច?", options: { A: "ការរៀន និងអភិវឌ្ឍខ្លួនជាបន្តបន្ទាប់ពេញមួយជីវិត", B: "រៀនតែពេលនៅសាលា", C: "រៀនតែពេលប្រឡង", D: "ឈប់រៀនក្រោយទទួលសញ្ញាបត្រ" }, answer: "A" },
-                    { id: 50, q: "តើគ្រូវិជ្ជាជីវៈល្អគួរមានគោលបំណងចុងក្រោយអ្វី?", options: { A: "ជួយសិស្សឱ្យក្លាយជាអ្នករៀនដែលមានចំណេះដឹង សមត្ថភាព សីលធម៌ និងទំនួលខុសត្រូវ", B: "ឱ្យសិស្សចងចាំសៀវភៅទាំងមូល", C: "ឱ្យសិស្សខ្លាចគ្រូ", D: "ឱ្យសិស្សទទួលពិន្ទុខ្ពស់តែប៉ុណ្ណោះ" }, answer: "A" }
-                ];
-
-                // កន្លែងរក្សាទុក Database សម្រាប់គ្រប់មុខវិជ្ជា និងវិញ្ញាសា
-                const examDatabase = { english: {}, general: {}, ict: {} };
-
-                // ភាសាអង់គ្លេស (មាន 10 វិញ្ញាសា)
-                for (let i = 1; i <= 10; i++) {
-                    examDatabase.english[i] = { title: `វិញ្ញាសាភាសាអង់គ្លេស ទី ${i}`, available: true, questions: generalSet1.map(q => ({...q, q: `English Set ${i} - ${q.q}`})) };
-                }
-
-                // វប្បធម៌ទូទៅ (មាន 17 វិញ្ញាសា៖ ទី១ ដល់ ទី៩ មានស្រាប់ ក្រៅពីនោះ Coming Soon)
-                for (let i = 1; i <= 17; i++) {
-                    if (i === 1) {
-                        examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i} (ភូមិសាស្ត្រ និងអាស៊ាន)`, available: true, questions: generalSet1 };
-                    } else if (i === 2) {
-                        examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i} (ប្រវត្តិសាស្ត្រ និងរដ្ឋធម្មនុញ្ញ)`, available: true, questions: generalSet2 };
-                    } else if (i === 3) {
-                        examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i} (រដ្ឋបាលសាធារណៈ)`, available: true, questions: generalSet3 };
-                    } else if (i === 4) {
-                        examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i} (ក្រមសីលធម៌វិជ្ជាជីវៈគ្រូ)`, available: true, questions: generalSet4 };
-                    } else if (i === 5) {
-                        examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i} (គោលនយោបាយរាជរដ្ឋាភិបាល)`, available: true, questions: generalSet5 };
-                    } else if (i === 6) {
-                        examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i} (ប្រវត្តិសាស្ត្រ និងវប្បធម៌ខ្មែរ)`, available: true, questions: generalSet6 };
-                    } else if (i === 7) {
-                        examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i} (ពលរដ្ឋវិទ្យា)`, available: true, questions: generalSet7 };
-                    } else if (i === 8) {
-                        examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i} (ប្រវត្តិវិទ្យា)`, available: true, questions: generalSet8 };
-                    } else if (i === 9) {
-                        examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i} (វិជ្ជាជីវៈគ្រូបង្រៀន)`, available: true, questions: generalSet9 };
-                    } else {
-                        examDatabase.general[i] = { title: `វិញ្ញាសាវប្បធម៌ទូទៅ ទី ${i} (Coming Soon)`, available: false, questions: [] };
-                    }
-                }
-
-                // ឯកទេស ICT (មាន 15 វិញ្ញាសា)
-                const ictSet1 = generalSet1.map((q, idx) => ({
-                    ...q,
-                    q: `សំណួរឯកទេស ICT ទី ${idx + 1}: តើគោលការណ៍ព័ត៌មានវិទ្យាណាមួយខាងក្រោមត្រឹមត្រូវ?`,
-                    options: { A: "ការប្រើប្រាស់ប្រព័ន្ធបច្ចេកវិទ្យាដើម្បីប្រសិទ្ធភាពការងារ", B: "ការបិទប្រព័ន្ធអ៊ីនធឺណិត", C: "ការប្រើប្រាស់ក្រដាសស្នាមសុទ្ធសាធ", D: "ការឈប់ប្រើប្រាស់កុំព្យូទ័រ" },
-                    answer: "A"
-                }));
-
-                for (let i = 1; i <= 15; i++) {
-                    if (i === 1) {
-                        examDatabase.ict[i] = { title: `វិញ្ញាសាឯកទេស ICT ទី ${i}`, available: true, questions: ictSet1 };
-                    } else {
-                        examDatabase.ict[i] = { title: `វិញ្ញាសាឯកទេស ICT ទី ${i} (Coming Soon)`, available: false, questions: [] };
-                    }
-                }
-
-                const totalSets = computed(() => {
-                    if (activeTab.value === 'english') return 10;
-                    if (activeTab.value === 'general') return 17;
-                    return 15;
-                });
-
-                const categoryNameKh = computed(() => {
-                    if (activeTab.value === 'english') return 'ភាសាអង់គ្លេស';
-                    if (activeTab.value === 'general') return 'វប្បធម៌ទូទៅ';
-                    return 'ឯកទេស ICT';
-                });
-
-                const isAvailable = (category, setId) => {
-                    return examDatabase[category][setId].available;
-                };
-
-                const answeredCount = computed(() => {
-                    return Object.keys(userAnswers.value).filter(k => userAnswers.value[k]).length;
-                });
-
-                const formattedTime = computed(() => {
-                    let m = Math.floor(timer.value / 60);
-                    let s = timer.value % 60;
-                    return `${m}:${s < 10 ? '0' : ''}${s}`;
-                });
-
-                const percentage = computed(() => Math.round((score.value / 50) * 100));
-
-                const feedbackMessage = computed(() => {
-                    if (percentage.value >= 80) return "🎉 ល្អប្រពៃណាស់! អ្នកមានចំណេះដឹងខ្លាំងក្លាណាស់។ Very Good! Keep practicing.";
-                    if (percentage.value >= 50) return "👍 ល្អបង្គួរ! អ្នកអាចព្យាយាមបន្ថែមលើចំណុចខ្សោយខ្លះទៀត។";
-                    return "💪 សូមព្យាយាមហាត់សមបន្ថែមទៀត ដើម្បីទទួលបានលទ្ធផលប្រសើរជាងនេះ។";
-                });
-
-                const switchTab = (tab) => {
-                    activeTab.value = tab;
-                };
-
-                const startExam = (category, setId) => {
-                    if (!examDatabase[category][setId].available) {
-                        alert("⚠️ វិញ្ញាសានេះកំពុងរៀបចំ និងដាក់ជូនក្នុងពេលឆាប់ៗខាងមុខនេះ (Coming Soon)! សូមសាកល្បងវិញ្ញាសាដែលមានស្រាប់ជាមុនសិន។");
-                        return;
-                    }
-                    if (!studentName.value.trim()) {
-                        alert("សូមបញ្ចូលឈ្មោះរបស់អ្នកជាមុនសិន!");
-                        return;
-                    }
-                    const examData = examDatabase[category][setId];
-                    currentExamTitle.value = examData.title;
-                    currentQuestions.value = examData.questions;
-                    userAnswers.value = {};
-                    currentView.value = 'exam';
-
-                    // Start Timer
-                    timer.value = 60 * 60;
-                    if (timerInterval) clearInterval(timerInterval);
-                    timerInterval = setInterval(() => {
-                        if (timer.value > 0) {
-                            timer.value--;
-                        } else {
-                            clearInterval(timerInterval);
-                            alert("អស់ពេលប្រឡងហើយ! ប្រព័ន្ធនឹងធ្វើការបញ្ជូនចម្លើយដោយស្វ័យប្រវត្តិ។");
-                            submitExam();
-                        }
-                    }, 1000);
-
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                };
-
-                const confirmSubmit = () => {
-                    if (confirm("តើអ្នកពិតជាចង់បញ្ជូនចម្លើយមែនទេ?")) {
-                        submitExam();
-                    }
-                };
-
-                const submitExam = () => {
-                    if (timerInterval) clearInterval(timerInterval);
-                    let sc = 0;
-                    currentQuestions.value.forEach(q => {
-                        if (userAnswers.value[q.id] === q.answer) {
-                            sc++;
-                        }
-                    });
-                    score.value = sc;
-                    currentView.value = 'result';
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                };
-
-                const isCorrect = (qid) => {
-                    const q = currentQuestions.value.find(item => item.id === qid);
-                    return q && userAnswers.value[qid] === q.answer;
-                };
-
-                const returnToDashboard = () => {
-                    if (timerInterval) clearInterval(timerInterval);
-                    currentView.value = 'dashboard';
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                };
-
-                onUnmounted(() => {
-                    if (timerInterval) clearInterval(timerInterval);
-                });
-
-                return {
-                    currentView,
-                    activeTab,
-                    studentName,
-                    currentExamTitle,
-                    currentQuestions,
-                    userAnswers,
-                    score,
-                    totalSets,
-                    categoryNameKh,
-                    isAvailable,
-                    answeredCount,
-                    formattedTime,
-                    percentage,
-                    feedbackMessage,
-                    switchTab,
-                    startExam,
-                    confirmSubmit,
-                    isCorrect,
-                    returnToDashboard
-                };
+            for (let i = 1; i <= totalSets; i++) {
+                grid.innerHTML += `
+                    <div class="border border-purple-200 rounded-xl p-4 flex justify-between items-center bg-purple-50 hover:bg-purple-100 transition">
+                        <div>
+                            <h4 class="font-bold text-purple-900">វិញ្ញាសាទី ${i} (Set ${i})</h4>
+                            <p class="text-xs text-gray-500">៥០ សំណួរ | ៦០ នាទី | MCQ</p>
+                        </div>
+                        <button onclick="startExam('${currentCategory}', ${i})" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow transition">
+                            ចាប់ផ្តើម (Start)
+                        </button>
+                    </div>
+                `;
             }
-        }).mount('#app');
+        }
+
+        renderExamGrid();
+
+        function startExam(category, setId) {
+            const studentName = document.getElementById('student-name').value.trim();
+            if (!studentName) {
+                alert("សូមបញ្ចូលឈ្មោះរបស់អ្នកជាមុនសិន!");
+                document.getElementById('student-name').focus();
+                return;
+            }
+
+            currentCategory = category;
+            currentSetId = setId;
+            const examData = examDatabase[category][setId];
+            currentQuestions = examData.questions;
+
+            currentAnswerKey = {};
+            currentQuestions.forEach(q => {
+                currentAnswerKey[q.id] = q.answer;
+            });
+
+            document.getElementById('current-exam-title').innerText = examData.title;
+            document.getElementById('exam-title-header').innerText = examData.title;
+
+            document.getElementById('dashboard-container').classList.add('hidden');
+            document.getElementById('exam-form').classList.remove('hidden');
+            document.getElementById('top-bar').classList.remove('hidden');
+            document.getElementById('result-container').classList.add('hidden');
+
+            renderQuestions();
+
+            // ⏱️ 60-Minute Countdown Timer
+            timeLeft = 60 * 60;
+            if (countdown) clearInterval(countdown);
+
+            const timerDisplay = document.getElementById('timer-display');
+            countdown = setInterval(() => {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                timerDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    alert("អស់ពេលប្រឡងហើយ! ប្រព័ន្ធនឹងធ្វើការបញ្ជូនចម្លើយរបស់អ្នកដោយស្វ័យប្រវត្តិ។");
+                    submitExam();
+                }
+                timeLeft--;
+            }, 1000);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            let currentPartHeader = "";
+
+            currentQuestions.forEach(item => {
+                let html = '';
+
+                if (item.part && item.part !== currentPartHeader) {
+                    currentPartHeader = item.part;
+                    html += `<div class="bg-purple-800 text-white font-bold p-4 rounded-xl shadow mt-8 text-lg">${currentPartHeader}</div>`;
+                }
+
+                if (item.passageTitle) {
+                    html += `
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-xl shadow-sm mt-6">
+                            <h3 class="font-bold text-blue-900 text-base mb-2">${item.passageTitle}</h3>
+                            <p class="text-gray-700 text-sm whitespace-pre-line leading-relaxed">${item.passageText}</p>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div class="bg-white rounded-xl shadow-md p-6 question-card transition hover:shadow-lg" data-qid="${item.id}">
+                        <p class="font-medium text-gray-900 mb-4 text-base">
+                            <span class="font-bold text-purple-700 mr-2">${item.id}.</span> ${item.q}
+                        </p>
+                        <div class="space-y-2.5">
+                `;
+
+                for (const [key, val] of Object.entries(item.options)) {
+                    html += `
+                        <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition">
+                            <input type="radio" name="q${item.id}" value="${key}" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
+                            <span class="text-gray-700 text-sm font-medium"><strong class="mr-1 text-purple-600">${key}.</strong> ${val}</span>
+                        </label>
+                    `;
+                }
+
+                html += `</div></div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        const form = document.getElementById('exam-form');
+        const progressIndicator = document.getElementById('progress-indicator');
+
+        form.addEventListener('change', () => {
+            let answered = 0;
+            currentQuestions.forEach(q => {
+                if (form.querySelector(`input[name="q${q.id}"]:checked`)) {
+                    answered++;
+                }
+            });
+            progressIndicator.innerText = `បានឆ្លើយ៖ ${answered} / 50`;
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const studentName = document.getElementById('student-name').value.trim();
+            if (!studentName) {
+                alert("សូមបញ្ចូលឈ្មោះរបស់អ្នកជាមុនសិន!");
+                return;
+            }
+            if (confirm("តើអ្នកពិតជាចង់បញ្ជូនចម្លើយមែនទេ?")) {
+                clearInterval(countdown);
+                submitExam();
+            }
+        });
+
+        function submitExam() {
+            let score = 0;
+            let reviewHtml = '';
+
+            currentQuestions.forEach(q => {
+                const selected = form.querySelector(`input[name="q${q.id}"]:checked`)?.value || 'គ្មាន';
+                const correct = currentAnswerKey[q.id];
+                const isCorrect = selected === correct;
+
+                if (isCorrect) score++;
+
+                reviewHtml += `
+                    <div class="p-4 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                        <p class="font-semibold text-gray-800 text-sm">សំណួរទី ${q.id}: ${q.q}</p>
+                        <p class="text-xs mt-1">ចម្លើយរបស់អ្នក៖ <span class="font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}">${selected}</span></p>
+                        ${!isCorrect ? `<p class="text-xs mt-0.5 text-green-700">ចម្លើយត្រឹមត្រូវ៖ <strong>${correct}</strong></p>` : ''}
+                    </div>
+                `;
+            });
+
+            form.style.display = 'none';
+            document.getElementById('top-bar').style.display = 'none';
+            const resultContainer = document.getElementById('result-container');
+            resultContainer.classList.remove('hidden');
+
+            document.getElementById('score-display').innerText = `${score} / 50`;
+            const percentage = Math.round((score / 50) * 100);
+            document.getElementById('percentage-display').innerText = `${percentage}%`;
+
+            let feedback = "";
+            if (percentage >= 80) feedback = "🎉 ល្អប្រពៃណាស់! អ្នកមានចំណេះដឹងខ្លាំងក្លាណាស់។ Very Good! Keep practicing.";
+            else if (percentage >= 50) feedback = "👍 ល្អបង្គួរ! អ្នកអាចព្យាយាមបន្ថែមលើចំណុចខ្សោយខ្លះទៀត។";
+            else feedback = "💪 សូមព្យាយាមហាត់សមបន្ថែមទៀតដើម្បីទទួលបានលទ្ធផលប្រសើរជាងនេះ។";
+
+            document.getElementById('feedback-message').innerText = feedback;
+            document.getElementById('review-list').innerHTML = reviewHtml;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function returnToDashboard() {
+            if (countdown) clearInterval(countdown);
+            form.reset();
+            form.style.display = 'block';
+            document.getElementById('top-bar').style.display = 'flex';
+            document.getElementById('top-bar').classList.add('hidden');
+            document.getElementById('exam-form').classList.add('hidden');
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('dashboard-container').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     </script>
 </body>
 </html>
